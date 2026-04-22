@@ -12,7 +12,7 @@ export default function Hero() {
       id="waitlist"
       className="relative overflow-hidden bg-gradient-to-b from-brand-mist to-white"
     >
-      <div className="mx-auto max-w-6xl px-6 pt-20 pb-24 md:pt-28 md:pb-32 text-center">
+      <div className="mx-auto max-w-6xl px-6 pt-32 pb-24 md:pt-40 md:pb-32 text-center">
         <FadeIn>
           <span className="inline-flex items-center gap-2 rounded-full bg-white border border-brand-sky/40 px-4 py-1.5 text-xs font-medium text-brand-skyDeep shadow-sm">
             <span className="h-2 w-2 rounded-full bg-brand-skyDeep animate-pulse" />

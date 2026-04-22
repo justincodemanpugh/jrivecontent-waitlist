@@ -31,12 +31,11 @@ export default function HowItWorks() {
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
           <div className="text-center mb-16">
-            <span className="text-sm font-medium text-brand-skyDeep">How it works</span>
-            <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight text-brand-ink">
-              From idea to content in 4 simple steps
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-brand-ink">
+              How it <span className="text-brand-skyDeep">Works</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-xl mx-auto">
-              Whether you&apos;re a brand or a creator, JriveContent makes collaboration simple and safe.
+              From idea to content in 4 simple steps. Whether you&apos;re a brand or a creator, JriveContent makes collaboration simple and safe.
             </p>
           </div>
         </FadeIn>
