@@ -2,8 +2,8 @@ import { ArrowRight, Gift, Zap } from "lucide-react";
 import { FadeIn } from "@/hooks/useFadeIn";
 
 const SPOTS = {
-  brands: { total: 50, remaining: 47 },
-  creators: { total: 100, remaining: 89 },
+  brands: { total: 50, remaining: 14 },
+  creators: { total: 100, remaining: 9 },
 };
 
 export default function Hero() {
