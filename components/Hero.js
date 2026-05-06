@@ -1,10 +1,5 @@
-import { ArrowRight, Gift, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FadeIn } from "@/hooks/useFadeIn";
-
-const SPOTS = {
-  brands: { total: 50, remaining: 14 },
-  creators: { total: 100, remaining: 9 },
-};
 
 export default function Hero() {
   return (
@@ -32,33 +27,6 @@ export default function Hero() {
             Get your first 100 users by collaborating with affordable UGC creators.
             Join the waitlist and be first in line when we launch.
           </p>
-        </FadeIn>
-
-        <FadeIn delay={300}>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-            <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
-                <Gift size={20} className="text-amber-600" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-amber-900">First {SPOTS.brands.total} brands</p>
-                <p className="text-xs text-amber-700">Get 3 free gigs</p>
-              </div>
-              <span className="ml-auto text-lg font-bold text-amber-600">{SPOTS.brands.remaining}</span>
-              <span className="text-xs text-amber-500">left</span>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                <Zap size={20} className="text-emerald-600" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-emerald-900">First {SPOTS.creators.total} creators</p>
-                <p className="text-xs text-emerald-700">Get $20 credit</p>
-              </div>
-              <span className="ml-auto text-lg font-bold text-emerald-600">{SPOTS.creators.remaining}</span>
-              <span className="text-xs text-emerald-500">left</span>
-            </div>
-          </div>
         </FadeIn>
 
         <FadeIn delay={400}>
