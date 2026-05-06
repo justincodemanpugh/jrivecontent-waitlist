@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-slate-100 bg-white">
@@ -14,6 +16,8 @@ export default function Footer() {
           © {new Date().getFullYear()} JriveContent. All rights reserved.
         </p>
         <div className="flex gap-5 text-xs text-slate-500">
+          <Link href="/terms" className="hover:text-brand-ink">Terms</Link>
+          <Link href="/privacy" className="hover:text-brand-ink">Privacy</Link>
           <a href="mailto:hello@jrivecontent.com" className="hover:text-brand-ink">Contact</a>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
@@ -20,6 +21,8 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-8 text-sm text-slate-600 justify-self-center">
           <a href="#how-it-works" className="hover:text-brand-ink transition">How it Works</a>
+          <Link href="/dashboard/brand" prefetch className="hover:text-brand-ink transition">Brands</Link>
+          <Link href="/dashboard/creator" prefetch className="hover:text-brand-ink transition">Creators</Link>
         </div>
 
         <a
@@ -44,6 +47,8 @@ export default function Navbar() {
         <div className="md:hidden mx-auto max-w-5xl mt-2 rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-md shadow-lg shadow-slate-900/5">
           <div className="px-6 py-4 flex flex-col gap-4 text-sm">
             <a href="#how-it-works" onClick={() => setOpen(false)}>How it Works</a>
+            <Link href="/dashboard/brand" prefetch onClick={() => setOpen(false)}>Brands</Link>
+            <Link href="/dashboard/creator" prefetch onClick={() => setOpen(false)}>Creators</Link>
             <a
               href="https://app.youform.com/forms/aj4rmaai"
               target="_blank"
