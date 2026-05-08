@@ -24,6 +24,8 @@ export function CreatorProvider({ value, children }) {
       bio: value?.bio || "",
       niches: value?.niches || [],
       avatarUrl: value?.avatar_url || null,
+      stripeAccountId: value?.stripe_account_id || null,
+      stripePayoutsEnabled: Boolean(value?.stripe_payouts_enabled),
     };
   }, [value]);
 
@@ -44,6 +46,8 @@ export function useCreator() {
       bio: "",
       niches: [],
       avatarUrl: null,
+      stripeAccountId: null,
+      stripePayoutsEnabled: false,
     };
   }
   return ctx;

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck } from "lucide-react";
 import {
   CREATOR_NICHES,
   CONTENT_TYPES,
@@ -11,6 +11,7 @@ import {
 import {
   saveCreatorOnboardingStep,
   completeCreatorOnboarding,
+  markCreatorOnboarded,
 } from "@/lib/onboarding/creatorActions";
 
 const STEP_TITLES = [
@@ -20,6 +21,7 @@ const STEP_TITLES = [
   "What kind of content do you make?",
   "Tell brands a bit about yourself",
   "Where can brands find your work?",
+  "Set up payouts with Stripe",
 ];
 
 const STEP_SUBTITLES = [
@@ -29,6 +31,7 @@ const STEP_SUBTITLES = [
   "Optional — pick the formats you can deliver.",
   "Optional — a short intro goes a long way.",
   "Optional — link your socials and portfolio.",
+  "Connect Stripe so brands can pay you. You can also do this later from your profile.",
 ];
 
 export default function OnboardingClient({ initial, userEmail }) {
@@ -53,7 +56,7 @@ export default function OnboardingClient({ initial, userEmail }) {
     }
     if (step === 2 && data.niches.length === 0)
       return "Pick at least one niche.";
-    if (step === TOTAL_CREATOR_STEPS - 1 && !data.terms_accepted) {
+    if (step === 5 && !data.terms_accepted) {
       return "Please agree to the Terms and Privacy Policy.";
     }
     return "";
@@ -80,6 +83,10 @@ export default function OnboardingClient({ initial, userEmail }) {
           portfolio_url: data.portfolio_url,
           terms_accepted: data.terms_accepted,
         };
+      case 6:
+        // Stripe Connect status is updated server-side via the connect API
+        // and webhook. Nothing extra to persist from this step.
+        return {};
       default:
         return {};
     }
@@ -128,9 +135,9 @@ export default function OnboardingClient({ initial, userEmail }) {
 
   const handleSkip = () => {
     if (!canSkipStep(step)) return;
-    // The last step also hosts the required terms checkbox, so a "skip"
+    // Step 5 also hosts the required terms checkbox, so a "skip"
     // there is really just clearing the optional social fields.
-    if (step === TOTAL_CREATOR_STEPS - 1 && !data.terms_accepted) {
+    if (step === 5 && !data.terms_accepted) {
       setError("Please agree to the Terms and Privacy Policy.");
       return;
     }
@@ -206,6 +213,7 @@ export default function OnboardingClient({ initial, userEmail }) {
           )}
           {step === 4 && <Step5 data={data} update={update} />}
           {step === 5 && <Step6 data={data} update={update} />}
+          {step === 6 && <Step7 />}
 
           {error && (
             <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -266,8 +274,9 @@ function deriveStartStep(d) {
 }
 
 function canSkipStep(step) {
-  // Steps 1, 3, 4, 5 are optional and can be skipped.
-  return step === 1 || step === 3 || step === 4 || step === 5;
+  // Steps 1, 3, 4, 5, 6 are optional and can be skipped.
+  // Step 6 = Stripe payouts; creators can connect later from their profile.
+  return step === 1 || step === 3 || step === 4 || step === 5 || step === 6;
 }
 
 function clearedPayload(step) {
@@ -411,6 +420,96 @@ function Step6({ data, update }) {
         checked={data.terms_accepted}
         onChange={(v) => update({ terms_accepted: v })}
       />
+    </div>
+  );
+}
+
+function Step7() {
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const startConnect = async () => {
+    setErr("");
+    setLoading(true);
+    try {
+      // Mark onboarding complete first so the user can land on the
+      // creator dashboard (profile page) when they return from Stripe.
+      const marked = await markCreatorOnboarded();
+      if (!marked?.ok) {
+        throw new Error(marked?.error || "Could not finish onboarding.");
+      }
+
+      const res = await fetch("/api/stripe/connect", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || "Could not start Stripe onboarding.");
+      }
+      window.location.href = json.url;
+    } catch (e) {
+      setErr(e.message || "Something went wrong.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-brand-skyDeep">
+            <CreditCard size={16} />
+          </span>
+          <div>
+            <p className="font-medium text-brand-ink">
+              Get paid directly to your bank account
+            </p>
+            <p className="mt-1 text-slate-600">
+              We use Stripe to securely pay creators. When a brand approves
+              your work, your share is transferred to your Stripe account
+              automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <ul className="space-y-2 text-sm text-slate-600">
+        <li className="flex items-start gap-2">
+          <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+          Free to set up — Stripe handles KYC and tax forms.
+        </li>
+        <li className="flex items-start gap-2">
+          <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+          Funds are held in escrow until the brand approves your delivery.
+        </li>
+        <li className="flex items-start gap-2">
+          <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+          Takes about 2 minutes. You can also do this later from your profile.
+        </li>
+      </ul>
+
+      <button
+        type="button"
+        onClick={startConnect}
+        disabled={loading}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#635BFF] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5247e6] disabled:opacity-50"
+      >
+        {loading ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <CreditCard size={16} />
+        )}
+        {loading ? "Redirecting to Stripe…" : "Connect Stripe account"}
+      </button>
+
+      {err && (
+        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {err}
+        </p>
+      )}
+
+      <p className="text-center text-xs text-slate-500">
+        Prefer to do this later? Click <span className="font-medium">Skip</span>
+        {" "}— you can connect Stripe any time from your creator profile.
+      </p>
     </div>
   );
 }

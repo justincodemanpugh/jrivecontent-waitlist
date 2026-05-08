@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   Compass,
+  Inbox,
   MessageSquare,
   User,
   Settings,
@@ -13,7 +14,8 @@ import {
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
   { label: "Explore Gigs", href: "/dashboard/creator/explore", icon: Compass },
-  { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare, badge: 2 },
+  { label: "Applications", href: "/dashboard/creator/applications", icon: Inbox },
+  { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },
 ];
 

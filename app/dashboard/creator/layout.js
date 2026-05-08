@@ -21,7 +21,7 @@ export default async function CreatorDashboardLayout({ children }) {
     const { data } = await supabase
       .from("creator_profiles")
       .select(
-        "display_name, handle, bio, avatar_url, niches, onboarded_at",
+        "display_name, handle, bio, avatar_url, niches, onboarded_at, stripe_account_id, stripe_payouts_enabled",
       )
       .eq("user_id", user.id)
       .maybeSingle();
@@ -36,6 +36,8 @@ export default async function CreatorDashboardLayout({ children }) {
     avatar_url: profile?.avatar_url || null,
     niches: profile?.niches || [],
     email: user?.email || "",
+    stripe_account_id: profile?.stripe_account_id || null,
+    stripe_payouts_enabled: Boolean(profile?.stripe_payouts_enabled),
   };
 
   return (

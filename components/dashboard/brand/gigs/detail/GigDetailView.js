@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, DollarSign, Users, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import ApplicantsList from "./ApplicantsList";
+
+const TABS = [
+  { key: "overview", label: "Overview" },
+  { key: "applicants", label: "Applicants" },
+];
+
+export default function BrandGigDetailView({ gigId }) {
+  const [gig, setGig] = useState(null);
+  const [brandId, setBrandId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+  const [tab, setTab] = useState("overview");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const [{ data: { user } }, { data, error }] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase.from("gigs").select("*").eq("id", gigId).maybeSingle(),
+        ]);
+        if (cancelled) return;
+        if (error) throw error;
+        setGig(data);
+        setBrandId(user?.id || null);
+      } catch (e) {
+        if (!cancelled) setErr(e.message || "Couldn't load gig.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [gigId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-slate-400">
+        <Loader2 size={20} className="animate-spin" />
+      </div>
+    );
+  }
+  if (err || !gig) {
+    return (
+      <div className="px-4 py-10 max-w-3xl mx-auto">
+        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {err || "Gig not found."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <main className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-4xl mx-auto space-y-5">
+      <Link
+        href="/dashboard/brand/gigs"
+        className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-brand-ink"
+      >
+        <ArrowLeft size={14} />
+        All gigs
+      </Link>
+
+      {gig.cover_image_url ? (
+        <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl bg-slate-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={gig.cover_image_url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
+
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-ink">
+          {gig.title}
+        </h1>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-1">
+            <DollarSign size={14} className="text-slate-400" />$
+            {Number(gig.pay_per_video)}
+            /video
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Users size={14} className="text-slate-400" />
+            {gig.applicants_count ?? 0}{" "}
+            {gig.applicants_count === 1 ? "applicant" : "applicants"}
+          </span>
+          {!gig.is_active ? (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200">
+              Deactivated
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="border-b border-slate-200 flex items-center gap-1">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setTab(t.key)}
+            className={[
+              "px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition",
+              tab === t.key
+                ? "border-brand-skyDeep text-brand-ink"
+                : "border-transparent text-slate-500 hover:text-brand-ink",
+            ].join(" ")}
+          >
+            {t.label}
+            {t.key === "applicants" && gig.applicants_count > 0 ? (
+              <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-skyDeep text-white text-[10px] font-semibold">
+                {gig.applicants_count}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+
+      {tab === "overview" ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+          <section>
+            <h2 className="text-sm font-semibold text-brand-ink mb-2">
+              Description
+            </h2>
+            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+              {gig.description || "No description provided."}
+            </p>
+          </section>
+
+          {Array.isArray(gig.examples) && gig.examples.length > 0 ? (
+            <section>
+              <h2 className="text-sm font-semibold text-brand-ink mb-2">
+                Example videos
+              </h2>
+              <ul className="space-y-1.5">
+                {gig.examples.map((ex, i) => {
+                  const value =
+                    typeof ex === "string" ? ex : ex?.value || ex?.name || "";
+                  if (!value) return null;
+                  const isUrl = /^https?:\/\//i.test(value);
+                  return (
+                    <li key={i} className="text-sm">
+                      {isUrl ? (
+                        <a
+                          href={value}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand-skyDeep hover:underline break-all"
+                        >
+                          {value}
+                        </a>
+                      ) : (
+                        <span className="text-slate-600">{value}</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+      ) : (
+        <ApplicantsList gigId={gigId} brandId={brandId} />
+      )}
+    </main>
+  );
+}

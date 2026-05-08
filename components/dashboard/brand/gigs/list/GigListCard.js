@@ -33,7 +33,19 @@ export default function GigListCard({ gig, onDeactivate, onDelete }) {
         !gig.isActive ? "opacity-80" : "",
       ].join(" ")}
     >
-      <div className={`relative h-28 bg-gradient-to-br ${gig.cover}`}>
+      <div
+        className={`relative h-28 overflow-hidden ${
+          gig.coverImageUrl ? "bg-slate-100" : `bg-gradient-to-br ${gig.cover}`
+        }`}
+      >
+        {gig.coverImageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={gig.coverImageUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
         <span
           className={`absolute left-3 top-3 inline-flex items-center rounded-full border px-2 py-1 text-[11px] font-medium ${status.classes}`}
         >
