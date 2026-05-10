@@ -1,5 +1,8 @@
 // POST /api/stripe/checkout
-// Body: { conversationId }
+// Body:
+//   { conversationId, videoCount? }   <- initial deposit
+//   { conversationId, additionalVideos: N }  <- top up for more videos
+//
 // Brand-only. Creates (or reuses) a payment row and returns a Stripe
 // Checkout Session URL. The webhook handles flipping the payment to
 // 'escrowed' once the brand actually pays.
@@ -10,7 +13,11 @@ import { stripe, feeBreakdown, siteUrl } from "@/lib/stripe/server";
 
 export async function POST(request) {
   try {
-    const { conversationId } = await request.json();
+    const body = await request.json();
+    const { conversationId } = body;
+    const additionalVideos = Number(body.additionalVideos || 0);
+    const videoCountInput = Number(body.videoCount || 1);
+
     if (!conversationId) {
       return NextResponse.json({ error: "conversationId required" }, { status: 400 });
     }
@@ -28,6 +35,7 @@ export async function POST(request) {
       .from("conversations")
       .select(
         `id, brand_id, creator_id, gig_id, payment_deposited,
+         total_videos_requested, videos_completed,
          gig:gigs ( id, title, pay_per_video )`,
       )
       .eq("id", conversationId)
@@ -39,38 +47,78 @@ export async function POST(request) {
     if (conv.brand_id !== user.id) {
       return NextResponse.json({ error: "Only the brand can deposit." }, { status: 403 });
     }
-    if (conv.payment_deposited) {
+
+    const perVideo = Number(conv.gig?.pay_per_video || 0);
+    if (!perVideo || perVideo <= 0) {
+      return NextResponse.json({ error: "Gig has no price set." }, { status: 400 });
+    }
+
+    const isAdditional = additionalVideos > 0;
+
+    if (isAdditional && !conv.payment_deposited) {
+      return NextResponse.json(
+        { error: "Make the initial deposit first." },
+        { status: 400 },
+      );
+    }
+    if (!isAdditional && conv.payment_deposited) {
       return NextResponse.json({ error: "Already deposited." }, { status: 400 });
     }
 
-    const dollars = Number(conv.gig?.pay_per_video || 0);
-    if (!dollars || dollars <= 0) {
-      return NextResponse.json({ error: "Gig has no price set." }, { status: 400 });
-    }
-    const amountCents = Math.round(dollars * 100);
+    // Number of videos this checkout session is paying for.
+    const videosForThisCheckout = isAdditional
+      ? Math.max(1, Math.floor(additionalVideos))
+      : Math.max(1, Math.floor(videoCountInput));
+
+    const perVideoCents = Math.round(perVideo * 100);
+    const amountCents = perVideoCents * videosForThisCheckout;
     const breakdown = feeBreakdown(amountCents);
 
     const admin = createAdminClient();
 
-    // Upsert pending payment row (idempotent on conversation_id).
-    const { data: payment, error: payErr } = await admin
-      .from("payments")
-      .upsert(
-        {
-          conversation_id: conv.id,
-          gig_id: conv.gig_id,
-          brand_id: conv.brand_id,
-          creator_id: conv.creator_id,
-          amount_cents: breakdown.amountCents,
-          platform_fee_cents: breakdown.platformFeeCents,
-          creator_payout_cents: breakdown.creatorPayoutCents,
-          status: "pending",
-        },
-        { onConflict: "conversation_id" },
-      )
-      .select()
-      .single();
-    if (payErr) throw payErr;
+    let paymentId;
+    if (isAdditional) {
+      // Top up: read existing payment row so the webhook can add to it.
+      const { data: existing, error: exErr } = await admin
+        .from("payments")
+        .select("id")
+        .eq("conversation_id", conv.id)
+        .maybeSingle();
+      if (exErr) throw exErr;
+      if (!existing) {
+        return NextResponse.json({ error: "No payment row found." }, { status: 400 });
+      }
+      paymentId = existing.id;
+    } else {
+      // Initial deposit: upsert a pending payment row sized for the chosen
+      // number of videos.
+      const { data: payment, error: payErr } = await admin
+        .from("payments")
+        .upsert(
+          {
+            conversation_id: conv.id,
+            gig_id: conv.gig_id,
+            brand_id: conv.brand_id,
+            creator_id: conv.creator_id,
+            amount_cents: breakdown.amountCents,
+            platform_fee_cents: breakdown.platformFeeCents,
+            creator_payout_cents: breakdown.creatorPayoutCents,
+            status: "pending",
+          },
+          { onConflict: "conversation_id" },
+        )
+        .select()
+        .single();
+      if (payErr) throw payErr;
+      paymentId = payment.id;
+
+      // Reflect chosen quantity on the conversation immediately so the UI
+      // banner shows the right total even before checkout completes.
+      await admin
+        .from("conversations")
+        .update({ total_videos_requested: videosForThisCheckout })
+        .eq("id", conv.id);
+    }
 
     const base = siteUrl();
     const session = await stripe.checkout.sessions.create({
@@ -78,13 +126,17 @@ export async function POST(request) {
       payment_method_types: ["card"],
       line_items: [
         {
-          quantity: 1,
+          quantity: videosForThisCheckout,
           price_data: {
             currency: "usd",
-            unit_amount: amountCents,
+            unit_amount: perVideoCents,
             product_data: {
-              name: conv.gig?.title || "Gig deposit",
-              description: "Funds held in escrow until you approve the deliverable.",
+              name: `${conv.gig?.title || "Gig deposit"}${
+                videosForThisCheckout > 1 ? ` (${videosForThisCheckout} videos)` : ""
+              }`,
+              description: isAdditional
+                ? "Additional videos — added to existing escrow."
+                : "Funds held in escrow until you approve each video.",
             },
           },
         },
@@ -92,23 +144,29 @@ export async function POST(request) {
       success_url: `${base}/dashboard/brand/messages/${conv.id}?deposit=success`,
       cancel_url: `${base}/dashboard/brand/messages/${conv.id}?deposit=cancel`,
       metadata: {
-        payment_id: payment.id,
+        payment_id: paymentId,
         conversation_id: conv.id,
         brand_id: conv.brand_id,
         creator_id: conv.creator_id,
+        kind: isAdditional ? "additional" : "initial",
+        videos: String(videosForThisCheckout),
       },
       payment_intent_data: {
         metadata: {
-          payment_id: payment.id,
+          payment_id: paymentId,
           conversation_id: conv.id,
+          kind: isAdditional ? "additional" : "initial",
+          videos: String(videosForThisCheckout),
         },
       },
     });
 
-    await admin
-      .from("payments")
-      .update({ stripe_checkout_session_id: session.id })
-      .eq("id", payment.id);
+    if (!isAdditional) {
+      await admin
+        .from("payments")
+        .update({ stripe_checkout_session_id: session.id })
+        .eq("id", paymentId);
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (e) {

@@ -8,8 +8,9 @@ import {
   Briefcase,
   MessageSquare,
   Search,
-  Settings,
   Gift,
+  Sparkles,
+  Settings,
 } from "lucide-react";
 import {
   fetchFreeGigsUsage,
@@ -52,6 +53,28 @@ export default function Sidebar() {
 
   const isActive = (item) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
+
+  const [upgrading, setUpgrading] = useState(false);
+  const handleUpgrade = async () => {
+    if (upgrading) return;
+    setUpgrading(true);
+    try {
+      const res = await fetch("/api/stripe/brand-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("[upgrade]", data.error);
+        setUpgrading(false);
+      }
+    } catch (e) {
+      console.error("[upgrade]", e);
+      setUpgrading(false);
+    }
+  };
 
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white z-40">
@@ -100,6 +123,36 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* Settings */}
+      <div className="px-3 pb-3 border-t border-slate-200 pt-3">
+        <Link
+          href="/dashboard/brand/settings"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+            pathname.startsWith("/dashboard/brand/settings")
+              ? "bg-brand-mist text-brand-ink"
+              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+          }`}
+        >
+          <Settings size={18} className="text-slate-400" />
+          Settings
+        </Link>
+      </div>
+
+      {/* Upgrade to Pro */}
+      <div className="px-3 pb-3">
+        <button
+          onClick={handleUpgrade}
+          disabled={upgrading}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-brand-sky/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <Sparkles size={16} />
+          {upgrading ? "Redirecting..." : "Upgrade to Pro"}
+        </button>
+        <p className="mt-1.5 text-center text-[11px] text-slate-500">
+          $25/mo · unlimited gigs
+        </p>
+      </div>
+
       {/* Free gigs chip */}
       {usage.remaining > 0 && (
         <div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
@@ -123,20 +176,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Settings at bottom */}
-      <div className="px-3 pb-5 border-t border-slate-200 pt-3">
-        <Link
-          href="/dashboard/brand/settings"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-            pathname.startsWith("/dashboard/brand/settings")
-              ? "bg-brand-mist text-brand-ink"
-              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
-          }`}
-        >
-          <Settings size={18} className="text-slate-400" />
-          Settings
-        </Link>
-      </div>
     </aside>
   );
 }

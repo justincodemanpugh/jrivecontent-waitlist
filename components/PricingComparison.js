@@ -1,6 +1,7 @@
 "use client";
 
 import { FadeIn } from "@/hooks/useFadeIn";
+import PricingCard from "@/components/PricingCard";
 
 const INDUSTRY = [
   { label: "$80",   pct: 55 },
@@ -137,6 +138,24 @@ export default function PricingComparison() {
             </div>
           </div>
         </FadeIn>
+
+        {/* Brand subscription plan */}
+        <div className="mt-24">
+          <FadeIn>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-brand-ink">
+                Simple, <span className="text-brand-skyDeep">flat-rate</span> pricing for brands
+              </h2>
+              <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+                One affordable monthly plan to post unlimited gigs and start working with creators.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="max-w-md mx-auto">
+            <PricingCard />
+          </div>
+        </div>
       </div>
     </section>
   );

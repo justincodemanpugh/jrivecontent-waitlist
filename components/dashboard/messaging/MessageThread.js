@@ -8,7 +8,10 @@ import {
   sendMessage,
   subscribeToMessages,
 } from "@/lib/dashboard/messagesApi";
-import { fetchConversation } from "@/lib/dashboard/conversationsApi";
+import {
+  fetchConversation,
+  subscribeToConversation,
+} from "@/lib/dashboard/conversationsApi";
 import MessageBubble from "./MessageBubble";
 import MessageComposer from "./MessageComposer";
 import DeliverableCard from "./DeliverableCard";
@@ -62,6 +65,24 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     });
     return unsubscribe;
   }, [conversationId]);
+
+  // Realtime conversation updates (payment_deposited, video counts, etc.).
+  // Without this, the PaymentBanner would stay on "Deposit $X" even after
+  // the brand finished Stripe checkout because we'd never re-fetch.
+  useEffect(() => {
+    if (!conversationId) return undefined;
+    const unsubscribe = subscribeToConversation(conversationId, async () => {
+      // Re-fetch the full row so we pick up nested gig/payment/counterpart
+      // joins (the realtime payload only contains the conversations row).
+      try {
+        const fresh = await fetchConversation(conversationId, role);
+        if (fresh) setConversation(fresh);
+      } catch {
+        /* swallow — next user action will retry */
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, role]);
 
   // Auto-scroll on new messages.
   useEffect(() => {
