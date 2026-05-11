@@ -88,7 +88,7 @@ function LoginForm() {
             ← Back to home
           </Link>
           <h1 className="mt-3 text-2xl font-semibold text-brand-ink">
-            Sign in to jRive
+            Sign in to JriveContent
           </h1>
           <p className="mt-1 text-sm text-slate-600">
             Brands and creators sign in here.
