@@ -16,12 +16,6 @@ export default function LoginPage() {
 
 function LoginForm() {
   const supabase = createClient();
-  // Debug: Check if environment variables are loaded
-  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log(
-    "Supabase Key:",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing",
-  );
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const roleParam = searchParams.get("role");
