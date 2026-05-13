@@ -84,6 +84,46 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     return unsubscribe;
   }, [conversationId, role]);
 
+  // Post-Stripe-checkout refresh. The webhook flips payment_deposited on the
+  // server, but the brand lands here via a top-level redirect so the realtime
+  // channel hasn't necessarily delivered the UPDATE yet. Force a re-fetch and
+  // strip the query param so a manual reload doesn't keep re-triggering.
+  useEffect(() => {
+    if (!conversationId) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("deposit") !== "success") return;
+
+    params.delete("deposit");
+    const qs = params.toString();
+    const next =
+      window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+    window.history.replaceState({}, "", next);
+
+    let cancelled = false;
+    (async () => {
+      // Webhook fires async — retry briefly so the UI catches up even if the
+      // user beats Stripe's webhook back to the page.
+      for (let i = 0; i < 5; i += 1) {
+        try {
+          const fresh = await fetchConversation(conversationId, role);
+          if (cancelled) return;
+          if (fresh?.payment_deposited) {
+            setConversation(fresh);
+            return;
+          }
+          if (fresh) setConversation(fresh);
+        } catch {
+          /* retry */
+        }
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, role]);
+
   // Auto-scroll on new messages.
   useEffect(() => {
     const el = scrollRef.current;
@@ -95,6 +135,14 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     role === "brand" ? conversation?.creator : conversation?.brand;
   const counterpartName =
     counterpart?.display_name || counterpart?.brand_name || "Conversation";
+  const counterpartAvatar = counterpart?.avatar_url || null;
+  const counterpartInitials = (counterpartName || "?")
+    .split(/\s+/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "?";
 
   const handleSend = async (body) => {
     try {
@@ -123,17 +171,29 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-full w-full">
       {/* Header */}
       <PaymentBanner conversation={conversation} role={role} />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 bg-white">
         <Link
           href={basePath}
-          className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100"
+          className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100"
           aria-label="Back to messages"
         >
           <ArrowLeft size={18} />
         </Link>
+        <span className="h-10 w-10 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
+          {counterpartAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={counterpartAvatar}
+              alt={counterpartName}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            counterpartInitials
+          )}
+        </span>
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-brand-ink truncate">
             {counterpartName}
@@ -162,6 +222,8 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
               key={m.id}
               message={m}
               isMine={m.sender_id === currentUserId}
+              avatarUrl={counterpartAvatar}
+              initials={counterpartInitials}
             >
               {m.kind === "deliverable" && m.deliverable_id ? (
                 <DeliverableCard

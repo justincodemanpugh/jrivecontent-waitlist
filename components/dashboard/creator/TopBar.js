@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useCreator } from "@/components/dashboard/creator/CreatorProvider";
+import NotificationsBell from "@/components/dashboard/NotificationsBell";
 
 export default function TopBar({ title = "Home" }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,14 +16,7 @@ export default function TopBar({ title = "Home" }) {
         <h1 className="text-lg font-semibold text-brand-ink">{title}</h1>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-slate-100 transition"
-          >
-            <Bell size={18} className="text-slate-600" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-brand-skyDeep ring-2 ring-white" />
-          </button>
+          <NotificationsBell />
 
           <div className="relative">
             <button
@@ -30,8 +24,17 @@ export default function TopBar({ title = "Home" }) {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 transition"
             >
-              <span className="h-8 w-8 rounded-full bg-brand-sky text-white text-sm font-semibold flex items-center justify-center">
-                {creator.initials}
+              <span className="h-8 w-8 rounded-full overflow-hidden bg-brand-sky text-white text-sm font-semibold flex items-center justify-center">
+                {creator.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={creator.avatarUrl}
+                    alt="Avatar"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  creator.initials
+                )}
               </span>
               <ChevronDown size={14} className="text-slate-500" />
             </button>

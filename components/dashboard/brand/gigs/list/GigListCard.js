@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Users, Clock, DollarSign } from "lucide-react";
-import { STATUS_META } from "@/lib/dashboard/brand/mockData";
+import { STATUS_META } from "@/lib/dashboard/brand/statusMeta";
 import GigActionsMenu from "./GigActionsMenu";
 
 /**

@@ -21,7 +21,7 @@ export default async function BrandDashboardLayout({ children }) {
   if (user) {
     const { data } = await supabase
       .from("brand_profiles")
-      .select("brand_name, website, industry, onboarded_at")
+      .select("brand_name, website, industry, avatar_url, onboarded_at")
       .eq("user_id", user.id)
       .maybeSingle();
     if (!data?.onboarded_at) redirect("/onboarding/brand");
@@ -32,6 +32,7 @@ export default async function BrandDashboardLayout({ children }) {
     brand_name: profile?.brand_name || "",
     website: profile?.website || "",
     industry: profile?.industry || "",
+    avatar_url: profile?.avatar_url || "",
     email: user?.email || "",
   };
 

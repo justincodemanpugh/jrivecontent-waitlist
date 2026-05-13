@@ -27,7 +27,19 @@ export default function StepExamples({ form, update }) {
 
   const onFile = (file) => {
     if (!file) return;
-    add({ type: "file", value: file.name, name: file.name });
+    // Keep the actual File so we can upload it on publish. `previewUrl` lets
+    // the review step + this list show a playable thumbnail before publish.
+    const previewUrl =
+      typeof URL !== "undefined" && URL.createObjectURL
+        ? URL.createObjectURL(file)
+        : "";
+    add({
+      type: "file",
+      value: file.name,
+      name: file.name,
+      file,
+      previewUrl,
+    });
   };
 
   const atCap = form.examples.length >= MAX_EXAMPLES;

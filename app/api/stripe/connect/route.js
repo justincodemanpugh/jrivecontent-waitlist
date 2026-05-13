@@ -32,8 +32,9 @@ export async function POST() {
     }
 
     let accountId = profile.stripe_account_id;
+    let account = null;
     if (!accountId) {
-      const account = await stripe.accounts.create({
+      account = await stripe.accounts.create({
         type: "express",
         email: user.email || undefined,
         capabilities: {
@@ -46,9 +47,23 @@ export async function POST() {
         .from("creator_profiles")
         .update({ stripe_account_id: accountId })
         .eq("user_id", user.id);
+    } else {
+      account = await stripe.accounts.retrieve(accountId);
     }
 
     const base = siteUrl();
+
+    // If the account already finished onboarding, send the creator to the
+    // Express Dashboard to actually manage their account, balance, payouts,
+    // etc. Otherwise, send them through the onboarding flow.
+    if (account?.details_submitted) {
+      const loginLink = await stripe.accounts.createLoginLink(accountId);
+      // newTab tells the client to open the Express Dashboard in a new tab
+      // so the creator's original tab stays on their profile page (Stripe
+      // hosts the dashboard and we can't inject a "back to profile" link).
+      return NextResponse.json({ url: loginLink.url, newTab: true });
+    }
+
     const link = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${base}/dashboard/creator/profile?stripe=refresh`,

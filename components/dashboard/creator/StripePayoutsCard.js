@@ -68,7 +68,14 @@ export default function StripePayoutsCard() {
       if (!res.ok || !json.url) {
         throw new Error(json.error || "Could not open Stripe.");
       }
-      window.location.href = json.url;
+      if (json.newTab) {
+        // Open Stripe Express Dashboard in a new tab so the creator can
+        // close it and return to their profile easily.
+        window.open(json.url, "_blank", "noopener,noreferrer");
+        setLoading(false);
+      } else {
+        window.location.href = json.url;
+      }
     } catch (e) {
       setErr(e.message || "Something went wrong.");
       setLoading(false);

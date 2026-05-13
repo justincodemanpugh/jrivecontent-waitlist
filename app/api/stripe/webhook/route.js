@@ -142,6 +142,66 @@ export async function POST(request) {
         break;
       }
 
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        // Keep brand_profiles in sync with the brand's platform-subscription
+        // ($25/mo) state so the Settings → Billing tab and any server-side
+        // plan gates have a fast read path.
+        const sub = event.data.object;
+        const customerId =
+          typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+        // Only handle the brand platform subscription, identified by the
+        // metadata we set when creating the Checkout session.
+        const isBrandPlan =
+          sub.metadata?.plan === "brand_monthly" ||
+          // Fallback: match by price id in case metadata is missing.
+          (sub.items?.data?.[0]?.price?.id &&
+            sub.items.data[0].price.id ===
+              process.env.STRIPE_BRAND_SUBSCRIPTION_PRICE_ID);
+        if (!customerId || !isBrandPlan) break;
+
+        const status =
+          event.type === "customer.subscription.deleted"
+            ? "canceled"
+            : sub.status || "active";
+
+        const priceId = sub.items?.data?.[0]?.price?.id || null;
+        const currentPeriodEnd = sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : null;
+
+        // Prefer matching on stripe_customer_id (saved at checkout time),
+        // but fall back to the user_id stamped on the subscription metadata
+        // in case the customer id wasn't persisted yet.
+        const update = {
+          stripe_customer_id: customerId,
+          stripe_subscription_id:
+            event.type === "customer.subscription.deleted" ? null : sub.id,
+          subscription_status: status,
+          subscription_price_id: priceId,
+          subscription_current_period_end: currentPeriodEnd,
+          subscription_cancel_at_period_end: !!sub.cancel_at_period_end,
+        };
+
+        const { data: byCustomer } = await admin
+          .from("brand_profiles")
+          .update(update)
+          .eq("stripe_customer_id", customerId)
+          .select("user_id");
+
+        if (!byCustomer || byCustomer.length === 0) {
+          const userId = sub.metadata?.user_id;
+          if (userId) {
+            await admin
+              .from("brand_profiles")
+              .update(update)
+              .eq("user_id", userId);
+          }
+        }
+        break;
+      }
+
       case "account.updated": {
         // Connect account onboarding completion.
         const acct = event.data.object;

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Users, Clock, DollarSign } from "lucide-react";
-import { STATUS_META } from "@/lib/dashboard/brand/mockData";
+import { STATUS_META } from "@/lib/dashboard/brand/statusMeta";
 
 export default function GigCard({ gig }) {
   const status = STATUS_META[gig.status] || STATUS_META.open;

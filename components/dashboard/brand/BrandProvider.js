@@ -22,6 +22,7 @@ export function BrandProvider({ value, children }) {
       email: value?.email || "",
       industry: value?.industry || null,
       website: value?.website || null,
+      avatarUrl: value?.avatar_url || null,
     };
   }, [value]);
 
@@ -32,7 +33,14 @@ export function useBrand() {
   const ctx = useContext(BrandContext);
   // Fallback so components don't crash outside a provider (e.g. storybook).
   if (!ctx) {
-    return { name: "Your Brand", initials: "?", email: "", industry: null, website: null };
+    return {
+      name: "Your Brand",
+      initials: "?",
+      email: "",
+      industry: null,
+      website: null,
+      avatarUrl: null,
+    };
   }
   return ctx;
 }

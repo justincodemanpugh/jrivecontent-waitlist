@@ -12,9 +12,22 @@ create table if not exists public.brand_profiles (
   referral_source text,
   terms_accepted_at timestamptz,
   onboarded_at timestamptz,
+  -- Stripe platform-subscription state (kept in sync by /api/stripe/webhook).
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  subscription_status text not null default 'free',
+  subscription_price_id text,
+  subscription_current_period_end timestamptz,
+  subscription_cancel_at_period_end boolean not null default false,
+  avatar_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create index if not exists brand_profiles_stripe_customer_idx
+  on public.brand_profiles (stripe_customer_id);
+create index if not exists brand_profiles_stripe_subscription_idx
+  on public.brand_profiles (stripe_subscription_id);
 
 -- Keep updated_at fresh.
 create or replace function public.set_updated_at()

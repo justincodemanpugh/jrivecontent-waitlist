@@ -41,8 +41,17 @@ export default function ConversationListItem({ conversation, basePath, active })
           : "bg-white border-slate-200 hover:border-brand-sky",
       ].join(" ")}
     >
-      <span className="h-10 w-10 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0">
-        {initials}
+      <span className="h-10 w-10 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
+        {conversation.counterpart.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={conversation.counterpart.avatarUrl}
+            alt={conversation.counterpart.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          initials
+        )}
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">

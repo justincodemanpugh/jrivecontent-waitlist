@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import TopBar from "@/components/dashboard/brand/TopBar";
@@ -8,9 +8,19 @@ import StatStrip from "@/components/dashboard/brand/StatStrip";
 import NeedsAttention from "@/components/dashboard/brand/NeedsAttention";
 import ActiveGigs from "@/components/dashboard/brand/ActiveGigs";
 import EmptyState from "@/components/dashboard/brand/EmptyState";
-import { mockStats, mockAttentionItems } from "@/lib/dashboard/brand/mockData";
 import { fetchMyGigs } from "@/lib/dashboard/brand/gigsApi";
+import {
+  fetchDashboardStats,
+  fetchAttentionItems,
+} from "@/lib/dashboard/brand/dashboardApi";
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
+
+const EMPTY_STATS = {
+  activeGigs: 0,
+  newApplications: 0,
+  awaitingApproval: 0,
+  completedThisMonth: 0,
+};
 
 export default function BrandDashboardPage() {
   const searchParams = useSearchParams();
@@ -19,28 +29,43 @@ export default function BrandDashboardPage() {
   const forceEmpty = searchParams?.get("empty") === "1";
 
   const [gigs, setGigs] = useState([]);
+  const [stats, setStats] = useState(EMPTY_STATS);
+  const [attention, setAttention] = useState([]);
   const [loaded, setLoaded] = useState(false);
+
+  const loadAll = useCallback(async () => {
+    try {
+      const [rows, statsRes, attentionRes] = await Promise.all([
+        fetchMyGigs().catch(() => []),
+        fetchDashboardStats().catch(() => EMPTY_STATS),
+        fetchAttentionItems().catch(() => []),
+      ]);
+      setGigs(rows);
+      setStats(statsRes);
+      setAttention(attentionRes);
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      try {
-        const rows = await fetchMyGigs();
-        if (!cancelled) setGigs(rows);
-      } catch {
-        if (!cancelled) setGigs([]);
-      } finally {
-        if (!cancelled) setLoaded(true);
-      }
+    const run = async () => {
+      await loadAll();
+      if (cancelled) return;
     };
-    load();
-    const onChange = () => load();
+    run();
+    const onChange = () => loadAll();
     window.addEventListener("gigs:changed", onChange);
+    window.addEventListener("applications:changed", onChange);
+    window.addEventListener("conversations:changed", onChange);
     return () => {
       cancelled = true;
       window.removeEventListener("gigs:changed", onChange);
+      window.removeEventListener("applications:changed", onChange);
+      window.removeEventListener("conversations:changed", onChange);
     };
-  }, []);
+  }, [loadAll]);
 
   const activeGigs = useMemo(
     () => gigs.filter((g) => g.isActive),
@@ -65,8 +90,8 @@ export default function BrandDashboardPage() {
 
         {hasGigs ? (
           <>
-            <StatStrip stats={mockStats} />
-            <NeedsAttention items={mockAttentionItems} />
+            <StatStrip stats={stats} />
+            <NeedsAttention items={attention} />
             <ActiveGigs gigs={activeGigs} />
           </>
         ) : showEmpty ? (

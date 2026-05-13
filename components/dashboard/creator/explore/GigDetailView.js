@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, DollarSign, Loader2, Check } from "lucide-react";
 import { fetchMarketplaceGig } from "@/lib/dashboard/marketplaceApi";
 import { fetchMyApplicationForGig } from "@/lib/dashboard/applicationsApi";
+import ExampleVideosSection from "@/components/dashboard/brand/gigs/ExampleVideosSection";
 import ApplyDialog from "./ApplyDialog";
 
 const APPLICATION_STATUS_META = {
@@ -122,37 +123,7 @@ export default function GigDetailView({ gigId }) {
             </p>
           </section>
 
-          {Array.isArray(gig.examples) && gig.examples.length > 0 ? (
-            <section>
-              <h2 className="text-sm font-semibold text-brand-ink mb-2">
-                Example videos
-              </h2>
-              <ul className="space-y-1.5">
-                {gig.examples.map((ex, i) => {
-                  const value =
-                    typeof ex === "string" ? ex : ex?.value || ex?.name || "";
-                  if (!value) return null;
-                  const isUrl = /^https?:\/\//i.test(value);
-                  return (
-                    <li key={i} className="text-sm">
-                      {isUrl ? (
-                        <a
-                          href={value}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-brand-skyDeep hover:underline break-all"
-                        >
-                          {value}
-                        </a>
-                      ) : (
-                        <span className="text-slate-600">{value}</span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ) : null}
+          <ExampleVideosSection examples={gig.examples} />
 
           <div className="pt-2">
             {statusMeta ? (

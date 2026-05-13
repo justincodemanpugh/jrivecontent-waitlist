@@ -16,11 +16,12 @@ import {
   fetchFreeGigsUsage,
   FREE_GIGS_TOTAL,
 } from "@/lib/dashboard/brand/gigsApi";
+import { startBrandSubscription } from "@/lib/dashboard/brand/billingApi";
 
 const NAV = [
   { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true },
   { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase },
-  { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, badge: 3 },
+  { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
   { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search },
 ];
 
@@ -59,17 +60,10 @@ export default function Sidebar() {
     if (upgrading) return;
     setUpgrading(true);
     try {
-      const res = await fetch("/api/stripe/brand-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        console.error("[upgrade]", data.error);
-        setUpgrading(false);
-      }
+      const url = await startBrandSubscription(
+        "/dashboard/brand/settings/billing?subscription=success",
+      );
+      window.location.href = url;
     } catch (e) {
       console.error("[upgrade]", e);
       setUpgrading(false);
@@ -123,23 +117,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Settings */}
-      <div className="px-3 pb-3 border-t border-slate-200 pt-3">
-        <Link
-          href="/dashboard/brand/settings"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-            pathname.startsWith("/dashboard/brand/settings")
-              ? "bg-brand-mist text-brand-ink"
-              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
-          }`}
-        >
-          <Settings size={18} className="text-slate-400" />
-          Settings
-        </Link>
-      </div>
-
       {/* Upgrade to Pro */}
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 border-t border-slate-200 pt-3">
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
@@ -175,6 +154,21 @@ export default function Sidebar() {
           </div>
         </div>
       )}
+
+      {/* Settings */}
+      <div className="px-3 pb-3">
+        <Link
+          href="/dashboard/brand/settings"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+            pathname.startsWith("/dashboard/brand/settings")
+              ? "bg-brand-mist text-brand-ink"
+              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+          }`}
+        >
+          <Settings size={18} className="text-slate-400" />
+          Settings
+        </Link>
+      </div>
 
     </aside>
   );

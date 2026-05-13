@@ -10,7 +10,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { stripe, feeBreakdown } from "@/lib/stripe/server";
+import { stripe, feeBreakdown, getAccountCurrency } from "@/lib/stripe/server";
 
 export async function POST(request) {
   try {
@@ -70,7 +70,31 @@ export async function POST(request) {
     const { creatorPayoutCents: shareCents } = feeBreakdown(perVideoCents);
 
     const totalVideos = Math.max(1, Number(conv?.total_videos_requested || 1));
-    const videosCompleted = Math.max(0, Number(conv?.videos_completed || 0));
+
+    // Count approved deliverables directly so we don't depend on a client-side
+    // RLS-guarded counter staying in sync.
+    const { count: approvedCount } = await admin
+      .from("deliverables")
+      .select("id", { count: "exact", head: true })
+      .eq("conversation_id", conversationId)
+      .eq("status", "approved");
+
+    const videosCompleted = Math.min(
+      totalVideos,
+      Math.max(
+        Number(conv?.videos_completed || 0),
+        Number(approvedCount || 0),
+      ),
+    );
+
+    // Keep the conversation counter in sync (admin client bypasses RLS).
+    if (videosCompleted !== Number(conv?.videos_completed || 0)) {
+      await admin
+        .from("conversations")
+        .update({ videos_completed: videosCompleted })
+        .eq("id", conversationId);
+    }
+
     const videosPaidOut = Math.max(0, Number(payment.videos_paid_out || 0));
 
     // Nothing more to release (caller already paid out for every approval).
@@ -99,35 +123,51 @@ export async function POST(request) {
       });
     }
 
-    const transfer = await stripe.transfers.create({
-      amount: shareCents,
-      currency: "usd",
-      destination: creator.stripe_account_id,
-      metadata: {
-        payment_id: payment.id,
-        conversation_id: conversationId,
-        video_index: String(videosPaidOut + 1),
-        total_videos: String(totalVideos),
-      },
-    });
+    // Release one transfer per outstanding approval so we self-heal if any
+    // earlier release silently failed.
+    const targetPaidOut = Math.min(videosCompleted, totalVideos);
+    let currentPaidOut = videosPaidOut;
+    let lastTransferId = null;
 
-    const newPaidOut = videosPaidOut + 1;
-    const fullyReleased = newPaidOut >= totalVideos;
+    // Use the platform account's default currency so transfers come out of
+    // a balance bucket we actually have. Stripe handles any conversion to
+    // the creator's connected-account currency on the receiving side.
+    const transferCurrency = await getAccountCurrency();
 
-    await admin
-      .from("payments")
-      .update({
-        status: fullyReleased ? "released" : "escrowed",
-        stripe_transfer_id: transfer.id,
-        videos_paid_out: newPaidOut,
-        released_at: fullyReleased ? new Date().toISOString() : payment.released_at,
-      })
-      .eq("id", payment.id);
+    while (currentPaidOut < targetPaidOut) {
+      const transfer = await stripe.transfers.create({
+        amount: shareCents,
+        currency: transferCurrency,
+        destination: creator.stripe_account_id,
+        metadata: {
+          payment_id: payment.id,
+          conversation_id: conversationId,
+          video_index: String(currentPaidOut + 1),
+          total_videos: String(totalVideos),
+        },
+      });
+
+      currentPaidOut += 1;
+      lastTransferId = transfer.id;
+
+      const fullyReleased = currentPaidOut >= totalVideos;
+      await admin
+        .from("payments")
+        .update({
+          status: fullyReleased ? "released" : "escrowed",
+          stripe_transfer_id: transfer.id,
+          videos_paid_out: currentPaidOut,
+          released_at: fullyReleased
+            ? new Date().toISOString()
+            : payment.released_at,
+        })
+        .eq("id", payment.id);
+    }
 
     return NextResponse.json({
       ok: true,
-      transferId: transfer.id,
-      videosPaidOut: newPaidOut,
+      transferId: lastTransferId,
+      videosPaidOut: currentPaidOut,
       totalVideos,
     });
   } catch (e) {
