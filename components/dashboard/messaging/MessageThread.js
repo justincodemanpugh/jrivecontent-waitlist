@@ -32,6 +32,30 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   const [submitOpen, setSubmitOpen] = useState(false);
   const scrollRef = useRef(null);
 
+  // DEBUG: verify the currentUserId prop reaches the client. If this is empty
+  // in the browser while the server-side log shows a valid user, we have a
+  // session hand-off problem. If both are empty, the user isn't authenticated.
+  useEffect(() => {
+    console.log("[MessageThread] mounted", {
+      role,
+      currentUserId: currentUserId || "(empty)",
+      conversationId,
+    });
+    // Also verify the browser client sees the same user.
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient()
+        .auth.getUser()
+        .then(({ data, error }) => {
+          console.log("[MessageThread] client-side auth", {
+            clientUserId: data?.user?.id || null,
+            email: data?.user?.email || null,
+            matchesProp: data?.user?.id === currentUserId,
+            error: error?.message || null,
+          });
+        });
+    });
+  }, [role, currentUserId, conversationId]);
+
   // Initial load.
   useEffect(() => {
     let cancelled = false;
@@ -217,11 +241,25 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
             No messages yet — say hi 👋
           </p>
         ) : (
-          messages.map((m) => (
+          messages.map((m) => {
+            const isMine = m.sender_id === currentUserId;
+            // DEBUG: per-message side decision. Look for any row where
+            // sender_id === currentUserId but isMine is false (whitespace, etc).
+            if (typeof window !== "undefined") {
+              console.log("[MessageThread] render msg", {
+                msgId: m.id,
+                senderId: m.sender_id,
+                currentUserId,
+                isMine,
+                kind: m.kind,
+                bodyPreview: (m.body || "").slice(0, 40),
+              });
+            }
+            return (
             <MessageBubble
               key={m.id}
               message={m}
-              isMine={m.sender_id === currentUserId}
+              isMine={isMine}
               avatarUrl={counterpartAvatar}
               initials={counterpartInitials}
             >
@@ -232,7 +270,8 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
                 />
               ) : null}
             </MessageBubble>
-          ))
+            );
+          })
         )}
       </div>
 
