@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Lock,
   ShieldCheck,
@@ -25,6 +26,7 @@ import {
 export default function PaymentBanner({ conversation, role }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [errCode, setErrCode] = useState("");
   const [videoCount, setVideoCount] = useState(1);
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -43,6 +45,7 @@ export default function PaymentBanner({ conversation, role }) {
   const handleInitialDeposit = async () => {
     setBusy(true);
     setErr("");
+    setErrCode("");
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -53,7 +56,10 @@ export default function PaymentBanner({ conversation, role }) {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Couldn't start checkout.");
+      if (!res.ok) {
+        if (json.code) setErrCode(json.code);
+        throw new Error(json.error || "Couldn't start checkout.");
+      }
       window.location.href = json.url;
     } catch (e) {
       setErr(e.message);
@@ -144,7 +150,22 @@ export default function PaymentBanner({ conversation, role }) {
               ${perVideo.toFixed(2)} × {videoCount} = ${total.toFixed(2)}
             </span>
           </div>
-          {err ? <p className="mt-1 text-xs text-rose-700">{err}</p> : null}
+          {err ? (
+            <p className="mt-1 text-xs text-rose-700">
+              {err}
+              {errCode === "brand_connect_required" ? (
+                <>
+                  {" "}
+                  <Link
+                    href="/dashboard/brand/settings/billing"
+                    className="underline font-semibold"
+                  >
+                    Connect Stripe
+                  </Link>
+                </>
+              ) : null}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"

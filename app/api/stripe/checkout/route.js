@@ -48,6 +48,28 @@ export async function POST(request) {
       return NextResponse.json({ error: "Only the brand can deposit." }, { status: 403 });
     }
 
+    // Require the brand to have completed Connect onboarding before they
+    // can deposit. New architecture: deposits land in the brand's own
+    // Stripe Connect balance via a destination charge, and the platform
+    // takes its cut as an application_fee_amount.
+    const admin0 = createAdminClient();
+    const { data: brandProfile } = await admin0
+      .from("brand_profiles")
+      .select("stripe_account_id, stripe_charges_enabled")
+      .eq("user_id", conv.brand_id)
+      .maybeSingle();
+    if (!brandProfile?.stripe_account_id || !brandProfile?.stripe_charges_enabled) {
+      return NextResponse.json(
+        {
+          error:
+            "Connect your brand Stripe account before depositing. Go to Settings → Billing.",
+          code: "brand_connect_required",
+        },
+        { status: 400 },
+      );
+    }
+    const brandStripeAccountId = brandProfile.stripe_account_id;
+
     const perVideo = Number(conv.gig?.pay_per_video || 0);
     if (!perVideo || perVideo <= 0) {
       return NextResponse.json({ error: "Gig has no price set." }, { status: 400 });
@@ -74,7 +96,7 @@ export async function POST(request) {
     const amountCents = perVideoCents * videosForThisCheckout;
     const breakdown = feeBreakdown(amountCents);
 
-    const admin = createAdminClient();
+    const admin = admin0;
 
     let paymentId;
     if (isAdditional) {
@@ -103,6 +125,7 @@ export async function POST(request) {
             amount_cents: breakdown.amountCents,
             platform_fee_cents: breakdown.platformFeeCents,
             creator_payout_cents: breakdown.creatorPayoutCents,
+            brand_stripe_account_id: brandStripeAccountId,
             status: "pending",
           },
           { onConflict: "conversation_id" },
@@ -121,6 +144,11 @@ export async function POST(request) {
     }
 
     const base = siteUrl();
+    // Brand-as-merchant flow: the charge is destination-routed to the
+    // brand's connected account, and we collect our 15% as an
+    // application_fee_amount on the PaymentIntent. After payment clears,
+    // (amount - application_fee) lands in the brand's Connect balance and
+    // becomes our escrow pool for that conversation.
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -150,13 +178,19 @@ export async function POST(request) {
         creator_id: conv.creator_id,
         kind: isAdditional ? "additional" : "initial",
         videos: String(videosForThisCheckout),
+        brand_stripe_account_id: brandStripeAccountId,
       },
       payment_intent_data: {
+        application_fee_amount: breakdown.platformFeeCents,
+        transfer_data: {
+          destination: brandStripeAccountId,
+        },
         metadata: {
           payment_id: paymentId,
           conversation_id: conv.id,
           kind: isAdditional ? "additional" : "initial",
           videos: String(videosForThisCheckout),
+          brand_stripe_account_id: brandStripeAccountId,
         },
       },
     });

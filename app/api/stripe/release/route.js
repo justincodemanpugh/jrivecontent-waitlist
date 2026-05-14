@@ -134,8 +134,17 @@ export async function POST(request) {
     // the creator's connected-account currency on the receiving side.
     const transferCurrency = await getAccountCurrency();
 
+    // New architecture: payments funded after the brand connected Stripe
+    // store the brand's connected-account id on the payment row. We move
+    // the per-video share *from the brand's Connect balance* to the
+    // creator's connected account (no platform balance involved).
+    //
+    // Legacy payments (pre-Connect) fall back to the original
+    // platform-balance transfer.
+    const brandAccountId = payment.brand_stripe_account_id || null;
+
     while (currentPaidOut < targetPaidOut) {
-      const transfer = await stripe.transfers.create({
+      const transferParams = {
         amount: shareCents,
         currency: transferCurrency,
         destination: creator.stripe_account_id,
@@ -145,7 +154,13 @@ export async function POST(request) {
           video_index: String(currentPaidOut + 1),
           total_videos: String(totalVideos),
         },
-      });
+      };
+
+      const transfer = brandAccountId
+        ? await stripe.transfers.create(transferParams, {
+            stripeAccount: brandAccountId,
+          })
+        : await stripe.transfers.create(transferParams);
 
       currentPaidOut += 1;
       lastTransferId = transfer.id;

@@ -8,10 +8,11 @@ import {
   openBillingPortal,
   formatCardBrand,
 } from "@/lib/dashboard/brand/billingApi";
+import BrandStripePayoutsCard from "@/components/dashboard/brand/settings/BrandStripePayoutsCard";
 
 const RETURN_TO = "/dashboard/brand/settings/billing";
 
-export default function BillingPanel() {
+export default function BillingPanel({ connect }) {
   const [billing, setBilling] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -79,6 +80,9 @@ export default function BillingPanel() {
           {error}
         </div>
       )}
+
+      {/* Escrow / Stripe Connect setup */}
+      <BrandStripePayoutsCard initial={connect} />
 
       {/* Current plan */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">

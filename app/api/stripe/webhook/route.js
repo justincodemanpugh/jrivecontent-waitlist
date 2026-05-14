@@ -203,12 +203,24 @@ export async function POST(request) {
       }
 
       case "account.updated": {
-        // Connect account onboarding completion.
+        // Connect account onboarding completion. The same event fires for
+        // creator and brand connected accounts (they share the
+        // `account.updated` channel) so we update whichever profile owns
+        // the account id.
         const acct = event.data.object;
         if (acct?.id) {
           await admin
             .from("creator_profiles")
             .update({ stripe_payouts_enabled: !!acct.payouts_enabled })
+            .eq("stripe_account_id", acct.id);
+
+          await admin
+            .from("brand_profiles")
+            .update({
+              stripe_payouts_enabled: !!acct.payouts_enabled,
+              stripe_charges_enabled: !!acct.charges_enabled,
+              stripe_details_submitted: !!acct.details_submitted,
+            })
             .eq("stripe_account_id", acct.id);
         }
         break;

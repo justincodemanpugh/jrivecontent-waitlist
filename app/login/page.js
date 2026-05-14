@@ -19,6 +19,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const roleParam = searchParams.get("role");
+  const errorParam = searchParams.get("error");
 
   // Infer the default role from either an explicit ?role= hint or from the
   // post-login destination — e.g. clicking the Creators nav link sends users
@@ -32,7 +33,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(errorParam ? decodeURIComponent(errorParam) : "");
 
   // First-time users hit `/dashboard?role=...` which routes them into the
   // right onboarding flow. Returning users skip the hint — the router sends
