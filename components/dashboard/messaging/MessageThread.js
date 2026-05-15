@@ -83,9 +83,21 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   useEffect(() => {
     if (!conversationId) return undefined;
     const unsubscribe = subscribeToMessages(conversationId, (msg) => {
-      setMessages((prev) =>
-        prev.find((m) => m.id === msg.id) ? prev : [...prev, msg],
-      );
+      setMessages((prev) => {
+        // Already have the real row → no-op.
+        if (prev.find((m) => m.id === msg.id)) return prev;
+        // Replace any matching optimistic row from the same sender so we
+        // don't render the message twice once realtime catches up.
+        const withoutOptimistic = prev.filter(
+          (m) =>
+            !(
+              m.__optimistic &&
+              m.sender_id === msg.sender_id &&
+              (m.body || "") === (msg.body || "")
+            ),
+        );
+        return [...withoutOptimistic, msg];
+      });
     });
     return unsubscribe;
   }, [conversationId]);
@@ -169,10 +181,36 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     .toUpperCase() || "?";
 
   const handleSend = async (body) => {
+    // Optimistically render the message immediately so the sender sees it
+    // without waiting for the realtime echo (or a manual refresh if
+    // realtime is unavailable).
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic = {
+      id: tempId,
+      conversation_id: conversationId,
+      sender_id: currentUserId,
+      body,
+      kind: "text",
+      deliverable_id: null,
+      created_at: new Date().toISOString(),
+      __optimistic: true,
+    };
+    setMessages((prev) => [...prev, optimistic]);
     try {
-      await sendMessage({ conversationId, body });
-      // Realtime will append; we don't need to optimistically push.
+      const saved = await sendMessage({ conversationId, body });
+      // Swap the optimistic row for the persisted one so subsequent
+      // realtime echoes dedupe correctly by id.
+      if (saved) {
+        setMessages((prev) => {
+          if (prev.find((m) => m.id === saved.id)) {
+            return prev.filter((m) => m.id !== tempId);
+          }
+          return prev.map((m) => (m.id === tempId ? saved : m));
+        });
+      }
     } catch (e) {
+      // Roll back the optimistic message on failure.
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setErr(e.message || "Couldn't send.");
     }
   };

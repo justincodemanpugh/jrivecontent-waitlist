@@ -28,7 +28,7 @@ export default function FAQ() {
   const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
 
   return (
-    <section className="py-24 bg-white">
+    <section id="faq" className="py-24 bg-white">
       <div className="mx-auto max-w-5xl px-6">
         <FadeIn>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-brand-ink text-center">

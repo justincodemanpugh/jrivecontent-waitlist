@@ -202,7 +202,7 @@ export default function DeliverableCard({ deliverableId, role }) {
               preload="metadata"
               className="w-full aspect-[9/16] rounded-xl bg-slate-900 object-cover"
             />
-            {role === "brand" ? (
+            {role === "brand" && deliverable.status === "approved" ? (
               <button
                 type="button"
                 onClick={() => handleDownload(v, idx)}

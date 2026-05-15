@@ -211,9 +211,14 @@ before update on public.gig_applications
 for each row execute function public.set_updated_at();
 
 -- Maintain `gigs.applicants_count` automatically.
+-- SECURITY DEFINER so the bump UPDATE bypasses the "Gigs: brand manage own"
+-- RLS policy. Without it, the creator inserting the application can't update
+-- the gigs row and `applicants_count` would stay stuck at 0.
 create or replace function public.bump_gig_applicants_count()
 returns trigger
 language plpgsql
+security definer
+set search_path = public
 as $$
 begin
   if (tg_op = 'INSERT') then

@@ -20,19 +20,16 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-slate-600 justify-self-center">
-          <a href="#how-it-works" className="hover:text-brand-ink transition">How it Works</a>
-          <Link href="/dashboard/brand" prefetch className="hover:text-brand-ink transition">Brands</Link>
-          <Link href="/dashboard/creator" prefetch className="hover:text-brand-ink transition">Creators</Link>
+          <a href="#pricing" className="hover:text-brand-ink transition">Pricing</a>
+          <a href="#faq" className="hover:text-brand-ink transition">FAQ</a>
         </div>
 
-        <a
-          href="https://app.youform.com/forms/aj4rmaai"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/login"
           className="hidden md:inline-flex items-center rounded-full bg-brand-skyDeep text-white px-5 py-2 text-sm font-medium hover:bg-brand-ink transition justify-self-end"
         >
-          Join Waitlist
-        </a>
+          Get started for free
+        </Link>
 
         <button
           className="md:hidden p-2"
@@ -46,18 +43,15 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden mx-auto max-w-5xl mt-2 rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-md shadow-lg shadow-slate-900/5">
           <div className="px-6 py-4 flex flex-col gap-4 text-sm">
-            <a href="#how-it-works" onClick={() => setOpen(false)}>How it Works</a>
-            <Link href="/dashboard/brand" prefetch onClick={() => setOpen(false)}>Brands</Link>
-            <Link href="/dashboard/creator" prefetch onClick={() => setOpen(false)}>Creators</Link>
-            <a
-              href="https://app.youform.com/forms/aj4rmaai"
-              target="_blank"
-              rel="noopener noreferrer"
+            <a href="#pricing" onClick={() => setOpen(false)}>Pricing</a>
+            <a href="#faq" onClick={() => setOpen(false)}>FAQ</a>
+            <Link
+              href="/login"
               onClick={() => setOpen(false)}
               className="inline-flex justify-center rounded-full bg-brand-skyDeep text-white px-5 py-2 font-medium"
             >
-              Join Waitlist
-            </a>
+              Get started for free
+            </Link>
           </div>
         </div>
       )}
