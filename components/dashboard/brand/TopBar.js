@@ -61,12 +61,14 @@ export default function TopBar({ title = "Dashboard" }) {
                     </p>
                     <p className="text-xs text-slate-500">Brand account</p>
                   </div>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                  >
-                    Log out
-                  </button>
+                  <form action="/auth/signout" method="post">
+                    <button
+                      type="submit"
+                      className="block w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    >
+                      Log out
+                    </button>
+                  </form>
                 </div>
               </>
             )}

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Loader2, CheckCircle2, Building2, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { sendMagicLink } from "./actions";
 
 export default function LoginPage() {
   return (
@@ -66,13 +67,16 @@ function LoginForm() {
     setError("");
     if (!email.trim()) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: callbackUrl },
-    });
+    // Use a server action so the PKCE verifier doesn't have to round-trip
+    // through browser storage (Safari ITP / cross-device clicks were breaking
+    // it with "PKCE code verifier not found in storage").
+    const formData = new FormData();
+    formData.set("email", email.trim());
+    formData.set("next", next);
+    const result = await sendMagicLink(formData);
     setLoading(false);
-    if (error) {
-      setError(error.message);
+    if (result?.error) {
+      setError(result.error);
       return;
     }
     setSent(true);
