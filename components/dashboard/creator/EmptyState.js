@@ -39,8 +39,8 @@ export default function CreatorEmptyState({ creatorName }) {
 
         {/* Tutorial video */}
         <div 
-          className="mt-8 mx-auto max-w-2xl aspect-video rounded-2xl bg-brand-ink/90 relative overflow-hidden group cursor-pointer"
-          onClick={() => setIsPlaying(!isPlaying)}
+          className={`mt-8 mx-auto max-w-2xl aspect-video rounded-2xl bg-brand-ink/90 relative overflow-hidden group ${isPlaying ? "" : "cursor-pointer"}`}
+          onClick={isPlaying ? undefined : () => setIsPlaying(true)}
         >
           {isPlaying ? (
             <video
