@@ -34,9 +34,15 @@ export default async function DashboardRouter({ searchParams }) {
   if (brand?.onboarded_at) redirect("/dashboard/brand");
   if (creator?.onboarded_at) redirect("/dashboard/creator");
 
+  // Honour an explicit role hint from sign-in before falling back to whichever
+  // partial profile row happens to exist. Without this, a stale/partial
+  // brand_profiles row from an earlier attempt would silently send a user who
+  // just signed up as a creator into brand onboarding.
+  if (hint === "creator") redirect("/onboarding/creator");
+  if (hint === "brand") redirect("/onboarding/brand");
+
   if (brand) redirect("/onboarding/brand");
   if (creator) redirect("/onboarding/creator");
 
-  if (hint === "creator") redirect("/onboarding/creator");
   redirect("/onboarding/brand");
 }
