@@ -24,14 +24,21 @@ export default function BrandGigDetailView({ gigId }) {
     (async () => {
       try {
         const supabase = createClient();
-        const [{ data: { user } }, { data, error }] = await Promise.all([
-          supabase.auth.getUser(),
-          supabase.from("gigs").select("*").eq("id", gigId).maybeSingle(),
-        ]);
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (!user) throw new Error("You need to be signed in to view this gig.");
+        const { data, error } = await supabase
+          .from("gigs")
+          .select("*")
+          .eq("id", gigId)
+          .eq("brand_id", user.id)
+          .maybeSingle();
         if (cancelled) return;
         if (error) throw error;
         setGig(data);
-        setBrandId(user?.id || null);
+        setBrandId(user.id);
       } catch (e) {
         if (!cancelled) setErr(e.message || "Couldn't load gig.");
       } finally {
