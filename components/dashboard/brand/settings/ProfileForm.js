@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Check, Camera, Upload, Trash2 } from "lucide-react";
 import { updateBrandProfile } from "@/lib/dashboard/brand/profileApi";
 import { uploadBrandAvatar } from "@/lib/dashboard/brand/avatarUpload";
+import { COUNTRIES } from "@/lib/countries";
 
 function initialsFor(name) {
   if (!name) return "?";
@@ -18,9 +19,14 @@ export default function ProfileForm({ initial }) {
     brand_name: initial.brand_name || "",
     website: initial.website || "",
     industry: initial.industry || "",
+    country: initial.country || "",
     email: initial.email || "",
     avatar_url: initial.avatar_url || "",
   });
+  // Stripe locks the connected account country at creation. If the brand
+  // already finished Stripe onboarding, we hide the picker entirely so they
+  // don't think they can change it.
+  const stripeCountryLocked = Boolean(initial.stripe_country_locked);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [savedAt, setSavedAt] = useState(null);
@@ -77,6 +83,9 @@ export default function ProfileForm({ initial }) {
         website: form.website,
         industry: form.industry,
       };
+      if (!stripeCountryLocked) {
+        patch.country = form.country || null;
+      }
       if (form.email && form.email !== initial.email) {
         patch.email = form.email;
       }
@@ -198,6 +207,42 @@ export default function ProfileForm({ initial }) {
               placeholder="https://example.com"
               type="url"
             />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block">
+              <span className="block text-xs font-medium text-slate-700">
+                Country
+                {!stripeCountryLocked && (
+                  <span className="ml-1 font-normal text-slate-500">
+                    — used when you connect Stripe for payouts
+                  </span>
+                )}
+              </span>
+              <select
+                value={form.country}
+                onChange={(e) => set("country", e.target.value)}
+                disabled={stripeCountryLocked}
+                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-brand-skyDeep focus:ring-2 focus:ring-brand-sky/40 disabled:bg-slate-100 disabled:text-slate-500"
+              >
+                <option value="">Select your country…</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {stripeCountryLocked ? (
+                <span className="mt-1 block text-[11px] text-slate-500">
+                  Locked by Stripe — the country of a connected account can
+                  only be set when it's first created.
+                </span>
+              ) : (
+                <span className="mt-1 block text-[11px] text-slate-500">
+                  Pick the country where your business is legally based.
+                  Stripe locks this once you connect, so choose carefully.
+                </span>
+              )}
+            </label>
           </div>
         </div>
       </section>

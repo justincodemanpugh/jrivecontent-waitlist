@@ -21,7 +21,7 @@ export async function POST() {
 
     const { data: profile } = await admin
       .from("creator_profiles")
-      .select("user_id, stripe_account_id")
+      .select("user_id, stripe_account_id, country")
       .eq("user_id", user.id)
       .maybeSingle();
     if (!profile) {
@@ -34,8 +34,28 @@ export async function POST() {
     let accountId = profile.stripe_account_id;
     let account = null;
     if (!accountId) {
+      // Stripe locks the country of a connected account at creation time
+      // and it can never be changed. Require the user to pick their country
+      // in their profile first so we don't silently lock them to our
+      // platform's default country.
+      const country =
+        typeof profile.country === "string" && /^[A-Z]{2}$/.test(profile.country)
+          ? profile.country
+          : null;
+      if (!country) {
+        return NextResponse.json(
+          {
+            error:
+              "Please set your country in your profile before connecting Stripe.",
+            code: "country_required",
+          },
+          { status: 400 },
+        );
+      }
+
       account = await stripe.accounts.create({
         type: "express",
+        country,
         email: user.email || undefined,
         capabilities: {
           transfers: { requested: true },

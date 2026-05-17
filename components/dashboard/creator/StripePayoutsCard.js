@@ -10,6 +10,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useCreator } from "./CreatorProvider";
+import ResetStripeButton from "@/components/dashboard/ResetStripeButton";
 
 // Payouts setup card for the creator profile page. Shows different states
 // based on whether the creator has connected Stripe and whether payouts
@@ -133,7 +134,7 @@ export default function StripePayoutsCard() {
         </p>
       )}
 
-      <div className="mt-5">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={start}
@@ -153,6 +154,8 @@ export default function StripePayoutsCard() {
                 ? "Continue Stripe setup"
                 : "Connect Stripe account"}
         </button>
+
+        {hasAccount && <ResetStripeButton country={creator.country} />}
       </div>
     </div>
   );

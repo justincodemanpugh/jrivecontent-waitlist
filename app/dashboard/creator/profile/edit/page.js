@@ -27,7 +27,7 @@ export default async function CreatorProfileEditPage() {
     supabase
       .from("creator_profiles")
       .select(
-        "display_name, bio, avatar_url, cover_photo_url, instagram_handle, tiktok_handle, youtube_handle, portfolio_url",
+        "display_name, bio, avatar_url, cover_photo_url, instagram_handle, tiktok_handle, youtube_handle, portfolio_url, country, stripe_account_id",
       )
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -71,6 +71,10 @@ export default async function CreatorProfileEditPage() {
             tiktok_handle: profile?.tiktok_handle || "",
             youtube_handle: profile?.youtube_handle || "",
             portfolio_url: profile?.portfolio_url || "",
+            country: profile?.country || "",
+            // Once a Stripe connected account exists, its country is
+            // locked by Stripe and can't be changed via our app.
+            stripe_country_locked: Boolean(profile?.stripe_account_id),
           }}
         />
 

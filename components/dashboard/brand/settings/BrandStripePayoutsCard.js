@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import ResetStripeButton from "@/components/dashboard/ResetStripeButton";
 
 /**
  * Brand-side payouts/escrow setup card. Mirrors the creator
@@ -152,7 +153,7 @@ export default function BrandStripePayoutsCard({ initial }) {
         </p>
       )}
 
-      <div className="mt-5">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={start}
@@ -172,6 +173,20 @@ export default function BrandStripePayoutsCard({ initial }) {
                 ? "Continue Stripe setup"
                 : "Connect Stripe account"}
         </button>
+
+        {hasAccount && (
+          <ResetStripeButton
+            country={initial?.country || null}
+            onReset={() =>
+              setState({
+                hasAccount: false,
+                detailsSubmitted: false,
+                chargesEnabled: false,
+                payoutsEnabled: false,
+              })
+            }
+          />
+        )}
       </div>
     </div>
   );

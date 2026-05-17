@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Instagram, Youtube, Globe, Music2, Loader2 } from "lucide-react";
 import { updateCreatorProfile } from "@/lib/dashboard/creator/profileActions";
+import { COUNTRIES } from "@/lib/countries";
 
 export default function ProfileEditForm({ initial }) {
   const router = useRouter();
@@ -15,7 +16,12 @@ export default function ProfileEditForm({ initial }) {
     tiktok_handle: initial.tiktok_handle || "",
     youtube_handle: initial.youtube_handle || "",
     portfolio_url: initial.portfolio_url || "",
+    country: initial.country || "",
   });
+  // Stripe locks the connected account country at creation, so once the
+  // creator has finished Stripe onboarding we don't let them try to
+  // change it from here.
+  const stripeCountryLocked = Boolean(initial.stripe_country_locked);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -29,7 +35,10 @@ export default function ProfileEditForm({ initial }) {
     setError("");
     setSaved(false);
     startTransition(async () => {
-      const res = await updateCreatorProfile(form);
+      const payload = { ...form };
+      if (stripeCountryLocked) delete payload.country;
+      else payload.country = form.country || null;
+      const res = await updateCreatorProfile(payload);
       if (!res.ok) {
         setError(res.error || "Could not save changes.");
         return;
@@ -109,6 +118,32 @@ export default function ProfileEditForm({ initial }) {
             className={inputClass}
             placeholder="https://yoursite.com"
           />
+        </Field>
+      </Section>
+
+      <Section title="Payouts">
+        <Field
+          label="Country"
+          hint={stripeCountryLocked ? "Locked by Stripe" : "Used when you connect Stripe"}
+        >
+          <select
+            value={form.country}
+            onChange={(e) => update("country", e.target.value)}
+            disabled={stripeCountryLocked}
+            className={`${inputClass} disabled:bg-slate-100 disabled:text-slate-500`}
+          >
+            <option value="">Select your country…</option>
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-[11px] text-slate-500">
+            {stripeCountryLocked
+              ? "The country of a Stripe connected account can only be set when it's first created."
+              : "Pick the country where you'll receive payouts. Stripe locks this once you connect, so choose carefully."}
+          </p>
         </Field>
       </Section>
 

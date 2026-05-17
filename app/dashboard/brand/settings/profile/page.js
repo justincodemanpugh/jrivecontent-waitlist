@@ -11,7 +11,9 @@ export default async function BrandSettingsProfilePage() {
 
   const { data: profile } = await supabase
     .from("brand_profiles")
-    .select("brand_name, website, industry, avatar_url")
+    .select(
+      "brand_name, website, industry, avatar_url, country, stripe_account_id",
+    )
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -22,6 +24,10 @@ export default async function BrandSettingsProfilePage() {
         website: profile?.website || "",
         industry: profile?.industry || "",
         avatar_url: profile?.avatar_url || "",
+        country: profile?.country || "",
+        // Once a Stripe connected account exists, its country is locked
+        // by Stripe and can't be changed via our app.
+        stripe_country_locked: Boolean(profile?.stripe_account_id),
         email: user?.email || "",
       }}
     />

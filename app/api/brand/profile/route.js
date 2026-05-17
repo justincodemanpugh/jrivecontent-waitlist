@@ -5,6 +5,7 @@
 // brand_profiles row.
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isValidCountry } from "@/lib/countries";
 
 const EDITABLE_FIELDS = ["brand_name", "website", "industry", "avatar_url"];
 
@@ -27,6 +28,23 @@ export async function PATCH(request) {
         const raw = body[key];
         update[key] =
           typeof raw === "string" ? raw.trim() || null : raw ?? null;
+      }
+    }
+
+    // Country must be a valid Stripe-supported ISO alpha-2 code. We
+    // validate before writing because the constraint on the column would
+    // otherwise return an opaque DB error.
+    if ("country" in body) {
+      const raw = body.country;
+      if (raw === null || raw === "") {
+        update.country = null;
+      } else if (typeof raw === "string" && isValidCountry(raw)) {
+        update.country = raw.toUpperCase();
+      } else {
+        return NextResponse.json(
+          { error: "Please pick a supported country." },
+          { status: 400 },
+        );
       }
     }
 

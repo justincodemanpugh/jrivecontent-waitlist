@@ -10,6 +10,9 @@ create table if not exists public.brand_profiles (
   monthly_budget text,
   content_needs text[] not null default '{}',
   referral_source text,
+  -- ISO 3166-1 alpha-2 country code (e.g. "US", "CA"). Used as the
+  -- `country` parameter when creating the brand's Stripe Connect account.
+  country text check (country is null or country ~ '^[A-Z]{2}$'),
   terms_accepted_at timestamptz,
   onboarded_at timestamptz,
   -- Stripe platform-subscription state (kept in sync by /api/stripe/webhook).
@@ -84,6 +87,9 @@ create table if not exists public.creator_profiles (
   tiktok_handle text,
   youtube_handle text,
   location text,
+  -- ISO 3166-1 alpha-2 country code (e.g. "US", "CA"). Used as the
+  -- `country` parameter when creating the creator's Stripe Connect account.
+  country text check (country is null or country ~ '^[A-Z]{2}$'),
   terms_accepted_at timestamptz,
   onboarded_at timestamptz,
   created_at timestamptz not null default now(),

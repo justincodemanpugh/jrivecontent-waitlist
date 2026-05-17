@@ -26,6 +26,7 @@ export function CreatorProvider({ value, children }) {
       avatarUrl: value?.avatar_url || null,
       stripeAccountId: value?.stripe_account_id || null,
       stripePayoutsEnabled: Boolean(value?.stripe_payouts_enabled),
+      country: value?.country || null,
     };
   }, [value]);
 
@@ -48,6 +49,7 @@ export function useCreator() {
       avatarUrl: null,
       stripeAccountId: null,
       stripePayoutsEnabled: false,
+      country: null,
     };
   }
   return ctx;
