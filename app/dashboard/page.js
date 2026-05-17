@@ -28,7 +28,7 @@ export default async function DashboardRouter({ searchParams }) {
   ]);
 
   // Hint passed from /login when the user explicitly chose a role on a fresh
-  // sign-in. Honoured only if there's no existing profile of the *other* type.
+  // sign-in (preserved through the magic-link round-trip via the `next` param).
   const hint = searchParams?.role;
 
   if (brand?.onboarded_at) redirect("/dashboard/brand");
@@ -44,5 +44,8 @@ export default async function DashboardRouter({ searchParams }) {
   if (brand) redirect("/onboarding/brand");
   if (creator) redirect("/onboarding/creator");
 
-  redirect("/onboarding/brand");
+  // No role signal at all (e.g. user hit /dashboard directly without coming
+  // through /login). Send them back to pick a role rather than silently
+  // defaulting to brand onboarding.
+  redirect("/login?error=please_select_a_role");
 }
