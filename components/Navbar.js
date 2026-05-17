@@ -24,12 +24,20 @@ export default function Navbar() {
           <a href="#faq" className="hover:text-brand-ink transition">FAQ</a>
         </div>
 
-        <Link
-          href="/login"
-          className="hidden md:inline-flex items-center rounded-full bg-brand-skyDeep text-white px-5 py-2 text-sm font-medium hover:bg-brand-ink transition justify-self-end"
-        >
-          Get started for free
-        </Link>
+        <div className="hidden md:flex items-center gap-3 justify-self-end">
+          <Link
+            href="/signin"
+            className="text-sm font-medium text-slate-600 hover:text-brand-ink transition"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/signup"
+            className="inline-flex items-center rounded-full bg-brand-skyDeep text-white px-5 py-2 text-sm font-medium hover:bg-brand-ink transition"
+          >
+            Get started for free
+          </Link>
+        </div>
 
         <button
           className="md:hidden p-2"
@@ -46,7 +54,14 @@ export default function Navbar() {
             <a href="#pricing" onClick={() => setOpen(false)}>Pricing</a>
             <a href="#faq" onClick={() => setOpen(false)}>FAQ</a>
             <Link
-              href="/login"
+              href="/signin"
+              onClick={() => setOpen(false)}
+              className="text-slate-600"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
               onClick={() => setOpen(false)}
               className="inline-flex justify-center rounded-full bg-brand-skyDeep text-white px-5 py-2 font-medium"
             >

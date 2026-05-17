@@ -10,7 +10,7 @@ export default async function CreatorOnboardingPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login?next=/onboarding/creator&role=creator");
+  if (!user) redirect("/signup?role=creator");
 
   const { data: profile } = await supabase
     .from("creator_profiles")

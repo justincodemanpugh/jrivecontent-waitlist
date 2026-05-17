@@ -5,5 +5,5 @@ export async function POST(request) {
   const supabase = createClient();
   await supabase.auth.signOut();
   const { origin } = new URL(request.url);
-  return NextResponse.redirect(`${origin}/login`, { status: 303 });
+  return NextResponse.redirect(`${origin}/signin`, { status: 303 });
 }

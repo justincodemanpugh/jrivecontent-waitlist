@@ -12,7 +12,7 @@ export default async function DashboardRouter({ searchParams }) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) redirect("/signin");
 
   const [{ data: brand }, { data: creator }] = await Promise.all([
     supabase
@@ -47,5 +47,5 @@ export default async function DashboardRouter({ searchParams }) {
   // No role signal at all (e.g. user hit /dashboard directly without coming
   // through /login). Send them back to pick a role rather than silently
   // defaulting to brand onboarding.
-  redirect("/login?error=please_select_a_role");
+  redirect("/signup?error=please_select_a_role");
 }

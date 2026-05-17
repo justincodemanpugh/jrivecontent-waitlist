@@ -10,7 +10,7 @@ export default async function OnboardingPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login?next=/onboarding/brand");
+  if (!user) redirect("/signup?role=brand");
 
   const { data: profile } = await supabase
     .from("brand_profiles")

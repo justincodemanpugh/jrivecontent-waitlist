@@ -26,7 +26,7 @@ export default function Hero() {
         <FadeIn delay={400}>
           <div className="mt-10 flex justify-center items-center">
             <Link
-              href="/login"
+              href="/signup"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"
             >
               Get started for free

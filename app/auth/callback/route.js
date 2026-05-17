@@ -24,7 +24,7 @@ export async function GET(request) {
       return NextResponse.redirect(`${origin}${next}`);
     }
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error.message)}`,
+      `${origin}/signin?error=${encodeURIComponent(error.message)}`,
     );
   }
 
@@ -34,9 +34,9 @@ export async function GET(request) {
       return NextResponse.redirect(`${origin}${next}`);
     }
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error.message)}`,
+      `${origin}/signin?error=${encodeURIComponent(error.message)}`,
     );
   }
 
-  return NextResponse.redirect(`${origin}/login?error=missing_code`);
+  return NextResponse.redirect(`${origin}/signin?error=missing_code`);
 }
