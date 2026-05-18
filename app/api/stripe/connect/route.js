@@ -58,6 +58,7 @@ export async function POST() {
         country,
         email: user.email || undefined,
         capabilities: {
+          card_payments: { requested: true },
           transfers: { requested: true },
         },
         metadata: { user_id: user.id },
