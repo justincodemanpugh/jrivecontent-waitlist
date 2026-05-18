@@ -9,7 +9,7 @@ import { setCreatorCoverUrl } from "@/lib/dashboard/creator/profileActions";
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 const ACCEPT = "image/png,image/jpeg,image/webp";
 
-export default function CoverPhotoUploader({ userId, initialUrl }) {
+export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
   const router = useRouter();
   const inputRef = useRef(null);
   const [url, setUrl] = useState(initialUrl || null);
@@ -48,6 +48,7 @@ export default function CoverPhotoUploader({ userId, initialUrl }) {
       if (!res.ok) throw new Error(res.error || "Could not save cover photo.");
 
       setUrl(publicUrl);
+      if (typeof onChange === "function") onChange(publicUrl);
       router.refresh();
     } catch (e) {
       setError(e.message || "Upload failed.");
@@ -64,6 +65,7 @@ export default function CoverPhotoUploader({ userId, initialUrl }) {
       const res = await setCreatorCoverUrl("");
       if (!res.ok) throw new Error(res.error || "Could not remove cover.");
       setUrl(null);
+      if (typeof onChange === "function") onChange("");
       router.refresh();
     } catch (e) {
       setError(e.message || "Remove failed.");
@@ -84,9 +86,12 @@ export default function CoverPhotoUploader({ userId, initialUrl }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full w-full flex flex-col items-center justify-center text-slate-400">
+          <div className="h-full w-full flex flex-col items-center justify-center text-slate-500 px-3 text-center">
             <ImagePlus size={28} />
-            <p className="mt-1 text-xs">No cover yet</p>
+            <p className="mt-1 text-xs font-medium">Add a cover photo</p>
+            <p className="mt-0.5 text-[10px] text-slate-400">
+              Stand out to brands
+            </p>
           </div>
         )}
 

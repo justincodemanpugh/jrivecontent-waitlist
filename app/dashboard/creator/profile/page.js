@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil, Instagram, Youtube, Globe, Music2 } from "lucide-react";
+import { Pencil, Instagram, Youtube, Globe, Music2, ImagePlus } from "lucide-react";
 import TopBar from "@/components/dashboard/creator/TopBar";
 import StripePayoutsCard from "@/components/dashboard/creator/StripePayoutsCard";
 import PortfolioVideosGrid from "@/components/dashboard/creator/profile/PortfolioVideosGrid";
+import ProfileCompletenessCard from "@/components/dashboard/creator/profile/ProfileCompletenessCard";
 import { createClient } from "@/lib/supabase/server";
 
 function deriveInitials(name) {
@@ -82,6 +83,32 @@ export default async function CreatorProfilePage() {
     <>
       <TopBar title="Profile" />
       <main className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-3xl mx-auto space-y-6">
+        {/* Cover photo nudge — shown until a cover is uploaded */}
+        {!profile?.cover_photo_url && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <div className="flex items-start gap-4">
+              <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600">
+                <ImagePlus size={18} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-amber-900">
+                  Add a cover photo to stand out
+                </h3>
+                <p className="mt-1 text-xs text-amber-800/90">
+                  Brands are 85% more likely to hire creators with a cover
+                  photo. A normal portrait phone photo works great.
+                </p>
+                <Link
+                  href="/dashboard/creator/profile/edit"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+                >
+                  <ImagePlus size={12} /> Add cover photo
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header card */}
         <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
           <div className="p-6 flex items-start gap-5">
@@ -150,6 +177,12 @@ export default async function CreatorProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Profile completeness */}
+        <ProfileCompletenessCard
+          profile={profile}
+          videoCount={portfolioVideos.length}
+        />
 
         {/* Stripe payouts */}
         <StripePayoutsCard />

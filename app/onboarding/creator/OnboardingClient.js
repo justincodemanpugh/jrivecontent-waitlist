@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck, ImagePlus } from "lucide-react";
+import CoverPhotoUploader from "@/components/dashboard/creator/profile/CoverPhotoUploader";
 import {
   CREATOR_NICHES,
   CONTENT_TYPES,
@@ -20,6 +21,7 @@ const STEP_TITLES = [
   "What niches do you create in?",
   "What kind of content do you make?",
   "Tell brands a bit about yourself",
+  "Add a cover photo",
   "Where can brands find your work?",
   "Set up payouts with Stripe",
 ];
@@ -30,11 +32,12 @@ const STEP_SUBTITLES = [
   "Pick all that apply — brands use these to find you.",
   "Optional — pick the formats you can deliver.",
   "Optional — a short intro goes a long way.",
+  "Optional — but creators with a cover photo are 85% more likely to get hired.",
   "Optional — link your socials and portfolio.",
   "Connect Stripe so brands can pay you. You can also do this later from your profile.",
 ];
 
-export default function OnboardingClient({ initial, userEmail }) {
+export default function OnboardingClient({ initial, userEmail, userId }) {
   const [step, setStep] = useState(deriveStartStep(initial));
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
@@ -56,7 +59,7 @@ export default function OnboardingClient({ initial, userEmail }) {
     }
     if (step === 2 && data.niches.length === 0)
       return "Pick at least one niche.";
-    if (step === 5 && !data.terms_accepted) {
+    if (step === 6 && !data.terms_accepted) {
       return "Please agree to the Terms and Privacy Policy.";
     }
     return "";
@@ -76,6 +79,10 @@ export default function OnboardingClient({ initial, userEmail }) {
       case 4:
         return { bio: data.bio };
       case 5:
+        // Cover photo upload writes directly to creator_profiles via
+        // setCreatorCoverUrl, so nothing extra to persist on Continue.
+        return {};
+      case 6:
         return {
           instagram_handle: data.instagram_handle,
           tiktok_handle: data.tiktok_handle,
@@ -83,7 +90,7 @@ export default function OnboardingClient({ initial, userEmail }) {
           portfolio_url: data.portfolio_url,
           terms_accepted: data.terms_accepted,
         };
-      case 6:
+      case 7:
         // Stripe Connect status is updated server-side via the connect API
         // and webhook. Nothing extra to persist from this step.
         return {};
@@ -137,7 +144,7 @@ export default function OnboardingClient({ initial, userEmail }) {
     if (!canSkipStep(step)) return;
     // Step 5 also hosts the required terms checkbox, so a "skip"
     // there is really just clearing the optional social fields.
-    if (step === 5 && !data.terms_accepted) {
+    if (step === 6 && !data.terms_accepted) {
       setError("Please agree to the Terms and Privacy Policy.");
       return;
     }
@@ -212,8 +219,15 @@ export default function OnboardingClient({ initial, userEmail }) {
             />
           )}
           {step === 4 && <Step5 data={data} update={update} />}
-          {step === 5 && <Step6 data={data} update={update} />}
-          {step === 6 && <Step7 />}
+          {step === 5 && (
+            <StepCover
+              data={data}
+              userId={userId}
+              onChange={(url) => update({ cover_photo_url: url })}
+            />
+          )}
+          {step === 6 && <Step6 data={data} update={update} />}
+          {step === 7 && <Step7 />}
 
           {error && (
             <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -274,9 +288,16 @@ function deriveStartStep(d) {
 }
 
 function canSkipStep(step) {
-  // Steps 1, 3, 4, 5, 6 are optional and can be skipped.
-  // Step 6 = Stripe payouts; creators can connect later from their profile.
-  return step === 1 || step === 3 || step === 4 || step === 5 || step === 6;
+  // Steps 1, 3, 4, 5, 6, 7 are optional and can be skipped.
+  // Step 5 = cover photo (optional). Step 7 = Stripe payouts; can connect later.
+  return (
+    step === 1 ||
+    step === 3 ||
+    step === 4 ||
+    step === 5 ||
+    step === 6 ||
+    step === 7
+  );
 }
 
 function clearedPayload(step) {
@@ -288,6 +309,9 @@ function clearedPayload(step) {
     case 4:
       return { bio: "" };
     case 5:
+      // Cover photo is uploaded directly; skipping just leaves it empty.
+      return {};
+    case 6:
       return {
         instagram_handle: "",
         tiktok_handle: "",
@@ -377,6 +401,34 @@ function Step5({ data, update }) {
         {data.bio.length}/500
       </p>
     </Field>
+  );
+}
+
+function StepCover({ data, userId, onChange }) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-amber-600">
+            <ImagePlus size={16} />
+          </span>
+          <div className="text-sm text-amber-900">
+            <p className="font-medium">Why a cover photo matters</p>
+            <ul className="mt-1 space-y-0.5 text-amber-800/90">
+              <li>• Brands are 85% more likely to hire creators with a photo.</li>
+              <li>• Shows your style at a glance.</li>
+              <li>• A normal portrait phone photo works great.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <CoverPhotoUploader
+        userId={userId}
+        initialUrl={data.cover_photo_url || null}
+        onChange={onChange}
+      />
+    </div>
   );
 }
 
