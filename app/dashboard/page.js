@@ -45,8 +45,6 @@ export default async function DashboardRouter({ searchParams }) {
   if (brand) redirect("/onboarding/brand");
   if (creator) redirect("/onboarding/creator");
 
-  // No role signal at all (e.g. user hit /dashboard directly without coming
-  // through /login). Send them back to pick a role rather than silently
-  // defaulting to brand onboarding.
-  redirect("/signup?error=please_select_a_role");
+  // No role signal at all — send to role picker (user is already authenticated).
+  redirect("/choose-role");
 }
