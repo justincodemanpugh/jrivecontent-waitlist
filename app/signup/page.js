@@ -31,10 +31,15 @@ function SignUpForm() {
     errorParam ? decodeURIComponent(errorParam) : "",
   );
 
-  // Sign-up always goes straight to the role-specific onboarding after the
-  // magic link is verified. No dashboard router round-trip is needed because
-  // we already know which onboarding flow the user wants.
-  const next = `/onboarding/${role}`;
+  // Route through /dashboard with a role hint rather than straight to
+  // /onboarding/{role}. The dashboard router already knows how to interpret
+  // the `role` query param for fresh sign-ups, and this means the role is
+  // encoded in the URL itself — so even if the cookie fallback fails (e.g.
+  // the magic link is opened in a different browser), the role survives as
+  // long as Supabase preserves the `next` query param. If even that gets
+  // stripped, the dashboard router will at least show a clearer error than
+  // dropping the user into the wrong onboarding flow.
+  const next = `/dashboard?role=${role}`;
 
   const callbackUrl = (() => {
     if (typeof window === "undefined") return "";

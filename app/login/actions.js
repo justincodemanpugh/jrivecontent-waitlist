@@ -26,13 +26,29 @@ export async function sendMagicLink(formData) {
   // Supabase email templates use `{{ .TokenHash }}` and hardcode the callback
   // URL, dropping any query params we set via emailRedirectTo. The cookie acts
   // as a reliable fallback for the /auth/callback route on the same device.
-  cookies().set("auth_next", next, {
+  const cookieJar = cookies();
+  cookieJar.set("auth_next", next, {
     httpOnly: true,
     sameSite: "lax",
     secure: true,
     path: "/",
     maxAge: 60 * 60, // 1 hour — long enough for the user to click the email
   });
+
+  // Belt-and-suspenders: also persist any role hint extracted from `next` as
+  // its own cookie so the dashboard router can recover the role even if the
+  // entire `next` URL gets mangled in transit (e.g. an email client rewrites
+  // the link and the `role` query param is lost).
+  const roleMatch = /[?&]role=(brand|creator)\b/.exec(next);
+  if (roleMatch) {
+    cookieJar.set("signup_role", roleMatch[1], {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      path: "/",
+      maxAge: 60 * 60,
+    });
+  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
