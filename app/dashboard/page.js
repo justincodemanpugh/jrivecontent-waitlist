@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,15 +27,10 @@ export default async function DashboardRouter({ searchParams }) {
       .maybeSingle(),
   ]);
 
-  // Hint passed from /signup when the user picked a role on a fresh account.
-  // Prefer the query param (`?role=creator`) but fall back to the cookie that
-  // `sendMagicLink` set, in case the magic-link round-trip dropped the param.
-  const cookieStore = cookies();
-  const cookieRole = cookieStore.get("signup_role")?.value;
-  const hint = searchParams?.role || cookieRole;
-  if (cookieRole) {
-    cookieStore.set("signup_role", "", { path: "/", maxAge: 0 });
-  }
+  // Hint passed from /signup via the `?role=` query param (preserved through
+  // the magic-link round-trip via `next={{ .RedirectTo }}` in the email
+  // template).
+  const hint = searchParams?.role;
 
   if (brand?.onboarded_at) redirect("/dashboard/brand");
   if (creator?.onboarded_at) redirect("/dashboard/creator");

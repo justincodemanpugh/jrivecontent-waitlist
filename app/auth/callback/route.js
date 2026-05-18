@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,17 +11,7 @@ export async function GET(request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-
-  // Custom Supabase email templates that hardcode the callback URL often
-  // drop the `next` query param. `sendMagicLink` stashes it in an httpOnly
-  // cookie as a same-device fallback so we still know where to send the user
-  // (e.g. /dashboard?role=creator for fresh sign-ups).
-  const cookieStore = cookies();
-  const cookieNext = cookieStore.get("auth_next")?.value;
-  const next = searchParams.get("next") || cookieNext || "/dashboard";
-  if (cookieNext) {
-    cookieStore.set("auth_next", "", { path: "/", maxAge: 0 });
-  }
+  const next = searchParams.get("next") || "/dashboard";
 
   const supabase = createClient();
 
