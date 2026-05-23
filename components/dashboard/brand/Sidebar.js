@@ -11,18 +11,19 @@ import {
   Gift,
   Sparkles,
   Settings,
+  Lock,
 } from "lucide-react";
 import {
   fetchFreeGigsUsage,
   FREE_GIGS_TOTAL,
 } from "@/lib/dashboard/brand/gigsApi";
-import { startBrandSubscription } from "@/lib/dashboard/brand/billingApi";
+import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
 const NAV = [
   { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true },
   { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
-  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search },
+  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, proOnly: true },
 ];
 
 export default function Sidebar() {
@@ -32,6 +33,7 @@ export default function Sidebar() {
     total: FREE_GIGS_TOTAL,
     remaining: FREE_GIGS_TOTAL,
   });
+  const [isPro, setIsPro] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +52,20 @@ export default function Sidebar() {
       cancelled = true;
       window.removeEventListener("gigs:changed", onChange);
     };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const billing = await fetchBilling();
+        if (!cancelled) setIsPro(billing?.plan === "pro");
+      } catch {
+        // Silent — default to showing lock icons
+        if (!cancelled) setIsPro(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const isActive = (item) =>
@@ -92,10 +108,12 @@ export default function Sidebar() {
         {NAV.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
+          const locked = item.proOnly && isPro === false;
+          const href = locked ? "/dashboard/brand/pricing" : item.href;
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                 active
                   ? "bg-brand-mist text-brand-ink"
@@ -107,7 +125,9 @@ export default function Sidebar() {
                 className={active ? "text-brand-skyDeep" : "text-slate-400"}
               />
               <span className="flex-1">{item.label}</span>
-              {item.badge ? (
+              {locked ? (
+                <Lock size={14} className="text-slate-400" />
+              ) : item.badge ? (
                 <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-skyDeep text-white text-[11px] font-semibold">
                   {item.badge}
                 </span>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 import Stepper from "@/components/dashboard/brand/gigs/Stepper";
 import StepJobInfo from "@/components/dashboard/brand/gigs/StepJobInfo";
@@ -18,6 +18,7 @@ import {
   validateStep,
 } from "@/lib/dashboard/brand/gigForm";
 import { publishGig } from "@/lib/dashboard/brand/gigsApi";
+import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
 export default function NewGigPage() {
   const router = useRouter();
@@ -26,6 +27,26 @@ export default function NewGigPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState("");
+  const [checkingPro, setCheckingPro] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const billing = await fetchBilling();
+        if (!cancelled) {
+          if (billing?.plan !== "pro") {
+            router.replace("/dashboard/brand/pricing");
+          } else {
+            setCheckingPro(false);
+          }
+        }
+      } catch {
+        if (!cancelled) router.replace("/dashboard/brand/pricing");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [router]);
 
   const update = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
@@ -62,6 +83,14 @@ export default function NewGigPage() {
       setPublishing(false);
     }
   };
+
+  if (checkingPro) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 size={24} className="animate-spin text-slate-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

@@ -1,11 +1,46 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import TopBar from "@/components/dashboard/brand/TopBar";
 import CreatorsView from "@/components/dashboard/brand/creators/CreatorsView";
-
-export const metadata = {
-  title: "Browse Creators — JriveContent",
-};
+import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
 export default function BrandCreatorsPage() {
+  const router = useRouter();
+  const [checkingPro, setCheckingPro] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const billing = await fetchBilling();
+        if (!cancelled) {
+          if (billing?.plan !== "pro") {
+            router.replace("/dashboard/brand/pricing");
+          } else {
+            setCheckingPro(false);
+          }
+        }
+      } catch {
+        if (!cancelled) router.replace("/dashboard/brand/pricing");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [router]);
+
+  if (checkingPro) {
+    return (
+      <>
+        <TopBar title="Browse Creators" />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={24} className="animate-spin text-slate-400" />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <TopBar title="Browse Creators" />

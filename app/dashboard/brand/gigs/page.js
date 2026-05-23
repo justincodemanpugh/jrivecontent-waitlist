@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Inbox, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Inbox, Loader2, Lock } from "lucide-react";
 
 import TopBar from "@/components/dashboard/brand/TopBar";
 import GigsTabs from "@/components/dashboard/brand/gigs/list/GigsTabs";
@@ -13,14 +14,17 @@ import {
   deactivateGig,
   deleteGig,
 } from "@/lib/dashboard/brand/gigsApi";
+import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
 export default function BrandGigsPage() {
+  const router = useRouter();
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState("active");
   const [pendingDeactivate, setPendingDeactivate] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [isPro, setIsPro] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +42,26 @@ export default function BrandGigsPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const billing = await fetchBilling();
+        if (!cancelled) setIsPro(billing?.plan === "pro");
+      } catch {
+        if (!cancelled) setIsPro(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleNewGig = (e) => {
+    if (isPro === false) {
+      e.preventDefault();
+      router.push("/dashboard/brand/pricing");
+    }
+  };
 
   const counts = useMemo(
     () => ({
@@ -99,9 +123,10 @@ export default function BrandGigsPage() {
           </div>
           <Link
             href="/dashboard/brand/gigs/new"
+            onClick={handleNewGig}
             className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
-            <Plus size={16} />
+            {isPro === false ? <Lock size={16} /> : <Plus size={16} />}
             New gig
           </Link>
         </div>
@@ -119,7 +144,7 @@ export default function BrandGigsPage() {
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : visible.length === 0 ? (
-          <EmptyTab tab={tab} />
+          <EmptyTab tab={tab} isPro={isPro} />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visible.map((gig) => (
@@ -177,7 +202,7 @@ export default function BrandGigsPage() {
   );
 }
 
-function EmptyTab({ tab }) {
+function EmptyTab({ tab, isPro }) {
   const isActive = tab === "active";
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/60 px-6 py-16 text-center">
@@ -194,10 +219,10 @@ function EmptyTab({ tab }) {
       </p>
       {isActive && (
         <Link
-          href="/dashboard/brand/gigs/new"
+          href={isPro === false ? "/dashboard/brand/pricing" : "/dashboard/brand/gigs/new"}
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
-          <Plus size={16} />
+          {isPro === false ? <Lock size={16} /> : <Plus size={16} />}
           New gig
         </Link>
       )}

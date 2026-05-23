@@ -29,7 +29,7 @@ export default function Hero() {
               href="/signup"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"
             >
-              Get started for free
+              Get started
               <ArrowRight size={18} className="group-hover:translate-x-0.5 transition" />
             </Link>
           </div>
