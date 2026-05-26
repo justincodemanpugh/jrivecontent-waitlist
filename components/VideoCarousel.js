@@ -98,7 +98,7 @@ export default function VideoCarousel() {
   };
 
   return (
-    <section className="relative bg-white pb-20 md:pb-28 overflow-hidden">
+    <section className="relative bg-white pb-8 md:pb-10 overflow-hidden">
       <div className="relative">
         {/* Edge fades */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-white to-transparent z-10" />

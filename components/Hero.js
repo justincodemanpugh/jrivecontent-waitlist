@@ -18,7 +18,7 @@ export default function Hero() {
         </FadeIn>
 
         <FadeIn delay={100}>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-bold tracking-tight leading-[1.02] text-brand-ink">
+          <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-6xl font-bold tracking-tight leading-[1.02] text-brand-ink">
             Let creators <br className="hidden sm:block" />
             handle the marketing. <br className="hidden sm:block" />
             <span className="text-brand-skyDeep">You focus on building your business.</span>
