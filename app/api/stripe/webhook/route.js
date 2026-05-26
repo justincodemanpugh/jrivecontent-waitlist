@@ -58,9 +58,37 @@ export async function POST(request) {
             .eq("id", paymentId)
             .maybeSingle();
 
-          const amountTotal = Number(session.amount_total || 0);
-          const platformFee = Math.round(amountTotal * 0.15);
-          const creatorPayout = amountTotal - platformFee;
+          // Read the gig subtotal + fee split from metadata. We CANNOT use
+          // session.amount_total here because it now includes the
+          // brand-paid Stripe processing fee, which is not part of escrow.
+          const subtotalFromMeta = Number(
+            session.metadata?.subtotal_cents || 0,
+          );
+          const platformFeeFromMeta = Number(
+            session.metadata?.platform_fee_cents || 0,
+          );
+          const creatorPayoutFromMeta = Number(
+            session.metadata?.creator_payout_cents || 0,
+          );
+          // Fallback for any pre-migration top-ups that lack the new
+          // metadata: derive from amount_total minus the recorded
+          // processing_fee_cents (also new), else fall back to old
+          // amount_total * 0.15 behaviour.
+          const processingFeeFromMeta = Number(
+            session.metadata?.processing_fee_cents || 0,
+          );
+          const amountTotal = subtotalFromMeta
+            ? subtotalFromMeta
+            : Math.max(
+                0,
+                Number(session.amount_total || 0) - processingFeeFromMeta,
+              );
+          const platformFee = platformFeeFromMeta
+            ? platformFeeFromMeta
+            : Math.round(amountTotal * 0.15);
+          const creatorPayout = creatorPayoutFromMeta
+            ? creatorPayoutFromMeta
+            : amountTotal - platformFee;
 
           await admin
             .from("payments")

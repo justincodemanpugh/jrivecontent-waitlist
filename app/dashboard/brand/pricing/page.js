@@ -1,21 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import TopBar from "@/components/dashboard/brand/TopBar";
 import { startBrandSubscription } from "@/lib/dashboard/brand/billingApi";
 
 const FEATURES = [
-  "Unlimited gig postings",
-  "Browse & invite any creator",
-  "Priority support",
-  "Cancel anytime",
+  { label: "Gig postings", value: "Unlimited" },
+  { label: "Creator browsing", value: "All creators" },
+  { label: "Creator invites", value: "Unlimited" },
+  { label: "Applications", value: "Unlimited" },
+  { label: "Messaging", value: "Full access" },
+  { label: "Support", value: "Priority" },
+  { label: "Billing", value: "Cancel anytime" },
 ];
+
+const REDIRECT_REASONS = {
+  "post-gig": "Posting a gig is a Pro feature. Upgrade to publish your first gig.",
+  "browse-creators": "Browsing creators is a Pro feature. Upgrade to discover and invite creators.",
+};
 
 export default function BrandPricingPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const reasonKey = searchParams?.get("from");
+  const reasonMessage = reasonKey ? REDIRECT_REASONS[reasonKey] : null;
 
   const handleUpgrade = async () => {
     if (busy) return;
@@ -33,84 +45,98 @@ export default function BrandPricingPage() {
   return (
     <>
       <TopBar title="Upgrade to Pro" />
-      <main className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-2xl mx-auto">
+      <main className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-xl mx-auto">
         {/* Back link */}
         <Link
           href="/dashboard/brand"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-ink transition mb-8"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-ink transition mb-6"
         >
           <ArrowLeft size={16} />
           Back to dashboard
         </Link>
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-brand-ink">
-            Unlock full access
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Create unlimited gigs and browse every creator on the platform.
-          </p>
-        </div>
+        {/* Contextual banner when redirected from a gated route */}
+        {reasonMessage && (
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-brand-sky/40 bg-brand-mist px-4 py-3 text-sm text-brand-ink">
+            <Info size={18} className="mt-0.5 shrink-0 text-brand-skyDeep" />
+            <p>{reasonMessage}</p>
+          </div>
+        )}
 
         {/* Pricing card */}
-        <div className="relative rounded-2xl border-2 border-brand-sky bg-white shadow-lg shadow-brand-sky/10 p-6 sm:p-8">
-          {/* Badge */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white text-xs font-semibold uppercase tracking-wide px-3 py-1">
-              <Sparkles size={12} />
-              Recommended
+        <div className="relative rounded-3xl border border-brand-sky/40 bg-white shadow-xl shadow-brand-sky/10 p-7 sm:p-9">
+          {/* Most popular pill */}
+          <span className="inline-flex items-center rounded-full border border-brand-skyDeep/40 bg-brand-mist px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-skyDeep">
+            Most Popular
+          </span>
+
+          {/* Plan name + tagline */}
+          <h2 className="mt-5 text-3xl font-bold tracking-tight text-brand-ink">
+            Pro
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            For brands serious about growth.
+          </p>
+
+          {/* Price */}
+          <div className="mt-6 flex items-baseline gap-2">
+            <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-brand-ink">
+              $25
             </span>
+            <span className="text-lg text-slate-500">/month</span>
           </div>
-
-          <div className="text-center pt-4">
-            <p className="text-sm font-medium text-slate-500">Pro Plan</p>
-            <div className="mt-2 flex items-baseline justify-center gap-1">
-              <span className="text-5xl font-bold text-brand-ink">$25</span>
-              <span className="text-lg text-slate-500">/month</span>
-            </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Billed monthly · Cancel anytime
-            </p>
-          </div>
-
-          {/* Features */}
-          <ul className="mt-8 space-y-3">
-            {FEATURES.map((feature) => (
-              <li key={feature} className="flex items-center gap-3">
-                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-mist text-brand-skyDeep">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-                <span className="text-sm text-brand-ink">{feature}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-1 text-xs text-slate-400">Less than $1 a day</p>
 
           {/* CTA */}
           <button
             type="button"
             onClick={handleUpgrade}
             disabled={busy}
-            className="mt-8 w-full rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white py-3 text-base font-semibold shadow-md shadow-brand-sky/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="mt-6 w-full rounded-xl bg-brand-skyDeep text-white py-3.5 text-base font-semibold shadow-md shadow-brand-sky/30 hover:bg-brand-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {busy ? "Redirecting to checkout…" : "Get started"}
+            {busy ? "Redirecting to checkout…" : "Upgrade to Pro"}
           </button>
 
           {error && (
             <p className="mt-3 text-center text-sm text-red-600">{error}</p>
           )}
 
-          <p className="mt-4 text-center text-xs text-slate-400">
-            Secure payment via Stripe
+          {/* Divider */}
+          <div className="my-7 border-t border-slate-200" />
+
+          {/* Feature rows */}
+          <ul className="space-y-4">
+            {FEATURES.map((f, i) => (
+              <li
+                key={f.label}
+                className={`flex items-center justify-between gap-4 ${
+                  i !== FEATURES.length - 1 ? "pb-4 border-b border-slate-100" : ""
+                }`}
+              >
+                <span className="flex items-center gap-2.5 text-sm text-brand-ink">
+                  <Check
+                    size={16}
+                    strokeWidth={3}
+                    className="text-brand-skyDeep shrink-0"
+                  />
+                  {f.label}
+                </span>
+                <span className="text-sm font-medium text-brand-skyDeep text-right">
+                  {f.value}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-7 text-center text-xs text-slate-400">
+            Secure payment via Stripe · Cancel anytime
           </p>
         </div>
 
         {/* Current plan note */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-500">
-            Currently on the <span className="font-medium text-brand-ink">Free</span> plan
-          </p>
-        </div>
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Currently on the <span className="font-medium text-brand-ink">Free</span> plan
+        </p>
       </main>
     </>
   );

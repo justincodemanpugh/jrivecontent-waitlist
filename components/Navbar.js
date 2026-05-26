@@ -35,7 +35,7 @@ export default function Navbar() {
             href="/signup"
             className="inline-flex items-center rounded-full bg-brand-skyDeep text-white px-5 py-2 text-sm font-medium hover:bg-brand-ink transition"
           >
-            Get started for free
+            Get started
           </Link>
         </div>
 
@@ -65,7 +65,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="inline-flex justify-center rounded-full bg-brand-skyDeep text-white px-5 py-2 font-medium"
             >
-              Get started for free
+              Get started
             </Link>
           </div>
         </div>

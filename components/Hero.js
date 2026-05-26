@@ -9,17 +9,26 @@ export default function Hero() {
       className="relative overflow-hidden bg-gradient-to-b from-brand-mist to-white"
     >
       <div className="mx-auto max-w-6xl px-6 pt-32 pb-24 md:pt-40 md:pb-32 text-center">
+        <FadeIn delay={50}>
+          <div className="flex justify-center mb-6">
+            <span className="inline-block rounded-full border border-brand-skyDeep/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-skyDeep">
+              Built for small startups who just want to build &amp; not worry about marketing
+            </span>
+          </div>
+        </FadeIn>
+
         <FadeIn delay={100}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05] text-brand-ink">
-            For brands and creators <br className="hidden sm:block" />
-            just starting their <span className="text-brand-skyDeep">journey</span>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-bold tracking-tight leading-[1.02] text-brand-ink">
+            Let creators <br className="hidden sm:block" />
+            handle the marketing. <br className="hidden sm:block" />
+            <span className="text-brand-skyDeep">You focus on building your business.</span>
           </h1>
         </FadeIn>
 
         <FadeIn delay={200}>
           <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600 leading-relaxed">
-            Get your first 100 users by collaborating with affordable UGC creators.
-            Sign up free and start collaborating today.
+            JriveContent helps you find budget friendly UGC creators so you can build,
+            ship, and market on a small budget.
           </p>
         </FadeIn>
 

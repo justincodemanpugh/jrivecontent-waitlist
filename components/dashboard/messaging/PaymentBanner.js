@@ -12,6 +12,19 @@ import {
   PackagePlus,
 } from "lucide-react";
 
+// Mirror of lib/stripe/server.js gross-up so we can show the brand the
+// processing-fee surcharge before they click through to Stripe Checkout.
+const STRIPE_FEE_PERCENT = 0.029;
+const STRIPE_FEE_FIXED_CENTS = 30;
+function processingFeeForDollars(subtotalDollars) {
+  const subtotalCents = Math.round(subtotalDollars * 100);
+  if (subtotalCents <= 0) return 0;
+  const gross = Math.ceil(
+    (subtotalCents + STRIPE_FEE_FIXED_CENTS) / (1 - STRIPE_FEE_PERCENT),
+  );
+  return (gross - subtotalCents) / 100;
+}
+
 /**
  * Banner that lives at the top of a MessageThread.
  *
@@ -130,6 +143,8 @@ export default function PaymentBanner({ conversation, role }) {
   // ----- Not deposited -----
   if (role === "brand") {
     const total = perVideo * videoCount;
+    const processingFee = processingFeeForDollars(total);
+    const grandTotal = total + processingFee;
     return (
       <Wrap tone="amber">
         <Lock size={16} />
@@ -150,6 +165,10 @@ export default function PaymentBanner({ conversation, role }) {
               ${perVideo.toFixed(2)} × {videoCount} = ${total.toFixed(2)}
             </span>
           </div>
+          <p className="mt-1 text-[11px] text-amber-900/70">
+            + ${processingFee.toFixed(2)} payment processing fee · You'll be
+            charged <strong>${grandTotal.toFixed(2)}</strong> at checkout.
+          </p>
           {err ? (
             <p className="mt-1 text-xs text-rose-700">
               {err}
@@ -174,7 +193,7 @@ export default function PaymentBanner({ conversation, role }) {
           className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
         >
           {busy ? <Loader2 size={13} className="animate-spin" /> : null}
-          Deposit ${total.toFixed(2)}
+          Deposit ${grandTotal.toFixed(2)}
         </button>
       </Wrap>
     );
@@ -239,6 +258,8 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const total = perVideo * count;
+  const processingFee = processingFeeForDollars(total);
+  const grandTotal = total + processingFee;
   const currentTotal = Math.max(
     1,
     Number(conversation?.total_videos_requested || 1),
@@ -302,6 +323,15 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
             <Row
               label="Additional deposit"
               value={`$${total.toFixed(2)}`}
+            />
+            <Row
+              label="Payment processing fee"
+              value={`$${processingFee.toFixed(2)}`}
+            />
+            <div className="my-2 border-t border-slate-200" />
+            <Row
+              label="Charged today"
+              value={`$${grandTotal.toFixed(2)}`}
               strong
             />
             <p className="mt-2 text-xs text-slate-500">
@@ -331,7 +361,7 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
             className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
           >
             {busy ? <Loader2 size={13} className="animate-spin" /> : null}
-            Deposit ${total.toFixed(2)}
+            Deposit ${grandTotal.toFixed(2)}
           </button>
         </div>
       </div>

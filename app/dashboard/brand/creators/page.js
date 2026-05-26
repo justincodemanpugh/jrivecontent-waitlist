@@ -18,13 +18,13 @@ export default function BrandCreatorsPage() {
         const billing = await fetchBilling();
         if (!cancelled) {
           if (billing?.plan !== "pro") {
-            router.replace("/dashboard/brand/pricing");
+            router.replace("/dashboard/brand/pricing?from=browse-creators");
           } else {
             setCheckingPro(false);
           }
         }
       } catch {
-        if (!cancelled) router.replace("/dashboard/brand/pricing");
+        if (!cancelled) router.replace("/dashboard/brand/pricing?from=browse-creators");
       }
     })();
     return () => { cancelled = true; };

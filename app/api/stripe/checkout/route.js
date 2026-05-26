@@ -9,7 +9,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { stripe, feeBreakdown, siteUrl } from "@/lib/stripe/server";
+import {
+  stripe,
+  feeBreakdown,
+  processingFeeFor,
+  siteUrl,
+} from "@/lib/stripe/server";
 
 export async function POST(request) {
   try {
@@ -95,6 +100,13 @@ export async function POST(request) {
     const perVideoCents = Math.round(perVideo * 100);
     const amountCents = perVideoCents * videosForThisCheckout;
     const breakdown = feeBreakdown(amountCents);
+    // The brand absorbs Stripe's card-processing fee on top of the gig
+    // subtotal. We surface it as a separate line item at checkout so the
+    // total they're charged is itemised, and so that AFTER Stripe takes
+    // its cut the brand's Connect balance still grows by exactly
+    // `amountCents` (the gig subtotal). That keeps our 15% and the
+    // creator's payout whole regardless of card fees.
+    const processingFeeCents = processingFeeFor(amountCents);
 
     const admin = admin0;
 
@@ -144,54 +156,78 @@ export async function POST(request) {
     }
 
     const base = siteUrl();
-    // Brand-as-merchant flow: the charge is destination-routed to the
-    // brand's connected account, and we collect our 15% as an
-    // application_fee_amount on the PaymentIntent. After payment clears,
-    // (amount - application_fee) lands in the brand's Connect balance and
-    // becomes our escrow pool for that conversation.
+    // Brand-as-merchant flow:
+    //   - on_behalf_of bills Stripe's processing fee to the brand's
+    //     connected account (not the platform). Combined with the
+    //     "Payment processing fee" line item below, the brand fully
+    //     absorbs card costs.
+    //   - transfer_data.destination routes the charge to the brand's
+    //     connected account; we collect our 15% as application_fee_amount
+    //     against the gig subtotal (NOT against the grossed-up total).
+    //   - After payment clears, exactly `amountCents` lands in the
+    //     brand's Connect balance (gig subtotal), becoming the escrow
+    //     pool for that conversation.
+    const sharedMetadata = {
+      payment_id: paymentId,
+      conversation_id: conv.id,
+      brand_id: conv.brand_id,
+      creator_id: conv.creator_id,
+      kind: isAdditional ? "additional" : "initial",
+      videos: String(videosForThisCheckout),
+      brand_stripe_account_id: brandStripeAccountId,
+      subtotal_cents: String(breakdown.amountCents),
+      platform_fee_cents: String(breakdown.platformFeeCents),
+      creator_payout_cents: String(breakdown.creatorPayoutCents),
+      processing_fee_cents: String(processingFeeCents),
+    };
+
+    const lineItems = [
+      {
+        quantity: videosForThisCheckout,
+        price_data: {
+          currency: "usd",
+          unit_amount: perVideoCents,
+          product_data: {
+            name: `${conv.gig?.title || "Gig deposit"}${
+              videosForThisCheckout > 1 ? ` (${videosForThisCheckout} videos)` : ""
+            }`,
+            description: isAdditional
+              ? "Additional videos — added to existing escrow."
+              : "Funds held in escrow until you approve each video.",
+          },
+        },
+      },
+    ];
+
+    if (processingFeeCents > 0) {
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          currency: "usd",
+          unit_amount: processingFeeCents,
+          product_data: {
+            name: "Payment processing fee",
+            description:
+              "Covers card-network fees so 100% of the gig price reaches escrow.",
+          },
+        },
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      line_items: [
-        {
-          quantity: videosForThisCheckout,
-          price_data: {
-            currency: "usd",
-            unit_amount: perVideoCents,
-            product_data: {
-              name: `${conv.gig?.title || "Gig deposit"}${
-                videosForThisCheckout > 1 ? ` (${videosForThisCheckout} videos)` : ""
-              }`,
-              description: isAdditional
-                ? "Additional videos — added to existing escrow."
-                : "Funds held in escrow until you approve each video.",
-            },
-          },
-        },
-      ],
+      line_items: lineItems,
       success_url: `${base}/dashboard/brand/messages/${conv.id}?deposit=success`,
       cancel_url: `${base}/dashboard/brand/messages/${conv.id}?deposit=cancel`,
-      metadata: {
-        payment_id: paymentId,
-        conversation_id: conv.id,
-        brand_id: conv.brand_id,
-        creator_id: conv.creator_id,
-        kind: isAdditional ? "additional" : "initial",
-        videos: String(videosForThisCheckout),
-        brand_stripe_account_id: brandStripeAccountId,
-      },
+      metadata: sharedMetadata,
       payment_intent_data: {
         application_fee_amount: breakdown.platformFeeCents,
+        on_behalf_of: brandStripeAccountId,
         transfer_data: {
           destination: brandStripeAccountId,
         },
-        metadata: {
-          payment_id: paymentId,
-          conversation_id: conv.id,
-          kind: isAdditional ? "additional" : "initial",
-          videos: String(videosForThisCheckout),
-          brand_stripe_account_id: brandStripeAccountId,
-        },
+        metadata: sharedMetadata,
       },
     });
 
