@@ -19,9 +19,8 @@ export default function Hero() {
 
         <FadeIn delay={100}>
           <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-6xl font-bold tracking-tight leading-[1.02] text-brand-ink">
-            Let creators <br className="hidden sm:block" />
-            handle the marketing. <br className="hidden sm:block" />
-            <span className="text-brand-skyDeep">You focus on building your business.</span>
+            Find affordable UGC Creators <br className="hidden sm:block" />
+            for Startups <span className="text-brand-skyDeep">($20–$60)</span>
           </h1>
         </FadeIn>
 
@@ -38,7 +37,7 @@ export default function Hero() {
               href="/signup"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"
             >
-              Get started
+              Get started for free
               <ArrowRight size={18} className="group-hover:translate-x-0.5 transition" />
             </Link>
           </div>

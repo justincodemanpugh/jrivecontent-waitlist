@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { FadeIn } from "@/hooks/useFadeIn";
 
 export default function PricingCard({
+  variant = "pro", // "free" | "pro"
   eyebrow = "Most Popular",
   title = "Pro",
   price = "$25",
@@ -21,11 +22,20 @@ export default function PricingCard({
     { label: "Billing", value: "Cancel anytime" },
   ],
   buttonText = "Upgrade to Pro",
+  // For the free tier we just send the user to signup — no Stripe call.
+  ctaHref = null,
+  footerNote = "Secure payment via Stripe · Cancel anytime",
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isFree = variant === "free";
+
   async function handleClick() {
+    if (ctaHref) {
+      window.location.href = ctaHref;
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -46,11 +56,32 @@ export default function PricingCard({
     }
   }
 
+  const cardBorder = isFree
+    ? "border-slate-200 shadow-lg shadow-slate-200/40"
+    : "border-brand-sky/40 shadow-xl shadow-brand-sky/10";
+
+  const eyebrowClasses = isFree
+    ? "border-slate-300 bg-slate-50 text-slate-600"
+    : "border-brand-skyDeep/40 bg-brand-mist text-brand-skyDeep";
+
+  const buttonClasses = isFree
+    ? "bg-white border border-slate-300 text-brand-ink hover:bg-slate-50"
+    : "bg-brand-skyDeep text-white shadow-md shadow-brand-sky/30 hover:bg-brand-ink";
+
+  const checkClasses = isFree ? "text-slate-500" : "text-brand-skyDeep";
+  const valueClasses = isFree
+    ? "text-slate-600"
+    : "text-brand-skyDeep";
+
   return (
     <FadeIn>
-      <div className="relative rounded-3xl border border-brand-sky/40 bg-white shadow-xl shadow-brand-sky/10 p-7 sm:p-9">
-        {/* Most popular pill */}
-        <span className="inline-flex items-center rounded-full border border-brand-skyDeep/40 bg-brand-mist px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-skyDeep">
+      <div
+        className={`relative rounded-3xl border bg-white p-7 sm:p-9 h-full flex flex-col ${cardBorder}`}
+      >
+        {/* Eyebrow pill */}
+        <span
+          className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider w-fit ${eyebrowClasses}`}
+        >
           {eyebrow}
         </span>
 
@@ -75,7 +106,7 @@ export default function PricingCard({
         <button
           onClick={handleClick}
           disabled={loading}
-          className="mt-6 w-full rounded-xl bg-brand-skyDeep text-white py-3.5 text-base font-semibold shadow-md shadow-brand-sky/30 hover:bg-brand-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`mt-6 w-full rounded-xl py-3.5 text-base font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed ${buttonClasses}`}
         >
           {loading ? "Redirecting…" : buttonText}
         </button>
@@ -88,7 +119,7 @@ export default function PricingCard({
         <div className="my-7 border-t border-slate-200" />
 
         {/* Feature rows */}
-        <ul className="space-y-4">
+        <ul className="space-y-4 flex-1">
           {features.map((f, i) => {
             const item = typeof f === "string" ? { label: f, value: null } : f;
             return (
@@ -102,12 +133,12 @@ export default function PricingCard({
                   <Check
                     size={16}
                     strokeWidth={3}
-                    className="text-brand-skyDeep shrink-0"
+                    className={`${checkClasses} shrink-0`}
                   />
                   {item.label}
                 </span>
                 {item.value && (
-                  <span className="text-sm font-medium text-brand-skyDeep text-right">
+                  <span className={`text-sm font-medium text-right ${valueClasses}`}>
                     {item.value}
                   </span>
                 )}
@@ -116,9 +147,11 @@ export default function PricingCard({
           })}
         </ul>
 
-        <p className="mt-7 text-center text-xs text-slate-400">
-          Secure payment via Stripe · Cancel anytime
-        </p>
+        {footerNote && (
+          <p className="mt-7 text-center text-xs text-slate-400">
+            {footerNote}
+          </p>
+        )}
       </div>
     </FadeIn>
   );

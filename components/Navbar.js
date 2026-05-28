@@ -20,8 +20,9 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-slate-600 justify-self-center">
-          <a href="#pricing" className="hover:text-brand-ink transition">Pricing</a>
-          <a href="#faq" className="hover:text-brand-ink transition">FAQ</a>
+          <a href="/#pricing" className="hover:text-brand-ink transition">Pricing</a>
+          <a href="/#faq" className="hover:text-brand-ink transition">FAQ</a>
+          <Link href="/blog" className="hover:text-brand-ink transition">Blog</Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3 justify-self-end">
@@ -35,7 +36,7 @@ export default function Navbar() {
             href="/signup"
             className="inline-flex items-center rounded-full bg-brand-skyDeep text-white px-5 py-2 text-sm font-medium hover:bg-brand-ink transition"
           >
-            Get started
+            Get started for free
           </Link>
         </div>
 
@@ -51,8 +52,9 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden mx-auto max-w-5xl mt-2 rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-md shadow-lg shadow-slate-900/5">
           <div className="px-6 py-4 flex flex-col gap-4 text-sm">
-            <a href="#pricing" onClick={() => setOpen(false)}>Pricing</a>
-            <a href="#faq" onClick={() => setOpen(false)}>FAQ</a>
+            <a href="/#pricing" onClick={() => setOpen(false)}>Pricing</a>
+            <a href="/#faq" onClick={() => setOpen(false)}>FAQ</a>
+            <Link href="/blog" onClick={() => setOpen(false)}>Blog</Link>
             <Link
               href="/signin"
               onClick={() => setOpen(false)}
@@ -65,7 +67,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="inline-flex justify-center rounded-full bg-brand-skyDeep text-white px-5 py-2 font-medium"
             >
-              Get started
+              Get started for free
             </Link>
           </div>
         </div>

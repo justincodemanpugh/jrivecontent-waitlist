@@ -16,6 +16,7 @@ export default function Footer() {
           © {new Date().getFullYear()} JriveContent. All rights reserved.
         </p>
         <div className="flex gap-5 text-xs text-slate-500">
+          <Link href="/blog" className="hover:text-brand-ink">Blog</Link>
           <Link href="/terms" className="hover:text-brand-ink">Terms</Link>
           <Link href="/privacy" className="hover:text-brand-ink">Privacy</Link>
           <a href="mailto:hello@jrivecontent.com" className="hover:text-brand-ink">Contact</a>
