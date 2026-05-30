@@ -17,7 +17,7 @@ import {
   INITIAL_FORM,
   validateStep,
 } from "@/lib/dashboard/brand/gigForm";
-import { publishGig } from "@/lib/dashboard/brand/gigsApi";
+import { publishGig, fetchFreeGigsUsage } from "@/lib/dashboard/brand/gigsApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
 export default function NewGigPage() {
@@ -33,9 +33,14 @@ export default function NewGigPage() {
     let cancelled = false;
     (async () => {
       try {
-        const billing = await fetchBilling();
+        const [billing, freeUsage] = await Promise.all([
+          fetchBilling(),
+          fetchFreeGigsUsage(),
+        ]);
         if (!cancelled) {
-          if (billing?.plan !== "pro") {
+          const isPro = billing?.plan === "pro";
+          const hasFreeGigRemaining = freeUsage?.remaining > 0;
+          if (!isPro && !hasFreeGigRemaining) {
             router.replace("/dashboard/brand/pricing?from=post-gig");
           } else {
             setCheckingPro(false);

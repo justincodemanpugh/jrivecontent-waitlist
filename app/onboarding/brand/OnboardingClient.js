@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Check } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import {
   saveOnboardingStep,
   completeOnboarding,
 } from "@/lib/onboarding/actions";
+import { logOnboardingEvent } from "@/lib/onboarding/analytics";
 
 const STEP_TITLES = [
   "Tell us about your brand",
@@ -39,6 +40,27 @@ export default function OnboardingClient({ initial, userEmail }) {
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  // Funnel instrumentation. We fire `onboarding_started` once per mount,
+  // then `step_viewed` on every step change so the admin funnel can count
+  // distinct users per step.
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (!startedRef.current) {
+      startedRef.current = true;
+      logOnboardingEvent({
+        role: "brand",
+        event: "onboarding_started",
+        stepIndex: step,
+      });
+    }
+    logOnboardingEvent({
+      role: "brand",
+      event: "step_viewed",
+      stepIndex: step,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const update = (patch) => setData((d) => ({ ...d, ...patch }));
 
@@ -86,6 +108,11 @@ export default function OnboardingClient({ initial, userEmail }) {
         setError(res?.error || "Something went wrong. Please try again.");
         return;
       }
+      logOnboardingEvent({
+        role: "brand",
+        event: "step_completed",
+        stepIndex: step,
+      });
       if (step < TOTAL_STEPS - 1) {
         setStep((s) => s + 1);
       } else {
@@ -129,6 +156,11 @@ export default function OnboardingClient({ initial, userEmail }) {
             ? { content_needs: [] }
             : { referral_source: null, terms_accepted: data.terms_accepted };
       await saveOnboardingStep(cleared);
+      logOnboardingEvent({
+        role: "brand",
+        event: "step_skipped",
+        stepIndex: step,
+      });
       if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
       else {
         const final = await completeOnboarding({

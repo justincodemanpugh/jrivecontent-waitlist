@@ -13,6 +13,7 @@ import {
   fetchMyGigs,
   deactivateGig,
   deleteGig,
+  fetchFreeGigsUsage,
 } from "@/lib/dashboard/brand/gigsApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
@@ -24,7 +25,7 @@ export default function BrandGigsPage() {
   const [tab, setTab] = useState("active");
   const [pendingDeactivate, setPendingDeactivate] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
-  const [isPro, setIsPro] = useState(null);
+  const [canPostGig, setCanPostGig] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,19 +48,26 @@ export default function BrandGigsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const billing = await fetchBilling();
-        if (!cancelled) setIsPro(billing?.plan === "pro");
+        const [billing, freeUsage] = await Promise.all([
+          fetchBilling(),
+          fetchFreeGigsUsage(),
+        ]);
+        if (!cancelled) {
+          const isPro = billing?.plan === "pro";
+          const hasFreeGigRemaining = freeUsage?.remaining > 0;
+          setCanPostGig(isPro || hasFreeGigRemaining);
+        }
       } catch {
-        if (!cancelled) setIsPro(false);
+        if (!cancelled) setCanPostGig(false);
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
   const handleNewGig = (e) => {
-    if (isPro === false) {
+    if (canPostGig === false) {
       e.preventDefault();
-      router.push("/dashboard/brand/pricing");
+      router.push("/dashboard/brand/pricing?from=post-gig");
     }
   };
 
@@ -126,7 +134,7 @@ export default function BrandGigsPage() {
             onClick={handleNewGig}
             className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
-            {isPro === false ? <Lock size={16} /> : <Plus size={16} />}
+            {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
             New gig
           </Link>
         </div>
@@ -144,7 +152,7 @@ export default function BrandGigsPage() {
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : visible.length === 0 ? (
-          <EmptyTab tab={tab} isPro={isPro} />
+          <EmptyTab tab={tab} canPostGig={canPostGig} />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visible.map((gig) => (
@@ -202,7 +210,7 @@ export default function BrandGigsPage() {
   );
 }
 
-function EmptyTab({ tab, isPro }) {
+function EmptyTab({ tab, canPostGig }) {
   const isActive = tab === "active";
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/60 px-6 py-16 text-center">
@@ -219,10 +227,10 @@ function EmptyTab({ tab, isPro }) {
       </p>
       {isActive && (
         <Link
-          href={isPro === false ? "/dashboard/brand/pricing" : "/dashboard/brand/gigs/new"}
+          href={canPostGig === false ? "/dashboard/brand/pricing?from=post-gig" : "/dashboard/brand/gigs/new"}
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
-          {isPro === false ? <Lock size={16} /> : <Plus size={16} />}
+          {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
           New gig
         </Link>
       )}
