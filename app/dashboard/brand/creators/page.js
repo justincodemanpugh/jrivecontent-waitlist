@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import TopBar from "@/components/dashboard/brand/TopBar";
 import CreatorsView from "@/components/dashboard/brand/creators/CreatorsView";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
+import { fetchFreeTierUsage } from "@/lib/dashboard/brand/gigsApi";
 
 export default function BrandCreatorsPage() {
   const router = useRouter();
@@ -15,9 +16,14 @@ export default function BrandCreatorsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const billing = await fetchBilling();
+        const [billing, freeUsage] = await Promise.all([
+          fetchBilling(),
+          fetchFreeTierUsage(),
+        ]);
         if (!cancelled) {
-          if (billing?.plan !== "pro") {
+          const isPro = billing?.plan === "pro";
+          const hasFreeInviteRemaining = freeUsage?.invites?.remaining > 0;
+          if (!isPro && !hasFreeInviteRemaining) {
             router.replace("/dashboard/brand/pricing?from=browse-creators");
           } else {
             setCheckingPro(false);
