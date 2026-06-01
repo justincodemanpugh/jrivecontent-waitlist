@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Search, Users } from "lucide-react";
 import {
   fetchAllCreators,
   fetchMyInvitationsForCreators,
 } from "@/lib/dashboard/brand/creatorsApi";
+import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import CreatorCard from "./CreatorCard";
 import CreatorProfileModal from "./CreatorProfileModal";
 import InviteDialog from "./InviteDialog";
@@ -13,6 +15,7 @@ import InviteDialog from "./InviteDialog";
 // Top-level browse page. Fetches all onboarded creators + the brand's
 // existing invitations so cards can show "Invited" once delivered.
 export default function CreatorsView() {
+  const router = useRouter();
   const [creators, setCreators] = useState([]);
   const [invitedSet, setInvitedSet] = useState(new Set());
   const [loading, setLoading] = useState(true);
@@ -20,13 +23,18 @@ export default function CreatorsView() {
   const [query, setQuery] = useState("");
   const [openCreator, setOpenCreator] = useState(null);
   const [inviteCreator, setInviteCreator] = useState(null);
+  const [isPro, setIsPro] = useState(false);
 
   async function reload() {
     setLoading(true);
     setErr("");
     try {
-      const rows = await fetchAllCreators();
+      const [rows, billing] = await Promise.all([
+        fetchAllCreators(),
+        fetchBilling(),
+      ]);
       setCreators(rows);
+      setIsPro(billing?.plan === "pro");
       const ids = rows.map((r) => r.id);
       const invites = await fetchMyInvitationsForCreators(ids);
       const next = new Set(
@@ -118,8 +126,15 @@ export default function CreatorsView() {
               key={c.id}
               creator={c}
               invited={invitedSet.has(c.id)}
+              isPro={isPro}
               onOpen={(creator) => setOpenCreator(creator)}
-              onInvite={(creator) => setInviteCreator(creator)}
+              onInvite={(creator) => {
+                if (!isPro) {
+                  router.push("/dashboard/brand/pricing?from=invite-creator");
+                } else {
+                  setInviteCreator(creator);
+                }
+              }}
             />
           ))}
         </div>
@@ -130,11 +145,16 @@ export default function CreatorsView() {
         <CreatorProfileModal
           creator={openCreator}
           invited={invitedSet.has(openCreator.id)}
+          isPro={isPro}
           onClose={() => setOpenCreator(null)}
           onInvite={(creator) => {
-            // Switch from profile modal → invite dialog.
-            setOpenCreator(null);
-            setInviteCreator(creator);
+            if (!isPro) {
+              router.push("/dashboard/brand/pricing?from=invite-creator");
+            } else {
+              // Switch from profile modal → invite dialog.
+              setOpenCreator(null);
+              setInviteCreator(creator);
+            }
           }}
         />
       ) : null}

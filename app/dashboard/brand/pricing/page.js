@@ -20,6 +20,7 @@ const FEATURES = [
 const REDIRECT_REASONS = {
   "post-gig": "Posting a gig is a Pro feature. Upgrade to publish your first gig.",
   "browse-creators": "Browsing creators is a Pro feature. Upgrade to discover and invite creators.",
+  "invite-creator": "Inviting creators is a Pro feature. Upgrade to send invitations.",
 };
 
 export default function BrandPricingPage() {

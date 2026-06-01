@@ -19,11 +19,11 @@ import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/bill
 import { fetchPendingApplicantCount } from "@/lib/dashboard/applicationsApi";
 
 const NAV = [
-  { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true },
-  { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase },
-  { label: "Applicants", href: "/dashboard/brand/applicants", icon: Users, badgeKey: "pendingApplicants" },
-  { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
-  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, proOnly: true },
+  { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true, tourId: "nav-dashboard" },
+  { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase, tourId: "nav-gigs" },
+  { label: "Applicants", href: "/dashboard/brand/applicants", icon: Users, badgeKey: "pendingApplicants", tourId: "nav-applicants" },
+  { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
+  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, proOnly: true, tourId: "nav-creators" },
 ];
 
 export default function Sidebar() {
@@ -139,6 +139,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={href}
+              data-tour={item.tourId}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                 active
                   ? "bg-brand-mist text-brand-ink"
@@ -167,6 +168,7 @@ export default function Sidebar() {
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
+          data-tour="upgrade-button"
           className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-brand-sky/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Sparkles size={16} />

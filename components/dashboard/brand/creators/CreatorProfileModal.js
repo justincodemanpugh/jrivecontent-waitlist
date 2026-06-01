@@ -9,6 +9,7 @@ import {
   Globe,
   MapPin,
   Send,
+  Lock,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function CreatorProfileModal({
   creator,
   invited,
+  isPro,
   onClose,
   onInvite,
 }) {
@@ -118,10 +120,12 @@ export default function CreatorProfileModal({
               className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
                 invited
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-brand-ink text-white hover:bg-slate-800"
+                  : !isPro
+                    ? "bg-slate-100 text-slate-500 border border-slate-200"
+                    : "bg-brand-ink text-white hover:bg-slate-800"
               }`}
             >
-              <Send size={14} />
+              {invited ? <Send size={14} /> : !isPro ? <Lock size={14} /> : <Send size={14} />}
               {invited ? "Invited" : "Invite to gig"}
             </button>
           </div>

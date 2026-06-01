@@ -132,6 +132,7 @@ export default function BrandGigsPage() {
           <Link
             href="/dashboard/brand/gigs/new"
             onClick={handleNewGig}
+            data-tour="new-gig-button"
             className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
             {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}

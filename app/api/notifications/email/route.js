@@ -60,6 +60,14 @@ function buildEmail(notification, recipientName) {
         cta: "Open conversation",
         link,
       };
+    case "gig_new":
+      return {
+        subject: `New gig: ${notification.title || "A brand is looking for creators"}`,
+        heading: "New gig posted",
+        intro: notification.body || "A brand just posted a new gig that might be perfect for you.",
+        cta: "View gig",
+        link,
+      };
     default:
       // Generic fallback so future notification types still get an email
       // without code changes.
