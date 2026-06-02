@@ -34,6 +34,12 @@ export default function WelcomeBanner({ brandName, onStartTour }) {
             await initTutorialProgress();
           }
           setVisible(true);
+          // Auto-start tour for new brands after a short delay
+          setTimeout(() => {
+            if (!cancelled && onStartTour) {
+              onStartTour();
+            }
+          }, 1500);
         }
       } catch (err) {
         console.error("[WelcomeBanner]", err);

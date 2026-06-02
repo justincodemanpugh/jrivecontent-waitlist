@@ -8,27 +8,37 @@ import { startTour, completeTour, dismissTour } from "@/lib/dashboard/brand/tuto
 const TOUR_STEPS = [
   {
     id: "welcome",
-    target: null, // Center modal, no highlight
+    target: null,
     title: "Welcome to JriveContent! 🎉",
     content:
       "Let's take a quick tour to help you post your first gig and start connecting with creators.",
     position: "center",
   },
   {
-    id: "sidebar_gigs",
-    target: '[data-tour="nav-gigs"]',
-    title: "My Gigs",
-    content:
-      "This is where you'll manage all your gigs. Create new ones, track applications, and see what's active.",
-    position: "right",
-  },
-  {
-    id: "new_gig_button",
-    target: '[data-tour="new-gig-button"]',
+    id: "post_gig_button",
+    target: '[data-tour="post-new-gig"]',
     title: "Post Your First Gig",
     content:
       "Click here to create your first gig. Describe what content you need, set your budget, and publish it to the marketplace.",
     position: "bottom",
+    highlight: true,
+  },
+  {
+    id: "sidebar_gigs",
+    target: '[data-tour="nav-gigs"]',
+    title: "My Gigs",
+    content:
+      "This is where you'll manage all your gigs. Track applications, see what's active, and review past campaigns.",
+    position: "right",
+    highlight: true,
+  },
+  {
+    id: "sidebar_applicants",
+    target: '[data-tour="nav-applicants"]',
+    title: "Review Applicants",
+    content:
+      "When creators apply to your gigs, you'll see them here. Review their profiles, portfolios, and accept the best fits.",
+    position: "right",
     highlight: true,
   },
   {
@@ -38,14 +48,7 @@ const TOUR_STEPS = [
     content:
       "Explore our creator marketplace to find the perfect match for your brand. Filter by niche, style, and more.",
     position: "right",
-  },
-  {
-    id: "sidebar_applicants",
-    target: '[data-tour="nav-applicants"]',
-    title: "Review Applicants",
-    content:
-      "When creators apply to your gigs, you'll see them here. Review their profiles, portfolios, and accept the best fits.",
-    position: "right",
+    highlight: true,
   },
   {
     id: "sidebar_messages",
@@ -54,15 +57,16 @@ const TOUR_STEPS = [
     content:
       "Chat directly with creators you're working with. Discuss details, share feedback, and coordinate deliverables.",
     position: "right",
+    highlight: true,
   },
   {
     id: "upgrade_button",
     target: '[data-tour="upgrade-button"]',
-    title: "Upgrade to Pro",
+    title: "Upgrade to Pro (Optional)",
     content:
-      "Unlock unlimited gigs, priority support, and advanced features. Or continue with our free plan to get started!",
+      "Unlock unlimited gigs, priority support, and advanced features. Or continue with our free plan — you can post your first gig for free!",
     position: "right",
-    optional: true,
+    highlight: true,
   },
   {
     id: "complete",

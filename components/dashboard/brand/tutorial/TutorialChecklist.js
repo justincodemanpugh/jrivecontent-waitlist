@@ -81,13 +81,14 @@ const CHECKLIST_SECTIONS = [
   },
 ];
 
-export default function TutorialChecklist({ onStartTour }) {
+export default function TutorialChecklist({ onStartTour, onHide }) {
   const router = useRouter();
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState(["get_started"]);
   const [isPro, setIsPro] = useState(false);
   const [hasGigs, setHasGigs] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -158,11 +159,13 @@ export default function TutorialChecklist({ onStartTour }) {
   };
 
   const handleHide = async () => {
+    setIsHidden(true);
+    onHide?.();
     await toggleChecklistVisibility(true);
   };
 
   if (loading) return null;
-  if (progress?.checklist_hidden) return null;
+  if (isHidden || progress?.checklist_hidden) return null;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">

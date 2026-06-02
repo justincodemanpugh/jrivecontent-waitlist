@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ListChecks } from "lucide-react";
 
 import TopBar from "@/components/dashboard/brand/TopBar";
 import StatStrip from "@/components/dashboard/brand/StatStrip";
@@ -12,6 +13,7 @@ import WelcomeBanner from "@/components/dashboard/brand/tutorial/WelcomeBanner";
 import TutorialChecklist from "@/components/dashboard/brand/tutorial/TutorialChecklist";
 import GuidedTour from "@/components/dashboard/brand/tutorial/GuidedTour";
 import { fetchMyGigs } from "@/lib/dashboard/brand/gigsApi";
+import { toggleChecklistVisibility } from "@/lib/dashboard/brand/tutorialApi";
 import {
   fetchDashboardStats,
   fetchAttentionItems,
@@ -36,6 +38,7 @@ export default function BrandDashboardPage() {
   const [attention, setAttention] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [checklistHidden, setChecklistHidden] = useState(false);
 
   const loadAll = useCallback(async () => {
     try {
@@ -81,6 +84,11 @@ export default function BrandDashboardPage() {
 
   const handleStartTour = () => setTourOpen(true);
   const handleCloseTour = () => setTourOpen(false);
+  const handleHideChecklist = () => setChecklistHidden(true);
+  const handleShowChecklist = async () => {
+    setChecklistHidden(false);
+    await toggleChecklistVisibility(false);
+  };
 
   return (
     <>
@@ -115,7 +123,20 @@ export default function BrandDashboardPage() {
           {/* Tutorial checklist sidebar */}
           <div className="lg:w-80 flex-shrink-0">
             <div className="lg:sticky lg:top-24">
-              <TutorialChecklist onStartTour={handleStartTour} />
+              {!checklistHidden ? (
+                <TutorialChecklist
+                  onStartTour={handleStartTour}
+                  onHide={handleHideChecklist}
+                />
+              ) : (
+                <button
+                  onClick={handleShowChecklist}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-brand-ink hover:bg-slate-50 shadow-sm transition"
+                >
+                  <ListChecks size={16} className="text-brand-skyDeep" />
+                  Show setup guide
+                </button>
+              )}
             </div>
           </div>
         </div>
