@@ -326,12 +326,12 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
               aria-label={
                 conversation?.payment_deposited
                   ? "Submit videos"
-                  : "Waiting for brand to deposit payment"
+                  : "Add videos - waiting for brand to deposit payment"
               }
               title={
                 conversation?.payment_deposited
                   ? "Submit videos"
-                  : "Brand must deposit payment before you can submit videos."
+                  : "Brand must deposit payment into escrow before you can submit videos. Funds are held until your videos are approved."
               }
             >
               <Paperclip size={18} />

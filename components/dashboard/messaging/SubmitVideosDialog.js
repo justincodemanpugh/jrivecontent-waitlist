@@ -97,10 +97,16 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
             <h2 className="text-base font-semibold text-brand-ink">
               Submit videos
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Up to {MAX_VIDEOS_PER_SUBMISSION} videos per submission. mp4, mov,
-              m4v, or webm.
-            </p>
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-slate-500">
+                Up to {MAX_VIDEOS_PER_SUBMISSION} videos per submission. mp4, mov, m4v, or webm.
+              </p>
+              <div className="text-xs text-slate-400 space-y-0.5">
+                <p>• Recommended: 1080p resolution, 15-60 seconds</p>
+                <p>• Max file size: 500MB per video</p>
+                <p>• Ensure good lighting and clear audio</p>
+              </div>
+            </div>
           </div>
           <button
             type="button"
@@ -133,10 +139,10 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
               <span className="font-medium text-brand-ink">
                 {files.length >= MAX_VIDEOS_PER_SUBMISSION
                   ? "Max videos selected"
-                  : "Click to add videos"}
+                  : "Add video"}
               </span>
               <span className="text-xs text-slate-500">
-                {files.length}/{MAX_VIDEOS_PER_SUBMISSION} selected
+                {files.length}/{MAX_VIDEOS_PER_SUBMISSION} videos selected
               </span>
             </button>
           </div>
