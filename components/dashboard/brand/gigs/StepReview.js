@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Eye, Edit3, CheckCircle2 } from "lucide-react";
 import StepShell from "./StepShell";
 import GigPreviewCard from "./GigPreviewCard";
+import {
+  platformLabel,
+  contentTypeLabel,
+} from "@/lib/dashboard/brand/gigForm";
 
 export default function StepReview({ form, goToStep }) {
   const [mode, setMode] = useState("summary"); // "summary" | "creator"
@@ -66,9 +70,30 @@ export default function StepReview({ form, goToStep }) {
             onEdit={() => goToStep(0)}
           />
           <ReviewRow
+            label="Videos"
+            value={`${form.videoQuantity} video${
+              Number(form.videoQuantity) === 1 ? "" : "s"
+            }`}
+            onEdit={() => goToStep(1)}
+          />
+          <ReviewRow
+            label="Platforms"
+            value={
+              form.platforms?.length
+                ? form.platforms.map(platformLabel).join(", ")
+                : "—"
+            }
+            onEdit={() => goToStep(1)}
+          />
+          <ReviewRow
+            label="Content type"
+            value={form.contentType ? contentTypeLabel(form.contentType) : "—"}
+            onEdit={() => goToStep(1)}
+          />
+          <ReviewRow
             label="Pay per video"
             value={`$${form.payPerVideo}`}
-            onEdit={() => goToStep(1)}
+            onEdit={() => goToStep(2)}
           />
           <ReviewRow
             label="Example videos"
@@ -77,7 +102,7 @@ export default function StepReview({ form, goToStep }) {
                 ? `${form.examples.length} added`
                 : "None"
             }
-            onEdit={() => goToStep(2)}
+            onEdit={() => goToStep(3)}
           />
         </div>
       )}

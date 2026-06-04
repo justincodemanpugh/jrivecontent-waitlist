@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Loader2, Check } from "lucide-react";
+import { ArrowLeft, DollarSign, Loader2, Check, Film } from "lucide-react";
 import { fetchMarketplaceGig } from "@/lib/dashboard/marketplaceApi";
 import { fetchMyApplicationForGig } from "@/lib/dashboard/applicationsApi";
+import { platformLabel, contentTypeLabel } from "@/lib/dashboard/brand/gigForm";
 import ExampleVideosSection from "@/components/dashboard/brand/gigs/ExampleVideosSection";
 import ApplyDialog from "./ApplyDialog";
 
@@ -102,17 +103,48 @@ export default function GigDetailView({ gigId }) {
             </h1>
           </div>
 
-          <div className="rounded-2xl bg-brand-mist/50 border border-brand-sky/30 p-4 flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-skyDeep">
-              <DollarSign size={18} />
-            </span>
-            <div>
-              <p className="text-xs text-slate-500">Pay per video</p>
-              <p className="text-lg font-semibold text-brand-ink">
-                ${gig.payPerVideo}
-              </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-brand-mist/50 border border-brand-sky/30 p-4 flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-skyDeep">
+                <DollarSign size={18} />
+              </span>
+              <div>
+                <p className="text-xs text-slate-500">Pay per video</p>
+                <p className="text-lg font-semibold text-brand-ink">
+                  ${gig.payPerVideo}
+                </p>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-brand-mist/50 border border-brand-sky/30 p-4 flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-skyDeep">
+                <Film size={18} />
+              </span>
+              <div>
+                <p className="text-xs text-slate-500">Videos needed</p>
+                <p className="text-lg font-semibold text-brand-ink">
+                  {gig.videoQuantity} video{gig.videoQuantity === 1 ? "" : "s"}
+                </p>
+              </div>
             </div>
           </div>
+
+          {(gig.contentType || (gig.platforms && gig.platforms.length > 0)) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {gig.contentType && (
+                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-medium">
+                  {contentTypeLabel(gig.contentType)}
+                </span>
+              )}
+              {(gig.platforms || []).map((p) => (
+                <span
+                  key={p}
+                  className="inline-flex items-center rounded-full bg-brand-mist text-brand-skyDeep px-3 py-1 text-xs font-medium"
+                >
+                  {platformLabel(p)}
+                </span>
+              ))}
+            </div>
+          )}
 
           <section>
             <h2 className="text-sm font-semibold text-brand-ink mb-2">

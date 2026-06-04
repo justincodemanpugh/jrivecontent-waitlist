@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, ChevronDown } from "lucide-react";
+import { Plus, ChevronDown, ListChecks } from "lucide-react";
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
 
-export default function TopBar({ title = "Dashboard" }) {
+export default function TopBar({ title = "Dashboard", checklistHidden, checklistProgress, onShowChecklist }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const brand = useBrand();
 
@@ -25,6 +25,42 @@ export default function TopBar({ title = "Dashboard" }) {
             <span className="hidden sm:inline">Post New Gig</span>
             <span className="sm:hidden">Post</span>
           </Link>
+
+          {checklistHidden && onShowChecklist && (
+            <button
+              onClick={onShowChecklist}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand-ink hover:bg-slate-50 transition shadow-sm"
+            >
+              <span>Setup guide</span>
+              <svg className="w-5 h-5" viewBox="0 0 36 36">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="#e2e8f0"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="url(#progress-gradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(checklistProgress / 100) * 94.2} 94.2`}
+                  transform="rotate(-90 18 18)"
+                />
+                <defs>
+                  <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </button>
+          )}
 
           <NotificationsBell />
 

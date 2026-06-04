@@ -29,6 +29,11 @@ export default function MarketplaceGigCard({ gig }) {
         <h3 className="font-semibold text-brand-ink leading-snug group-hover:text-brand-skyDeep transition line-clamp-2">
           {gig.title}
         </h3>
+        {gig.videoQuantity ? (
+          <p className="mt-1.5 text-xs text-slate-500">
+            {gig.videoQuantity} video{gig.videoQuantity === 1 ? "" : "s"} needed
+          </p>
+        ) : null}
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 min-w-0">
           <span className="font-medium text-slate-700 truncate">
             {gig.brandName}

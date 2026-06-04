@@ -1,4 +1,5 @@
-import { DollarSign, Link2, Video } from "lucide-react";
+import { DollarSign, Link2, Video, Film } from "lucide-react";
+import { platformLabel, contentTypeLabel } from "@/lib/dashboard/brand/gigForm";
 
 /**
  * Mirrors the creator-facing card so brands see exactly what will be published.
@@ -26,6 +27,26 @@ export default function GigPreviewCard({ form }) {
             <DollarSign size={14} />
             {form.payPerVideo || 0}/video
           </span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 px-2.5 py-1 text-xs font-medium">
+            <Film size={12} />
+            {form.videoQuantity || 1} video{Number(form.videoQuantity) === 1 ? "" : "s"}
+          </span>
+          {form.contentType && (
+            <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-2.5 py-1 text-xs font-medium">
+              {contentTypeLabel(form.contentType)}
+            </span>
+          )}
+          {(form.platforms || []).map((p) => (
+            <span
+              key={p}
+              className="inline-flex items-center rounded-full bg-brand-mist text-brand-skyDeep px-2.5 py-1 text-xs font-medium"
+            >
+              {platformLabel(p)}
+            </span>
+          ))}
         </div>
 
         <p className="mt-3 text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">

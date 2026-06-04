@@ -10,6 +10,12 @@ import {
   MapPin,
   Send,
   Lock,
+  Check,
+  Eye,
+  Heart,
+  MessageCircle,
+  ExternalLink,
+  Play,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -164,16 +170,17 @@ export default function CreatorProfileModal({
             </div>
           ) : null}
 
-          {/* Socials */}
+          {/* Social Profiles */}
           <div className="rounded-2xl border border-slate-200 p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-              Where to find them
+              Social Profiles
             </h3>
             <ul className="space-y-1.5 text-sm">
               <SocialRow
                 icon={Instagram}
                 label="Instagram"
                 handle={creator.instagram}
+                verified={creator.instagram_verified}
                 href={
                   creator.instagram
                     ? `https://instagram.com/${creator.instagram}`
@@ -184,6 +191,7 @@ export default function CreatorProfileModal({
                 icon={Music2}
                 label="TikTok"
                 handle={creator.tiktok}
+                verified={creator.tiktok_verified}
                 href={
                   creator.tiktok
                     ? `https://tiktok.com/@${creator.tiktok}`
@@ -194,6 +202,7 @@ export default function CreatorProfileModal({
                 icon={Youtube}
                 label="YouTube"
                 handle={creator.youtube}
+                verified={creator.youtube_verified}
                 href={
                   creator.youtube
                     ? `https://youtube.com/@${creator.youtube}`
@@ -210,42 +219,75 @@ export default function CreatorProfileModal({
             </ul>
           </div>
 
-          {/* Portfolio videos */}
-          <div>
-            <h3 className="text-sm font-semibold text-brand-ink mb-2">
-              Sample work
-            </h3>
-            {portfolioUrls.length === 0 ? (
-              <p className="text-sm text-slate-400 italic">
-                No videos uploaded yet.
-              </p>
-            ) : (
-              <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {portfolioUrls.map((v) => (
+          {/* Top Posts */}
+          {creator.portfolioVideos && creator.portfolioVideos.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-brand-ink mb-2">
+                Top Posts
+              </h3>
+              <ul className="space-y-3">
+                {creator.portfolioVideos.map((video, index) => (
                   <li
-                    key={v.id}
-                    className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-[9/16]"
+                    key={video.id}
+                    className="rounded-xl border border-slate-200 bg-white p-4"
                   >
-                    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                    <video
-                      src={v.url}
-                      className="h-full w-full object-cover"
-                      controls
-                      preload="metadata"
-                      playsInline
-                    />
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">
+                            {video.platform === 'instagram' ? '📷' : 
+                             video.platform === 'tiktok' ? '🎵' : '🎬'}
+                          </span>
+                          <span className="text-sm font-medium text-brand-ink">
+                            {video.title || `Video ${index + 1}`}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-xs text-slate-600">
+                          <span className="flex items-center gap-1">
+                            <Eye size={12} /> {video.views?.toLocaleString() || 0} views
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Heart size={12} /> {video.likes?.toLocaleString() || 0} likes
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageCircle size={12} /> {video.comments?.toLocaleString() || 0} comments
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <a
+                        href={video.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full bg-brand-skyDeep px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 transition"
+                      >
+                        <ExternalLink size={12} />
+                        Open
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-3">
+                <Play size={20} className="text-slate-400" />
+                <div>
+                  <p className="text-sm font-medium text-slate-700">No top posts yet</p>
+                  <p className="text-xs text-slate-500">This creator hasn't added their best performing content.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function SocialRow({ icon: Icon, label, handle, href, rawUrl }) {
+function SocialRow({ icon: Icon, label, handle, href, rawUrl, verified }) {
   const has = Boolean(handle && href);
   return (
     <li className="flex items-center gap-2">
@@ -254,14 +296,22 @@ function SocialRow({ icon: Icon, label, handle, href, rawUrl }) {
         className={has ? "text-brand-skyDeep" : "text-slate-400"}
       />
       {has ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-brand-skyDeep hover:underline truncate"
-        >
-          {rawUrl ? handle : `@${handle}`}
-        </a>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-skyDeep hover:underline truncate"
+          >
+            {rawUrl ? handle : `@${handle}`}
+          </a>
+          {verified && (
+            <span className="inline-flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+              <Check size={10} />
+              Verified
+            </span>
+          )}
+        </div>
       ) : (
         <span className="text-slate-400">{label} not linked</span>
       )}

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck, ImagePlus } from "lucide-react";
 import CoverPhotoUploader from "@/components/dashboard/creator/profile/CoverPhotoUploader";
+import SocialAccountVerifier from "@/components/onboarding/SocialAccountVerifier";
+import VideoShowcaseUploader from "@/components/onboarding/VideoShowcaseUploader";
 import {
   CREATOR_NICHES,
   CONTENT_TYPES,
@@ -34,7 +36,7 @@ const STEP_SUBTITLES = [
   "Optional — pick the formats you can deliver.",
   "Optional — a short intro goes a long way.",
   "Optional — but creators with a cover photo are 85% more likely to get hired.",
-  "Optional — link your socials and portfolio.",
+  "Connect your social accounts and showcase your best content.",
   "Connect Stripe so brands can pay you. You can also do this later from your profile.",
 ];
 
@@ -43,6 +45,13 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [socialVerified, setSocialVerified] = useState({
+    instagram: false,
+    tiktok: false,
+    youtube: false,
+  });
+  const [portfolioVideos, setPortfolioVideos] = useState([]);
+  const [hasValidVideos, setHasValidVideos] = useState(false);
 
   // Funnel instrumentation. Mirrors the brand flow: fire `onboarding_started`
   // once on mount, then `step_viewed` every time the step changes.
@@ -80,8 +89,17 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
     }
     if (step === 2 && data.niches.length === 0)
       return "Pick at least one niche.";
-    if (step === 6 && !data.terms_accepted) {
-      return "Please agree to the Terms and Privacy Policy.";
+    if (step === 6) {
+      if (!data.terms_accepted) {
+        return "Please agree to the Terms and Privacy Policy.";
+      }
+      const hasAnySocialVerified = Object.values(socialVerified).some(v => v);
+      if (!hasAnySocialVerified) {
+        return "Please connect and verify at least one social account.";
+      }
+      if (!hasValidVideos) {
+        return "Please add at least one of your best videos.";
+      }
     }
     return "";
   };
@@ -109,6 +127,10 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
           tiktok_handle: data.tiktok_handle,
           youtube_handle: data.youtube_handle,
           portfolio_url: data.portfolio_url,
+          instagram_verified: socialVerified.instagram,
+          tiktok_verified: socialVerified.tiktok,
+          youtube_verified: socialVerified.youtube,
+          portfolio_videos: portfolioVideos,
           terms_accepted: data.terms_accepted,
         };
       case 7:
@@ -257,7 +279,18 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
               onChange={(url) => update({ cover_photo_url: url })}
             />
           )}
-          {step === 6 && <Step6 data={data} update={update} />}
+          {step === 6 && (
+            <Step6 
+              data={data} 
+              update={update}
+              socialVerified={socialVerified}
+              setSocialVerified={setSocialVerified}
+              portfolioVideos={portfolioVideos}
+              setPortfolioVideos={setPortfolioVideos}
+              hasValidVideos={hasValidVideos}
+              setHasValidVideos={setHasValidVideos}
+            />
+          )}
           {step === 7 && <Step7 />}
 
           {error && (
@@ -319,14 +352,13 @@ function deriveStartStep(d) {
 }
 
 function canSkipStep(step) {
-  // Steps 1, 3, 4, 5, 6, 7 are optional and can be skipped.
-  // Step 5 = cover photo (optional). Step 7 = Stripe payouts; can connect later.
+  // Steps 1, 3, 4, 5, 7 are optional and can be skipped.
+  // Step 6 is now required (social accounts + videos). Step 7 = Stripe payouts; can connect later.
   return (
     step === 1 ||
     step === 3 ||
     step === 4 ||
     step === 5 ||
-    step === 6 ||
     step === 7
   );
 }
@@ -343,10 +375,8 @@ function clearedPayload(step) {
       // Cover photo is uploaded directly; skipping just leaves it empty.
       return {};
     case 6:
+      // Step 6 is now required, so don't clear when skipping
       return {
-        instagram_handle: "",
-        tiktok_handle: "",
-        youtube_handle: "",
         portfolio_url: "",
       };
     default:
@@ -463,34 +493,37 @@ function StepCover({ data, userId, onChange }) {
   );
 }
 
-function Step6({ data, update }) {
+function Step6({ 
+  data, 
+  update, 
+  socialVerified, 
+  setSocialVerified, 
+  portfolioVideos, 
+  setPortfolioVideos, 
+  hasValidVideos, 
+  setHasValidVideos 
+}) {
   return (
-    <div className="space-y-4">
-      <Field label="Instagram">
-        <PrefixInput
-          prefix="@"
-          value={data.instagram_handle}
-          onChange={(v) => update({ instagram_handle: v })}
-          placeholder="handle"
-        />
-      </Field>
-      <Field label="TikTok">
-        <PrefixInput
-          prefix="@"
-          value={data.tiktok_handle}
-          onChange={(v) => update({ tiktok_handle: v })}
-          placeholder="handle"
-        />
-      </Field>
-      <Field label="YouTube">
-        <PrefixInput
-          prefix="@"
-          value={data.youtube_handle}
-          onChange={(v) => update({ youtube_handle: v })}
-          placeholder="handle"
-        />
-      </Field>
-      <Field label="Portfolio URL">
+    <div className="space-y-6">
+      <SocialAccountVerifier
+        instagram={data.instagram_handle}
+        tiktok={data.tiktok_handle}
+        youtube={data.youtube_handle}
+        onInstagramChange={(v) => update({ instagram_handle: v })}
+        onTiktokChange={(v) => update({ tiktok_handle: v })}
+        onYoutubeChange={(v) => update({ youtube_handle: v })}
+        onVerificationChange={(platform, verified) => {
+          setSocialVerified(prev => ({ ...prev, [platform]: verified }));
+        }}
+      />
+      
+      <VideoShowcaseUploader
+        videos={portfolioVideos}
+        onVideosChange={setPortfolioVideos}
+        onValidationChange={setHasValidVideos}
+      />
+
+      <Field label="Portfolio URL (optional)">
         <input
           type="url"
           value={data.portfolio_url}
@@ -499,6 +532,7 @@ function Step6({ data, update }) {
           className={inputClass}
         />
       </Field>
+      
       <TermsAccept
         checked={data.terms_accepted}
         onChange={(v) => update({ terms_accepted: v })}

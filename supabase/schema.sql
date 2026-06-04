@@ -152,6 +152,10 @@ create table if not exists public.gigs (
   title text not null,
   description text not null default '',
   pay_per_video numeric not null default 0,
+  -- Deliverables: how many videos, which platforms, and content type.
+  video_quantity integer not null default 1,
+  platforms jsonb not null default '[]'::jsonb, -- ["tiktok","instagram","youtube"]
+  content_type text, -- product_demo | tutorial | unboxing | lifestyle | testimonial | other
   examples jsonb not null default '[]'::jsonb,
   status text not null default 'open', -- open | in_production | completed
   is_active boolean not null default true,

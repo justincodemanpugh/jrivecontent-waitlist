@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, DollarSign, Users, Loader2, Film } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { platformLabel, contentTypeLabel } from "@/lib/dashboard/brand/gigForm";
 import ExampleVideosSection from "@/components/dashboard/brand/gigs/ExampleVideosSection";
 import ApplicantsList from "./ApplicantsList";
 
@@ -99,6 +100,11 @@ export default function BrandGigDetailView({ gigId }) {
             /video
           </span>
           <span className="inline-flex items-center gap-1">
+            <Film size={14} className="text-slate-400" />
+            {Number(gig.video_quantity) || 1} video
+            {Number(gig.video_quantity) === 1 ? "" : "s"}
+          </span>
+          <span className="inline-flex items-center gap-1">
             <Users size={14} className="text-slate-400" />
             {gig.applicants_count ?? 0}{" "}
             {gig.applicants_count === 1 ? "applicant" : "applicants"}
@@ -136,6 +142,25 @@ export default function BrandGigDetailView({ gigId }) {
 
       {tab === "overview" ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+          {(gig.content_type ||
+            (Array.isArray(gig.platforms) && gig.platforms.length > 0)) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {gig.content_type && (
+                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-medium">
+                  {contentTypeLabel(gig.content_type)}
+                </span>
+              )}
+              {(gig.platforms || []).map((p) => (
+                <span
+                  key={p}
+                  className="inline-flex items-center rounded-full bg-brand-mist text-brand-skyDeep px-3 py-1 text-xs font-medium"
+                >
+                  {platformLabel(p)}
+                </span>
+              ))}
+            </div>
+          )}
+
           <section>
             <h2 className="text-sm font-semibold text-brand-ink mb-2">
               Description
