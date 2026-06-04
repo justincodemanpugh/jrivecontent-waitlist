@@ -283,6 +283,7 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
             <Step6 
               data={data} 
               update={update}
+              userId={userId}
               socialVerified={socialVerified}
               setSocialVerified={setSocialVerified}
               portfolioVideos={portfolioVideos}
@@ -496,6 +497,7 @@ function StepCover({ data, userId, onChange }) {
 function Step6({ 
   data, 
   update, 
+  userId,
   socialVerified, 
   setSocialVerified, 
   portfolioVideos, 
@@ -518,6 +520,7 @@ function Step6({
       />
       
       <VideoShowcaseUploader
+        userId={userId}
         videos={portfolioVideos}
         onVideosChange={setPortfolioVideos}
         onValidationChange={setHasValidVideos}

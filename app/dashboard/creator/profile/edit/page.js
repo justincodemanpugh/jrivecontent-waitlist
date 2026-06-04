@@ -33,7 +33,7 @@ export default async function CreatorProfileEditPage() {
       .maybeSingle(),
     supabase
       .from("creator_portfolio_videos")
-      .select("id, storage_path, mime_type, size_bytes, position, created_at")
+      .select("id, platform, video_url, thumbnail_path, title, storage_path, position, created_at")
       .eq("creator_id", user.id)
       .order("position", { ascending: true }),
   ]);

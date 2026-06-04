@@ -1,87 +1,128 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Trash2, ExternalLink, Play, Eye, Heart, MessageCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { Plus, Trash2, ExternalLink, Play, ImagePlus, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { PlatformLogo, PLATFORM_LABELS } from "@/components/icons/PlatformLogos";
 
-const PLATFORM_OPTIONS = [
-  { value: "instagram", label: "Instagram", icon: "📷" },
-  { value: "tiktok", label: "TikTok", icon: "🎵" },
-  { value: "youtube", label: "YouTube", icon: "🎬" },
-];
+const MAX_VIDEOS = 3;
+const MAX_THUMB_BYTES = 8 * 1024 * 1024; // 8 MB
+const THUMB_ACCEPT = "image/png,image/jpeg,image/webp";
+const PLATFORM_OPTIONS = ["instagram", "tiktok", "youtube"];
+const PLATFORM_PLACEHOLDERS = {
+  instagram: "https://instagram.com/reel/...",
+  tiktok: "https://tiktok.com/@you/video/...",
+  youtube: "https://youtube.com/shorts/...",
+};
 
-export default function VideoShowcaseUploader({ 
-  videos, 
+export default function VideoShowcaseUploader({
+  userId,
+  videos,
   onVideosChange,
-  onValidationChange 
+  onValidationChange,
 }) {
+  const thumbInputRef = useRef(null);
   const [newVideo, setNewVideo] = useState({
     platform: "instagram",
     video_url: "",
     title: "",
-    views: "",
-    likes: "",
-    comments: "",
   });
-
-  const addVideo = () => {
-    if (!newVideo.video_url.trim()) return;
-
-    const video = {
-      id: Date.now().toString(),
-      platform: newVideo.platform,
-      video_url: newVideo.video_url.trim(),
-      title: newVideo.title.trim() || `Video ${videos.length + 1}`,
-      views: parseInt(newVideo.views) || 0,
-      likes: parseInt(newVideo.likes) || 0,
-      comments: parseInt(newVideo.comments) || 0,
-    };
-
-    const updatedVideos = [...videos, video];
-    onVideosChange(updatedVideos);
-    
-    // Reset form
-    setNewVideo({
-      platform: "instagram",
-      video_url: "",
-      title: "",
-      views: "",
-      likes: "",
-      comments: "",
-    });
-    
-    onValidationChange(updatedVideos.length > 0);
-  };
-
-  const removeVideo = (id) => {
-    const updatedVideos = videos.filter(v => v.id !== id);
-    onVideosChange(updatedVideos);
-    onValidationChange(updatedVideos.length > 0);
-  };
+  const [thumbFile, setThumbFile] = useState(null);
+  const [thumbPreview, setThumbPreview] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
 
   const isValidUrl = (url) => {
     try {
-      new URL(url);
-      return true;
+      const u = new URL(url);
+      return u.protocol === "http:" || u.protocol === "https:";
     } catch {
       return false;
     }
   };
 
-  const getPlatformUrlPattern = (platform) => {
-    switch (platform) {
-      case "instagram":
-        return /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\//;
-      case "tiktok":
-        return /^https?:\/\/(www\.)?tiktok\.com\/@/;
-      case "youtube":
-        return /^https?:\/\/(www\.)?youtube\.com\/(watch|shorts)/;
-      default:
-        return /.*/;
+  const handleThumbSelect = (file) => {
+    setError("");
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Thumbnail must be an image (PNG, JPG, or WebP).");
+      return;
+    }
+    if (file.size > MAX_THUMB_BYTES) {
+      setError("Thumbnail must be under 8 MB.");
+      return;
+    }
+    setThumbFile(file);
+    setThumbPreview(URL.createObjectURL(file));
+  };
+
+  const resetForm = () => {
+    setNewVideo({ platform: "instagram", video_url: "", title: "" });
+    setThumbFile(null);
+    setThumbPreview("");
+    if (thumbInputRef.current) thumbInputRef.current.value = "";
+  };
+
+  const addVideo = async () => {
+    setError("");
+    if (videos.length >= MAX_VIDEOS) {
+      setError(`You can add at most ${MAX_VIDEOS} videos.`);
+      return;
+    }
+    if (!isValidUrl(newVideo.video_url)) {
+      setError("Please enter a valid video link.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let thumbnail_path = null;
+      if (thumbFile) {
+        const supabase = createClient();
+        const ext = (thumbFile.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${userId}/thumb-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("creator-portfolio")
+          .upload(path, thumbFile, { contentType: thumbFile.type, upsert: false });
+        if (upErr) throw upErr;
+        thumbnail_path = path;
+      }
+
+      const video = {
+        id: Date.now().toString(),
+        platform: newVideo.platform,
+        video_url: newVideo.video_url.trim(),
+        title: newVideo.title.trim() || PLATFORM_LABELS[newVideo.platform],
+        thumbnail_path,
+      };
+
+      const updatedVideos = [...videos, video];
+      onVideosChange(updatedVideos);
+      onValidationChange(updatedVideos.length > 0);
+      resetForm();
+    } catch (e) {
+      setError(e.message || "Could not add video.");
+    } finally {
+      setUploading(false);
     }
   };
 
+  const removeVideo = (id) => {
+    const updatedVideos = videos.filter((v) => v.id !== id);
+    onVideosChange(updatedVideos);
+    onValidationChange(updatedVideos.length > 0);
+  };
+
+  const thumbPublicUrl = (path) => {
+    const supabase = createClient();
+    return supabase.storage.from("creator-portfolio").getPublicUrl(path).data.publicUrl;
+  };
+
   const hasValidVideos = videos.length > 0;
-  const canAddVideo = newVideo.video_url.trim() && isValidUrl(newVideo.video_url);
+  const canAddVideo =
+    !uploading && videos.length < MAX_VIDEOS && isValidUrl(newVideo.video_url);
 
   return (
     <div className="space-y-4">
@@ -103,146 +144,136 @@ export default function VideoShowcaseUploader({
               {hasValidVideos ? "Best videos added!" : "Add your best performing videos"}
             </p>
             <p className="text-xs text-purple-700 mt-1">
-              Show brands your content quality with engagement metrics. Add 3-5 of your best videos.
+              Link up to {MAX_VIDEOS} of your top posts. Add a thumbnail so brands
+              can preview each one, then click through to see it on your profile.
             </p>
           </div>
         </div>
       </div>
 
       {/* Add new video form */}
-      <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-4">
-        <h3 className="text-sm font-medium text-brand-ink">Add Video</h3>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {videos.length < MAX_VIDEOS && (
+        <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-4">
+          <h3 className="text-sm font-medium text-brand-ink">Add video</h3>
+
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">Platform</label>
-            <select
-              value={newVideo.platform}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, platform: e.target.value }))}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
-            >
-              {PLATFORM_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.icon} {option.label}
-                </option>
+            <div className="grid grid-cols-3 gap-2">
+              {PLATFORM_OPTIONS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setNewVideo((prev) => ({ ...prev, platform: p }))}
+                  className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition ${
+                    newVideo.platform === p
+                      ? "border-brand-skyDeep bg-white text-brand-ink ring-2 ring-brand-sky/30"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  <PlatformLogo platform={p} size={18} />
+                  {PLATFORM_LABELS[p]}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
-          
+
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Video URL</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Video link</label>
             <input
               type="url"
               value={newVideo.video_url}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, video_url: e.target.value }))}
-              placeholder={`https://instagram.com/p/...`}
+              onChange={(e) => setNewVideo((prev) => ({ ...prev, video_url: e.target.value }))}
+              placeholder={PLATFORM_PLACEHOLDERS[newVideo.platform]}
               className={`w-full rounded-lg border px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-sky/30 ${
-                newVideo.video_url && !isValidUrl(newVideo.video_url) 
-                  ? 'border-red-300 focus:border-red-500' 
-                  : 'border-slate-200 focus:border-brand-skyDeep'
+                newVideo.video_url && !isValidUrl(newVideo.video_url)
+                  ? "border-red-300 focus:border-red-500"
+                  : "border-slate-200 focus:border-brand-skyDeep"
               }`}
             />
             {newVideo.video_url && !isValidUrl(newVideo.video_url) && (
               <p className="mt-1 text-xs text-red-600">Please enter a valid URL</p>
             )}
           </div>
-        </div>
 
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Title (optional)</label>
-          <input
-            type="text"
-            value={newVideo.title}
-            onChange={(e) => setNewVideo(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="My best performing video"
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
-            maxLength={100}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
-              <Eye size={12} className="inline mr-1" />Views
-            </label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Title (optional)</label>
             <input
-              type="number"
-              min="0"
-              value={newVideo.views}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, views: e.target.value }))}
-              placeholder="0"
+              type="text"
+              value={newVideo.title}
+              onChange={(e) => setNewVideo((prev) => ({ ...prev, title: e.target.value }))}
+              placeholder="My best performing video"
               className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
+              maxLength={100}
             />
           </div>
-          
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
-              <Heart size={12} className="inline mr-1" />Likes
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={newVideo.likes}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, likes: e.target.value }))}
-              placeholder="0"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
-              <MessageCircle size={12} className="inline mr-1" />Comments
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={newVideo.comments}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, comments: e.target.value }))}
-              placeholder="0"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
-            />
-          </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={addVideo}
-          disabled={!canAddVideo}
-          className="inline-flex items-center gap-2 rounded-full bg-brand-skyDeep px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus size={16} />
-          Add Video
-        </button>
-      </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => thumbInputRef.current?.click()}
+              className="relative h-20 w-12 shrink-0 rounded-lg border border-dashed border-slate-300 bg-white overflow-hidden flex items-center justify-center text-slate-400 hover:border-brand-skyDeep"
+            >
+              {thumbPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumbPreview} alt="Thumbnail preview" className="h-full w-full object-cover" />
+              ) : (
+                <ImagePlus size={16} />
+              )}
+            </button>
+            <div className="text-xs text-slate-500">
+              <p className="font-medium text-brand-ink">Thumbnail (recommended)</p>
+              <p>A 9:16 image works best. PNG, JPG, or WebP up to 8 MB.</p>
+            </div>
+            <input
+              ref={thumbInputRef}
+              type="file"
+              accept={THUMB_ACCEPT}
+              className="hidden"
+              onChange={(e) => handleThumbSelect(e.target.files?.[0])}
+            />
+          </div>
+
+          {error && <p className="text-xs text-red-600">{error}</p>}
+
+          <button
+            type="button"
+            onClick={addVideo}
+            disabled={!canAddVideo}
+            className="inline-flex items-center gap-2 rounded-full bg-brand-skyDeep px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {uploading ? "Adding…" : "Add video"}
+          </button>
+        </div>
+      )}
 
       {/* Added videos list */}
       {videos.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-brand-ink">Your Best Videos ({videos.length})</h3>
+          <h3 className="text-sm font-medium text-brand-ink">
+            Your best videos ({videos.length}/{MAX_VIDEOS})
+          </h3>
           {videos.map((video, index) => (
-            <div key={video.id} className="rounded-lg border border-slate-200 bg-white p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
+            <div key={video.id} className="rounded-lg border border-slate-200 bg-white p-3">
+              <div className="flex items-center gap-3">
+                <div className="h-16 w-10 shrink-0 rounded-md overflow-hidden bg-slate-100 flex items-center justify-center">
+                  {video.thumbnail_path ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={thumbPublicUrl(video.thumbnail_path)}
+                      alt={video.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <PlatformLogo platform={video.platform} size={22} />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">
-                      {PLATFORM_OPTIONS.find(p => p.value === video.platform)?.icon}
-                    </span>
-                    <span className="text-sm font-medium text-brand-ink">{video.title}</span>
-                    <span className="text-xs text-slate-500">#{index + 1}</span>
+                    <PlatformLogo platform={video.platform} size={16} />
+                    <span className="text-sm font-medium text-brand-ink truncate">{video.title}</span>
+                    <span className="text-xs text-slate-400">#{index + 1}</span>
                   </div>
-                  
-                  <div className="flex items-center gap-4 text-xs text-slate-600">
-                    <span className="flex items-center gap-1">
-                      <Eye size={12} /> {video.views.toLocaleString()} views
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Heart size={12} /> {video.likes.toLocaleString()} likes
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageCircle size={12} /> {video.comments.toLocaleString()} comments
-                    </span>
-                  </div>
-                  
                   <a
                     href={video.video_url}
                     target="_blank"
@@ -253,11 +284,10 @@ export default function VideoShowcaseUploader({
                     View original
                   </a>
                 </div>
-                
                 <button
                   type="button"
                   onClick={() => removeVideo(video.id)}
-                  className="ml-4 p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
                 >
                   <Trash2 size={14} />
                 </button>

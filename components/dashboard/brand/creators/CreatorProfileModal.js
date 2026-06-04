@@ -11,13 +11,11 @@ import {
   Send,
   Lock,
   Check,
-  Eye,
-  Heart,
-  MessageCircle,
   ExternalLink,
   Play,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PlatformLogo, PLATFORM_LABELS } from "@/components/icons/PlatformLogos";
 
 // Read-only profile detail. The brand opens this from the browse grid; the
 // invite button defers to the InviteDialog (mounted by the parent view).
@@ -28,14 +26,12 @@ export default function CreatorProfileModal({
   onClose,
   onInvite,
 }) {
-  // Resolve portfolio URLs once per render.
+  // Resolve storage public URLs (thumbnails for link videos, file for legacy).
   const supabase = createClient();
-  const portfolioUrls = (creator.portfolioVideos || []).map((v) => ({
-    id: v.id,
-    url: supabase.storage
-      .from("creator-portfolio")
-      .getPublicUrl(v.storage_path).data.publicUrl,
-  }));
+  const storageUrl = (path) =>
+    path
+      ? supabase.storage.from("creator-portfolio").getPublicUrl(path).data.publicUrl
+      : null;
 
   useEffect(() => {
     function onKey(e) {
@@ -225,49 +221,71 @@ export default function CreatorProfileModal({
               <h3 className="text-sm font-semibold text-brand-ink mb-2">
                 Top Posts
               </h3>
-              <ul className="space-y-3">
-                {creator.portfolioVideos.map((video, index) => (
-                  <li
-                    key={video.id}
-                    className="rounded-xl border border-slate-200 bg-white p-4"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">
-                            {video.platform === 'instagram' ? '📷' : 
-                             video.platform === 'tiktok' ? '🎵' : '🎬'}
+              <ul className="grid grid-cols-3 gap-3">
+                {creator.portfolioVideos.map((video, index) => {
+                  const isLink = Boolean(video.video_url);
+                  const thumb = storageUrl(video.thumbnail_path);
+                  const inner = (
+                    <>
+                      {isLink ? (
+                        thumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={thumb}
+                            alt={video.title || "Video thumbnail"}
+                            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+                          />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center bg-slate-800">
+                            <PlatformLogo platform={video.platform} size={40} />
+                          </div>
+                        )
+                      ) : (
+                        // eslint-disable-next-line jsx-a11y/media-has-caption
+                        <video
+                          src={storageUrl(video.storage_path)}
+                          className="h-full w-full object-cover"
+                          preload="metadata"
+                          playsInline
+                          controls
+                        />
+                      )}
+                      {isLink ? (
+                        <>
+                          <span className="absolute top-2 left-2 inline-flex items-center justify-center rounded-full bg-white/90 p-1 shadow-sm">
+                            <PlatformLogo platform={video.platform} size={14} />
                           </span>
-                          <span className="text-sm font-medium text-brand-ink">
-                            {video.title || `Video ${index + 1}`}
+                          <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-gradient-to-t from-black/75 to-transparent p-2 text-xs font-medium text-white">
+                            <span className="truncate">
+                              {video.title || PLATFORM_LABELS[video.platform]}
+                            </span>
+                            <ExternalLink size={12} className="ml-auto shrink-0" />
                           </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-xs text-slate-600">
-                          <span className="flex items-center gap-1">
-                            <Eye size={12} /> {video.views?.toLocaleString() || 0} views
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Heart size={12} /> {video.likes?.toLocaleString() || 0} likes
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle size={12} /> {video.comments?.toLocaleString() || 0} comments
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <a
-                        href={video.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-full bg-brand-skyDeep px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 transition"
-                      >
-                        <ExternalLink size={12} />
-                        Open
-                      </a>
-                    </div>
-                  </li>
-                ))}
+                        </>
+                      ) : null}
+                    </>
+                  );
+
+                  return (
+                    <li
+                      key={video.id}
+                      className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-[9/16] group"
+                    >
+                      {isLink ? (
+                        <a
+                          href={video.video_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block h-full w-full"
+                        >
+                          {inner}
+                        </a>
+                      ) : (
+                        inner
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : (
@@ -276,7 +294,7 @@ export default function CreatorProfileModal({
                 <Play size={20} className="text-slate-400" />
                 <div>
                   <p className="text-sm font-medium text-slate-700">No top posts yet</p>
-                  <p className="text-xs text-slate-500">This creator hasn't added their best performing content.</p>
+                  <p className="text-xs text-slate-500">This creator hasn&apos;t added their best performing content.</p>
                 </div>
               </div>
             </div>
