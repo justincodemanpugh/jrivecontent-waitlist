@@ -23,7 +23,7 @@ const NAV = [
   { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase, tourId: "nav-gigs" },
   { label: "Applicants", href: "/dashboard/brand/applicants", icon: Users, badgeKey: "pendingApplicants", tourId: "nav-applicants" },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
-  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, proOnly: true, tourId: "nav-creators" },
+  { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators" },
 ];
 
 export default function Sidebar() {
