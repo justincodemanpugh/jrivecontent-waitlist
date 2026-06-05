@@ -1,6 +1,6 @@
 "use client";
 
-import { Instagram, Music2, Youtube, MapPin, Lock } from "lucide-react";
+import { Instagram, Music2, Youtube, MapPin } from "lucide-react";
 
 // Browse card. Tapping anywhere on the card opens the profile modal; the
 // "Invite" button is a separate target that opens the invite dialog without
@@ -117,12 +117,10 @@ export default function CreatorCard({
           className={`mt-1 w-full inline-flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold transition ${
             invited
               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : !isPro
-                ? "bg-slate-100 text-slate-500 border border-slate-200"
-                : "bg-brand-ink text-white hover:bg-slate-800"
+              : "bg-brand-ink text-white hover:bg-slate-800"
           }`}
         >
-          {invited ? "Invited" : !isPro ? <><Lock size={12} /> Invite</> : "Invite"}
+          {invited ? "Invited" : "Invite"}
         </span>
       </div>
     </button>

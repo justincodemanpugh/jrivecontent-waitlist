@@ -129,11 +129,7 @@ export default function CreatorsView() {
               isPro={isPro}
               onOpen={(creator) => setOpenCreator(creator)}
               onInvite={(creator) => {
-                if (!isPro) {
-                  router.push("/dashboard/brand/pricing?from=invite-creator");
-                } else {
-                  setInviteCreator(creator);
-                }
+                setInviteCreator(creator);
               }}
             />
           ))}
@@ -148,13 +144,9 @@ export default function CreatorsView() {
           isPro={isPro}
           onClose={() => setOpenCreator(null)}
           onInvite={(creator) => {
-            if (!isPro) {
-              router.push("/dashboard/brand/pricing?from=invite-creator");
-            } else {
-              // Switch from profile modal → invite dialog.
-              setOpenCreator(null);
-              setInviteCreator(creator);
-            }
+            // Switch from profile modal → invite dialog.
+            setOpenCreator(null);
+            setInviteCreator(creator);
           }}
         />
       ) : null}

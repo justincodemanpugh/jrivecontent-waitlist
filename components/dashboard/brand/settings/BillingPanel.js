@@ -121,7 +121,7 @@ export default function BillingPanel({ connect }) {
                   )}
                 </>
               ) : (
-                "Up to 3 free gigs total. Upgrade for unlimited gigs."
+                "1 free gig. Upgrade for unlimited gigs."
               )}
             </p>
           </div>
@@ -156,7 +156,7 @@ export default function BillingPanel({ connect }) {
           <PlanCard
             title="Free"
             price="$0"
-            features={["Up to 3 gigs total", "Browse creators", "Standard support"]}
+            features={["1 gig total", "Browse creators", "Standard support"]}
             current={!isPro}
           />
           <PlanCard
