@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Loader2, Check, Film } from "lucide-react";
+import { ArrowLeft, DollarSign, Loader2, Check, Film, Shield } from "lucide-react";
 import { fetchMarketplaceGig } from "@/lib/dashboard/marketplaceApi";
 import { fetchMyApplicationForGig } from "@/lib/dashboard/applicationsApi";
-import { platformLabel, contentTypeLabel } from "@/lib/dashboard/brand/gigForm";
+import { platformLabel, contentTypeLabel, USAGE_RIGHTS } from "@/lib/dashboard/brand/gigForm";
 import ExampleVideosSection from "@/components/dashboard/brand/gigs/ExampleVideosSection";
 import ApplyDialog from "./ApplyDialog";
 
@@ -155,6 +155,8 @@ export default function GigDetailView({ gigId }) {
             </p>
           </section>
 
+          <UsageRightsSection usageRights={gig.usageRights} />
+
           <ExampleVideosSection examples={gig.examples} />
 
           <div className="pt-2">
@@ -185,5 +187,58 @@ export default function GigDetailView({ gigId }) {
         onApplied={(app) => setApplication(app)}
       />
     </main>
+  );
+}
+
+function UsageRightsSection({ usageRights }) {
+  if (!Array.isArray(usageRights) || usageRights.length === 0) return null;
+
+  const hasFullRights = usageRights.length >= USAGE_RIGHTS.length;
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Shield size={16} className="text-brand-skyDeep" />
+        <h2 className="text-sm font-semibold text-brand-ink">
+          Usage Rights You're Granting
+        </h2>
+        {hasFullRights && (
+          <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700">
+            Full Rights
+          </span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {USAGE_RIGHTS.map((right) => {
+          const granted = usageRights.includes(right.key);
+          return (
+            <div
+              key={right.key}
+              className={`flex items-start gap-2 text-sm ${
+                granted ? "text-slate-700" : "text-slate-400 line-through"
+              }`}
+            >
+              <span className="flex-shrink-0 mt-0.5">
+                {granted ? (
+                  <Check size={14} className="text-emerald-500" />
+                ) : (
+                  <span className="inline-block w-3.5 h-3.5 rounded-full border border-slate-300" />
+                )}
+              </span>
+              <div>
+                <span className="font-medium">{right.icon} {right.label}</span>
+                {granted && (
+                  <p className="text-xs text-slate-500 mt-0.5">{right.description}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-500">
+        <strong>Duration:</strong> Perpetual (lifetime) &nbsp;•&nbsp;
+        <strong>Territory:</strong> Worldwide
+      </p>
+    </section>
   );
 }

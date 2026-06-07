@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Users, Clock, DollarSign } from "lucide-react";
+import { Users, Clock, DollarSign, Shield } from "lucide-react";
 import { STATUS_META } from "@/lib/dashboard/brand/statusMeta";
+import { USAGE_RIGHTS } from "@/lib/dashboard/brand/gigForm";
 import GigActionsMenu from "./GigActionsMenu";
 
 /**
@@ -86,7 +87,41 @@ export default function GigListCard({ gig, onDeactivate, onDelete }) {
             {gig.applicants === 1 ? "applicant" : "applicants"}
           </span>
         </div>
+        {/* Usage Rights Badges */}
+        <UsageRightsBadges usageRights={gig.usageRights} />
       </div>
+    </div>
+  );
+}
+
+function UsageRightsBadges({ usageRights }) {
+  if (!Array.isArray(usageRights) || usageRights.length === 0) return null;
+
+  const hasFullRights = usageRights.length >= USAGE_RIGHTS.length;
+  const hasPaidAds = usageRights.includes("paid_ads");
+  const hasWhitelisting = usageRights.includes("whitelisting");
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {hasFullRights ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
+          <Shield size={10} />
+          Full Rights
+        </span>
+      ) : (
+        <>
+          {hasPaidAds && (
+            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+              💰 Paid Ads
+            </span>
+          )}
+          {hasWhitelisting && (
+            <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+              ⚡ Whitelist
+            </span>
+          )}
+        </>
+      )}
     </div>
   );
 }

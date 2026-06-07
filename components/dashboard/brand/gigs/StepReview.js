@@ -7,6 +7,8 @@ import GigPreviewCard from "./GigPreviewCard";
 import {
   platformLabel,
   contentTypeLabel,
+  usageRightLabel,
+  USAGE_RIGHTS,
 } from "@/lib/dashboard/brand/gigForm";
 
 export default function StepReview({ form, goToStep }) {
@@ -91,9 +93,20 @@ export default function StepReview({ form, goToStep }) {
             onEdit={() => goToStep(1)}
           />
           <ReviewRow
+            label="Usage rights"
+            value={
+              form.usageRights?.length >= USAGE_RIGHTS.length
+                ? "Full rights (all usage types)"
+                : form.usageRights?.length
+                ? form.usageRights.map(usageRightLabel).join(", ")
+                : "—"
+            }
+            onEdit={() => goToStep(2)}
+          />
+          <ReviewRow
             label="Pay per video"
             value={`$${form.payPerVideo}`}
-            onEdit={() => goToStep(2)}
+            onEdit={() => goToStep(3)}
           />
           <ReviewRow
             label="Example videos"
@@ -102,7 +115,7 @@ export default function StepReview({ form, goToStep }) {
                 ? `${form.examples.length} added`
                 : "None"
             }
-            onEdit={() => goToStep(3)}
+            onEdit={() => goToStep(4)}
           />
         </div>
       )}

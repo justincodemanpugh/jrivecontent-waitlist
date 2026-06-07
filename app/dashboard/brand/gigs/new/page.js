@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import Stepper from "@/components/dashboard/brand/gigs/Stepper";
 import StepJobInfo from "@/components/dashboard/brand/gigs/StepJobInfo";
 import StepDeliverables from "@/components/dashboard/brand/gigs/StepDeliverables";
+import StepUsageRights from "@/components/dashboard/brand/gigs/StepUsageRights";
 import StepPay from "@/components/dashboard/brand/gigs/StepPay";
 import StepExamples from "@/components/dashboard/brand/gigs/StepExamples";
 import StepReview from "@/components/dashboard/brand/gigs/StepReview";
@@ -124,9 +125,10 @@ export default function NewGigPage() {
         <div className="mt-6 md:mt-8">
           {step === 0 && <StepJobInfo form={form} update={update} />}
           {step === 1 && <StepDeliverables form={form} update={update} />}
-          {step === 2 && <StepPay form={form} update={update} />}
-          {step === 3 && <StepExamples form={form} update={update} />}
-          {step === 4 && <StepReview form={form} goToStep={setStep} />}
+          {step === 2 && <StepUsageRights form={form} update={update} />}
+          {step === 3 && <StepPay form={form} update={update} />}
+          {step === 4 && <StepExamples form={form} update={update} />}
+          {step === 5 && <StepReview form={form} goToStep={setStep} />}
         </div>
 
         <StepNav

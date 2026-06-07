@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { Shield } from "lucide-react";
+import { USAGE_RIGHTS } from "@/lib/dashboard/brand/gigForm";
 
 export default function MarketplaceGigCard({ gig }) {
+  const usageRights = gig.usageRights || [];
+  const hasFullRights = usageRights.length >= USAGE_RIGHTS.length;
+  const hasPaidAds = usageRights.includes("paid_ads");
+  const hasWhitelisting = usageRights.includes("whitelisting");
   return (
     <Link
       href={`/dashboard/creator/explore/${gig.id}`}
@@ -34,6 +40,30 @@ export default function MarketplaceGigCard({ gig }) {
             {gig.videoQuantity} video{gig.videoQuantity === 1 ? "" : "s"} needed
           </p>
         ) : null}
+        {/* Usage Rights Badges */}
+        {(hasFullRights || hasPaidAds || hasWhitelisting) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {hasFullRights ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
+                <Shield size={10} />
+                Full Rights
+              </span>
+            ) : (
+              <>
+                {hasPaidAds && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                    💰 Paid Ads
+                  </span>
+                )}
+                {hasWhitelisting && (
+                  <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                    ⚡ Whitelist
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+        )}
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 min-w-0">
           <span className="font-medium text-slate-700 truncate">
             {gig.brandName}
