@@ -19,13 +19,13 @@ export default function Hero() {
 
         <FadeIn delay={100}>
           <h1 className="text-5xl sm:text-7xl md:text-6xl lg:text-6xl font-bold tracking-tight leading-[1.02] text-brand-ink">
-            Turn One Video<br />into Thousands of Views
+            Stop guessing. Redistribute your winning videos across creators
           </h1>
         </FadeIn>
 
         <FadeIn delay={200}>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600 leading-relaxed">
-            Scale without creating more videos
+            Stop creating from scratch. Start scaling whats already working
           </p>
         </FadeIn>
 
