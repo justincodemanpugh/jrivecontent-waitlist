@@ -56,7 +56,7 @@ export default function HowItWorks() {
               How it works
             </p>
             <h2 className="mt-3 text-4xl md:text-6xl font-semibold tracking-tight text-brand-ink">
-              4 steps away from success.
+              4 simple steps to get started.
             </h2>
           </div>
         </FadeIn>

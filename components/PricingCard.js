@@ -6,12 +6,12 @@ import { FadeIn } from "@/hooks/useFadeIn";
 
 export default function PricingCard({
   variant = "pro", // "free" | "pro"
-  eyebrow = "Most Popular",
+  eyebrow = "3-Day Free Trial",
   title = "Pro",
-  price = "$25",
-  period = "month",
+  price = "$0",
+  period = "3 days",
   description = "For brands serious about growth.",
-  priceSubtext = "Less than $1 a day",
+  priceSubtext = "Then $25/month · Cancel anytime",
   features = [
     { label: "Gig postings", value: "Unlimited" },
     { label: "Creator browsing", value: "All creators" },
@@ -21,7 +21,7 @@ export default function PricingCard({
     { label: "Support", value: "Priority" },
     { label: "Billing", value: "Cancel anytime" },
   ],
-  buttonText = "Upgrade to Pro",
+  buttonText = "Start Free Trial",
   // For the free tier we just send the user to signup — no Stripe call.
   ctaHref = null,
   footerNote = "Secure payment via Stripe · Cancel anytime",

@@ -87,6 +87,7 @@ export async function POST(request) {
         metadata: user
           ? { user_id: user.id, plan: "brand_monthly" }
           : { plan: "brand_monthly" },
+        trial_period_days: 3,
       },
     });
 

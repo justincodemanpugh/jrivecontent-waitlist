@@ -18,9 +18,9 @@ const FEATURES = [
 ];
 
 const REDIRECT_REASONS = {
-  "post-gig": "Posting a gig is a Pro feature. Upgrade to publish your first gig.",
-  "browse-creators": "Browsing creators is a Pro feature. Upgrade to discover and invite creators.",
-  "invite-creator": "Inviting creators is a Pro feature. Upgrade to send invitations.",
+  "post-gig": "Start your free 3-day trial to post gigs and connect with creators.",
+  "browse-creators": "Browsing creators is free! Start a trial to post gigs.",
+  "invite-creator": "Start your free 3-day trial to invite creators directly.",
 };
 
 export default function BrandPricingPage() {
@@ -45,7 +45,7 @@ export default function BrandPricingPage() {
 
   return (
     <>
-      <TopBar title="Upgrade to Pro" />
+      <TopBar title="Start Free Trial" />
       <main className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-xl mx-auto">
         {/* Back link */}
         <Link
@@ -66,9 +66,9 @@ export default function BrandPricingPage() {
 
         {/* Pricing card */}
         <div className="relative rounded-3xl border border-brand-sky/40 bg-white shadow-xl shadow-brand-sky/10 p-7 sm:p-9">
-          {/* Most popular pill */}
+          {/* Trial pill */}
           <span className="inline-flex items-center rounded-full border border-brand-skyDeep/40 bg-brand-mist px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-skyDeep">
-            Most Popular
+            3-Day Free Trial
           </span>
 
           {/* Plan name + tagline */}
@@ -82,11 +82,11 @@ export default function BrandPricingPage() {
           {/* Price */}
           <div className="mt-6 flex items-baseline gap-2">
             <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-brand-ink">
-              $25
+              $0
             </span>
-            <span className="text-lg text-slate-500">/month</span>
+            <span className="text-lg text-slate-500">for 3 days</span>
           </div>
-          <p className="mt-1 text-xs text-slate-400">Less than $1 a day</p>
+          <p className="mt-1 text-xs text-slate-400">Then $25/month · Cancel anytime</p>
 
           {/* CTA */}
           <button
@@ -95,7 +95,7 @@ export default function BrandPricingPage() {
             disabled={busy}
             className="mt-6 w-full rounded-xl bg-brand-skyDeep text-white py-3.5 text-base font-semibold shadow-md shadow-brand-sky/30 hover:bg-brand-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {busy ? "Redirecting to checkout…" : "Upgrade to Pro"}
+            {busy ? "Redirecting to checkout…" : "Start Free Trial"}
           </button>
 
           {error && (
@@ -136,7 +136,7 @@ export default function BrandPricingPage() {
 
         {/* Current plan note */}
         <p className="mt-5 text-center text-sm text-slate-500">
-          Currently on the <span className="font-medium text-brand-ink">Free</span> plan
+          Browse creators for free · Start trial to post gigs
         </p>
       </main>
     </>

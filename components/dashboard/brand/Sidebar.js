@@ -8,13 +8,11 @@ import {
   Briefcase,
   MessageSquare,
   Search,
-  Gift,
   Sparkles,
   Settings,
   Lock,
   Users,
 } from "lucide-react";
-import { fetchFreeTierUsage } from "@/lib/dashboard/brand/gigsApi";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import { fetchPendingApplicantCount } from "@/lib/dashboard/applicationsApi";
 
@@ -28,32 +26,9 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [usage, setUsage] = useState(null);
   const [isPro, setIsPro] = useState(null);
   const [pendingApplicants, setPendingApplicants] = useState(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const next = await fetchFreeTierUsage();
-        if (!cancelled) setUsage(next);
-      } catch {
-        // Silent — chip just won't update. Pages surface their own errors.
-      }
-    };
-    load();
-    const onChange = () => load();
-    window.addEventListener("gigs:changed", onChange);
-    window.addEventListener("invitations:changed", onChange);
-    window.addEventListener("applications:changed", onChange);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("gigs:changed", onChange);
-      window.removeEventListener("invitations:changed", onChange);
-      window.removeEventListener("applications:changed", onChange);
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -172,44 +147,12 @@ export default function Sidebar() {
           className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-brand-sky/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Sparkles size={16} />
-          {upgrading ? "Redirecting..." : "Upgrade to Pro"}
+          {upgrading ? "Redirecting..." : "Start Free Trial"}
         </button>
         <p className="mt-1.5 text-center text-[11px] text-slate-500">
-          $25/mo · unlimited gigs
+          3 days free · then $25/mo
         </p>
       </div>
-
-      {/* Free-tier usage chip — only shown to non-Pro brands. */}
-      {usage && isPro === false && (
-        <div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-          <div className="flex items-center gap-2">
-            <Gift size={16} className="text-amber-600" />
-            <span className="text-xs font-semibold text-amber-900">
-              Free plan usage
-            </span>
-          </div>
-          <ul className="mt-2 space-y-1 text-[11px] text-amber-800">
-            <li className="flex items-center justify-between">
-              <span>Gigs</span>
-              <span className="font-semibold">
-                {usage.gigs.used}/{usage.gigs.limit}
-              </span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span>Invites</span>
-              <span className="font-semibold">
-                {usage.invites.used}/{usage.invites.limit}
-              </span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span>Accepted creators</span>
-              <span className="font-semibold">
-                {usage.acceptedCreators.used}/{usage.acceptedCreators.limit}
-              </span>
-            </li>
-          </ul>
-        </div>
-      )}
 
       {/* Settings */}
       <div className="px-3 pb-3">

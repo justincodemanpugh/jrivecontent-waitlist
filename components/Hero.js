@@ -8,7 +8,7 @@ export default function Hero() {
       id="waitlist"
       className="relative overflow-hidden bg-gradient-to-b from-brand-mist to-white"
     >
-      <div className="mx-auto max-w-6xl px-6 pt-32 pb-24 md:pt-40 md:pb-32 text-center">
+      <div className="mx-auto max-w-6xl px-6 pt-24 pb-16 md:pt-48 md:pb-24 text-center">
         <FadeIn delay={50}>
           <div className="flex justify-center mb-6">
             <span className="inline-block rounded-full border border-brand-skyDeep/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-skyDeep">
@@ -18,21 +18,19 @@ export default function Hero() {
         </FadeIn>
 
         <FadeIn delay={100}>
-          <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-6xl font-bold tracking-tight leading-[1.02] text-brand-ink">
-            Find affordable UGC Creators <br className="hidden sm:block" />
-            for Startups <span className="text-brand-skyDeep">($20–$60)</span>
+          <h1 className="text-5xl sm:text-7xl md:text-6xl lg:text-6xl font-bold tracking-tight leading-[1.02] text-brand-ink">
+            Turn One Video<br />into Thousands of Views
           </h1>
         </FadeIn>
 
         <FadeIn delay={200}>
-          <p className="mt-6 max-w-2xl mx-auto text-lg text-slate-600 leading-relaxed">
-            JriveContent helps you find budget friendly UGC creators so you can build,
-            ship, and market on a small budget.
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600 leading-relaxed">
+            Scale without creating more videos
           </p>
         </FadeIn>
 
         <FadeIn delay={400}>
-          <div className="mt-10 flex justify-center items-center">
+          <div className="mt-8 flex justify-center items-center">
             <Link
               href="/signup"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"

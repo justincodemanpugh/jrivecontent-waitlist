@@ -13,7 +13,6 @@ import {
   fetchMyGigs,
   deactivateGig,
   deleteGig,
-  fetchFreeGigsUsage,
 } from "@/lib/dashboard/brand/gigsApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
@@ -48,14 +47,10 @@ export default function BrandGigsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [billing, freeUsage] = await Promise.all([
-          fetchBilling(),
-          fetchFreeGigsUsage(),
-        ]);
+        const billing = await fetchBilling();
         if (!cancelled) {
           const isPro = billing?.plan === "pro";
-          const hasFreeGigRemaining = freeUsage?.remaining > 0;
-          setCanPostGig(isPro || hasFreeGigRemaining);
+          setCanPostGig(isPro);
         }
       } catch {
         if (!cancelled) setCanPostGig(false);
@@ -67,7 +62,7 @@ export default function BrandGigsPage() {
   const handleNewGig = (e) => {
     if (canPostGig === false) {
       e.preventDefault();
-      router.push("/dashboard/brand/pricing?from=post-gig");
+      router.push("/dashboard/brand/pricing?from=post-gig&trial=true");
     }
   };
 
@@ -228,11 +223,11 @@ function EmptyTab({ tab, canPostGig }) {
       </p>
       {isActive && (
         <Link
-          href={canPostGig === false ? "/dashboard/brand/pricing?from=post-gig" : "/dashboard/brand/gigs/new"}
+          href={canPostGig === false ? "/dashboard/brand/pricing?from=post-gig&trial=true" : "/dashboard/brand/gigs/new"}
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
-          New gig
+          {canPostGig === false ? "Start Free Trial" : "New gig"}
         </Link>
       )}
     </div>

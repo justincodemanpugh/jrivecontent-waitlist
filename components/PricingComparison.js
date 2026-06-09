@@ -5,10 +5,10 @@ import PricingCard from "@/components/PricingCard";
 
 export default function PricingComparison() {
   return (
-    <section id="pricing" className="pt-8 pb-24 bg-white">
+    <section id="pricing" className="pt-6 pb-16 bg-white">
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-brand-ink">
               Simple, <span className="text-brand-skyDeep">flat-rate</span> pricing for brands
             </h2>
