@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Plus, Play, Target, DollarSign, Image as ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { Plus, Target, DollarSign, Image as ImageIcon } from "lucide-react";
 
 const TIPS = [
   {
@@ -21,7 +20,6 @@ const TIPS = [
 ];
 
 export default function EmptyState({ brandName }) {
-  const [isPlaying, setIsPlaying] = useState(false);
   return (
     <div className="space-y-8">
       <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-brand-mist to-white p-8 md:p-12 text-center">
@@ -35,35 +33,6 @@ export default function EmptyState({ brandName }) {
         <p className="mt-3 max-w-lg mx-auto text-slate-600">
           Post a gig in under 60 seconds. Real creators apply within 24–48 hours.
         </p>
-
-        {/* Tutorial video */}
-        <div 
-          className={`mt-8 mx-auto max-w-2xl aspect-video rounded-2xl bg-brand-ink/90 relative overflow-hidden group ${isPlaying ? "" : "cursor-pointer"}`}
-          onClick={isPlaying ? undefined : () => setIsPlaying(true)}
-        >
-          {isPlaying ? (
-            <video
-              src="/videos/brand-tutorial/1778821031799621.mp4"
-              controls
-              autoPlay
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-skyDeep/30 to-transparent" />
-              <button
-                type="button"
-                aria-label="Play tutorial video"
-                className="relative h-16 w-16 rounded-full bg-white text-brand-ink flex items-center justify-center shadow-xl group-hover:scale-105 transition"
-              >
-                <Play size={24} className="ml-1 fill-brand-ink" />
-              </button>
-              <span className="absolute bottom-4 left-4 text-xs text-white/80">
-                How JriveContent works · Click to play
-              </span>
-            </>
-          )}
-        </div>
 
         <div className="mt-8">
           <Link

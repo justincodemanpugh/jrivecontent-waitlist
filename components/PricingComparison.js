@@ -13,7 +13,7 @@ export default function PricingComparison() {
               Simple, <span className="text-brand-skyDeep">flat-rate</span> pricing for brands
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Start free to test the platform. Upgrade to Pro when you&apos;re ready to scale.
+              Browse creators for free. Start a 3-day trial to post gigs and connect.
             </p>
           </div>
         </FadeIn>
@@ -21,24 +21,22 @@ export default function PricingComparison() {
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto items-stretch">
           <PricingCard
             variant="free"
-            eyebrow="Try It Free"
+            eyebrow="Always Free"
             title="Free"
             price="$0"
             period="forever"
-            description="Test the platform before you commit."
+            description="Browse and discover creators."
             priceSubtext="No credit card required"
             features={[
-              { label: "Gig postings", value: "1" },
-              { label: "Creator invites", value: "1" },
-              { label: "Accepted creators", value: "1" },
-              { label: "Applications", value: "Unlimited" },
-              { label: "Messaging", value: "With accepted creator" },
+              { label: "Browse all creators", value: "Unlimited" },
+              { label: "View creator profiles", value: "Full access" },
+              { label: "Favorite creators", value: "Unlimited" },
+              { label: "Access dashboard", value: "Full access" },
               { label: "Support", value: "Community" },
-              { label: "Upgrade anytime", value: "Yes" },
             ]}
             buttonText="Get Started Free"
             ctaHref="/?signup=brand#join"
-            footerNote="No credit card required · Upgrade anytime"
+            footerNote="No credit card required"
           />
           <PricingCard />
         </div>
