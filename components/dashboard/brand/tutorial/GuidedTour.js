@@ -64,8 +64,8 @@ const TOUR_STEPS = [
     target: '[data-tour="upgrade-button"]',
     title: "Upgrade to Pro (Optional)",
     content:
-      "Unlock unlimited gigs, priority support, and advanced features. Or continue with our free plan — you can post your first gig for free!",
-    position: "right",
+      "Unlock unlimited gigs, priority support, and advanced features. Pro is optional — you can continue with our free plan.",
+    position: "top",
     highlight: true,
   },
   {

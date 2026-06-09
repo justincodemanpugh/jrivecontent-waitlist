@@ -312,20 +312,6 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
         })}
       </div>
 
-      {/* Continue for free note */}
-      {!isPro && (
-        <div className="px-4 py-3 bg-slate-50 border-t border-slate-100">
-          <p className="text-xs text-slate-500 text-center">
-            You can post your first gig for free!{" "}
-            <button
-              onClick={() => router.push("/dashboard/brand/gigs/new")}
-              className="font-medium text-brand-skyDeep hover:underline"
-            >
-              Get started →
-            </button>
-          </p>
-        </div>
-      )}
     </div>
   );
 }
