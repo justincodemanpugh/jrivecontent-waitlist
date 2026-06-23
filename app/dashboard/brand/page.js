@@ -6,12 +6,12 @@ import { useSearchParams } from "next/navigation";
 import TopBar from "@/components/dashboard/brand/TopBar";
 import StatStrip from "@/components/dashboard/brand/StatStrip";
 import NeedsAttention from "@/components/dashboard/brand/NeedsAttention";
-import ActiveGigs from "@/components/dashboard/brand/ActiveGigs";
+import ActiveBriefs from "@/components/dashboard/brand/ActiveBriefs";
 import EmptyState from "@/components/dashboard/brand/EmptyState";
 import WelcomeBanner from "@/components/dashboard/brand/tutorial/WelcomeBanner";
 import TutorialChecklist from "@/components/dashboard/brand/tutorial/TutorialChecklist";
 import GuidedTour from "@/components/dashboard/brand/tutorial/GuidedTour";
-import { fetchMyGigs } from "@/lib/dashboard/brand/gigsApi";
+import { fetchMyBriefs } from "@/lib/dashboard/brand/briefsApi";
 import { toggleChecklistVisibility, fetchTutorialProgress } from "@/lib/dashboard/brand/tutorialApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import {
@@ -21,9 +21,9 @@ import {
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 
 const EMPTY_STATS = {
-  activeGigs: 0,
-  newApplications: 0,
-  awaitingApproval: 0,
+  activeBriefs: 0,
+  pendingSubmissions: 0,
+  connectedCreators: 0,
   completedThisMonth: 0,
 };
 
@@ -33,7 +33,7 @@ export default function BrandDashboardPage() {
   // ?empty=1 forces the first-time-user empty state for previewing.
   const forceEmpty = searchParams?.get("empty") === "1";
 
-  const [gigs, setGigs] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const [stats, setStats] = useState(EMPTY_STATS);
   const [attention, setAttention] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -45,13 +45,13 @@ export default function BrandDashboardPage() {
   const loadAll = useCallback(async () => {
     try {
       const [rows, statsRes, attentionRes, progress, billing] = await Promise.all([
-        fetchMyGigs().catch(() => []),
+        fetchMyBriefs().catch(() => []),
         fetchDashboardStats().catch(() => EMPTY_STATS),
         fetchAttentionItems().catch(() => []),
         fetchTutorialProgress().catch(() => null),
         fetchBilling().catch(() => null),
       ]);
-      setGigs(rows);
+      setBriefs(rows);
       setStats(statsRes);
       setAttention(attentionRes);
       setTutorialProgress(progress);
@@ -72,26 +72,26 @@ export default function BrandDashboardPage() {
     };
     run();
     const onChange = () => loadAll();
-    window.addEventListener("gigs:changed", onChange);
+    window.addEventListener("briefs:changed", onChange);
     window.addEventListener("applications:changed", onChange);
     window.addEventListener("conversations:changed", onChange);
     window.addEventListener("tutorial:changed", onChange);
     return () => {
       cancelled = true;
-      window.removeEventListener("gigs:changed", onChange);
+      window.removeEventListener("briefs:changed", onChange);
       window.removeEventListener("applications:changed", onChange);
       window.removeEventListener("conversations:changed", onChange);
       window.removeEventListener("tutorial:changed", onChange);
     };
   }, [loadAll]);
 
-  const activeGigs = useMemo(
-    () => gigs.filter((g) => g.isActive),
-    [gigs],
+  const activeBriefs = useMemo(
+    () => briefs.filter((b) => b.status === "active"),
+    [briefs],
   );
 
-  const hasGigs = !forceEmpty && loaded && activeGigs.length > 0;
-  const showEmpty = forceEmpty || (loaded && activeGigs.length === 0);
+  const hasBriefs = !forceEmpty && loaded && activeBriefs.length > 0;
+  const showEmpty = forceEmpty || (loaded && activeBriefs.length === 0);
 
   const handleStartTour = () => setTourOpen(true);
   const handleCloseTour = () => setTourOpen(false);
@@ -104,15 +104,15 @@ export default function BrandDashboardPage() {
   // Calculate checklist progress for the header button
   const checklistProgress = useMemo(() => {
     if (!tutorialProgress) return 0;
-    const hasGigsNow = gigs.length > 0;
+    const hasBriefsNow = briefs.length > 0;
     let count = 0;
     if (tutorialProgress.profile_completed) count++;
-    if (tutorialProgress.first_gig_posted || hasGigsNow) count++;
+    if (tutorialProgress.first_gig_posted || hasBriefsNow) count++;
     if (tutorialProgress.browsed_creators) count++;
     if (tutorialProgress.checked_applicants) count++;
     if (tutorialProgress.viewed_upgrade || isPro) count++;
     return (count / 5) * 100;
-  }, [tutorialProgress, gigs, isPro]);
+  }, [tutorialProgress, briefs, isPro]);
 
   return (
     <>
@@ -134,15 +134,15 @@ export default function BrandDashboardPage() {
                 Welcome back, {brand.name} <span className="inline-block">👋</span>
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                Here&apos;s what&apos;s happening with your gigs today.
+                Here&apos;s what&apos;s happening with your briefs today.
               </p>
             </div>
 
-            {hasGigs ? (
+            {hasBriefs ? (
               <>
                 <StatStrip stats={stats} />
                 <NeedsAttention items={attention} />
-                <ActiveGigs gigs={activeGigs} />
+                <ActiveBriefs briefs={activeBriefs} />
               </>
             ) : showEmpty ? (
               <EmptyState brandName={brand.name} />

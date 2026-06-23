@@ -5,25 +5,25 @@ import { useRouter } from "next/navigation";
 import { Loader2, Search, Users } from "lucide-react";
 import {
   fetchAllCreators,
-  fetchMyInvitationsForCreators,
+  fetchConnectionStatusForCreators,
+  connectWithCreator,
 } from "@/lib/dashboard/brand/creatorsApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import CreatorCard from "./CreatorCard";
 import CreatorProfileModal from "./CreatorProfileModal";
-import InviteDialog from "./InviteDialog";
 
 // Top-level browse page. Fetches all onboarded creators + the brand's
-// existing invitations so cards can show "Invited" once delivered.
+// connection status so cards can show "Connected" or "Pending".
 export default function CreatorsView() {
   const router = useRouter();
   const [creators, setCreators] = useState([]);
-  const [invitedSet, setInvitedSet] = useState(new Set());
+  const [connectionMap, setConnectionMap] = useState(new Map()); // creatorId -> status
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [query, setQuery] = useState("");
   const [openCreator, setOpenCreator] = useState(null);
-  const [inviteCreator, setInviteCreator] = useState(null);
   const [isPro, setIsPro] = useState(false);
+  const [connecting, setConnecting] = useState(null); // creatorId being connected
 
   async function reload() {
     setLoading(true);
@@ -36,13 +36,12 @@ export default function CreatorsView() {
       setCreators(rows);
       setIsPro(billing?.plan === "pro");
       const ids = rows.map((r) => r.id);
-      const invites = await fetchMyInvitationsForCreators(ids);
-      const next = new Set(
-        invites
-          .filter((i) => i.status === "pending" || i.status === "accepted")
-          .map((i) => i.creator_id),
-      );
-      setInvitedSet(next);
+      const connections = await fetchConnectionStatusForCreators(ids);
+      const map = new Map();
+      for (const c of connections) {
+        map.set(c.creator_id, c.status);
+      }
+      setConnectionMap(map);
     } catch (e) {
       setErr(e.message || "Couldn't load creators.");
     } finally {
@@ -56,15 +55,32 @@ export default function CreatorsView() {
       reload();
     }
     if (typeof window !== "undefined") {
-      window.addEventListener("invitations:changed", refresh);
+      window.addEventListener("brand-creators:changed", refresh);
     }
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("invitations:changed", refresh);
+        window.removeEventListener("brand-creators:changed", refresh);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleConnect = async (creator) => {
+    setConnecting(creator.id);
+    try {
+      await connectWithCreator(creator.id);
+      // Optimistically update the map
+      setConnectionMap((prev) => {
+        const next = new Map(prev);
+        next.set(creator.id, "pending");
+        return next;
+      });
+    } catch (e) {
+      alert(e.message || "Failed to connect.");
+    } finally {
+      setConnecting(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     if (!query.trim()) return creators;
@@ -125,12 +141,10 @@ export default function CreatorsView() {
             <CreatorCard
               key={c.id}
               creator={c}
-              invited={invitedSet.has(c.id)}
+              connectionStatus={connectionMap.get(c.id) || null}
               isPro={isPro}
               onOpen={(creator) => setOpenCreator(creator)}
-              onInvite={(creator) => {
-                setInviteCreator(creator);
-              }}
+              onConnect={handleConnect}
             />
           ))}
         </div>
@@ -140,29 +154,10 @@ export default function CreatorsView() {
       {openCreator ? (
         <CreatorProfileModal
           creator={openCreator}
-          invited={invitedSet.has(openCreator.id)}
+          connectionStatus={connectionMap.get(openCreator.id) || null}
           isPro={isPro}
           onClose={() => setOpenCreator(null)}
-          onInvite={(creator) => {
-            // Switch from profile modal → invite dialog.
-            setOpenCreator(null);
-            setInviteCreator(creator);
-          }}
-        />
-      ) : null}
-
-      {/* Invite dialog */}
-      {inviteCreator ? (
-        <InviteDialog
-          creator={inviteCreator}
-          onClose={() => setInviteCreator(null)}
-          onInvited={() => {
-            setInvitedSet((prev) => {
-              const next = new Set(prev);
-              next.add(inviteCreator.id);
-              return next;
-            });
-          }}
+          onConnect={handleConnect}
         />
       ) : null}
     </>

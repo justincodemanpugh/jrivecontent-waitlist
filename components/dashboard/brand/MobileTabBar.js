@@ -4,18 +4,18 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Briefcase,
-  Plus,
+  Users,
+  Send,
   MessageSquare,
   Search,
 } from "lucide-react";
 
 const TABS = [
   { label: "Home", href: "/dashboard/brand", icon: LayoutDashboard, exact: true },
-  { label: "Gigs", href: "/dashboard/brand/gigs", icon: Briefcase },
-  { label: "Post", href: "/dashboard/brand/gigs/new", icon: Plus, primary: true },
+  { label: "Creators", href: "/dashboard/brand/my-creators", icon: Users },
+  { label: "Brief", href: "/dashboard/brand/briefs/new", icon: Send, primary: true },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
-  { label: "Creators", href: "/dashboard/brand/creators", icon: Search },
+  { label: "Browse", href: "/dashboard/brand/creators", icon: Search },
 ];
 
 export default function MobileTabBar() {

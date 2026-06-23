@@ -1,30 +1,29 @@
-import { Briefcase, Users, CheckCircle2, Sparkles } from "lucide-react";
+import { FileText, Users, Clock, CheckCircle2 } from "lucide-react";
 
 export default function StatStrip({ stats }) {
   const items = [
     {
-      label: "Active gigs",
-      value: stats.activeGigs,
-      icon: Briefcase,
+      label: "Active briefs",
+      value: stats.activeBriefs ?? 0,
+      icon: FileText,
       tint: "bg-sky-50 text-sky-600",
     },
     {
-      label: "New applications",
-      value: stats.newApplications,
+      label: "Connected creators",
+      value: stats.connectedCreators ?? 0,
       icon: Users,
       tint: "bg-emerald-50 text-emerald-600",
-      highlight: stats.newApplications > 0,
     },
     {
-      label: "Awaiting approval",
-      value: stats.awaitingApproval,
-      icon: Sparkles,
+      label: "Pending submissions",
+      value: stats.pendingSubmissions ?? 0,
+      icon: Clock,
       tint: "bg-amber-50 text-amber-600",
-      highlight: stats.awaitingApproval > 0,
+      highlight: (stats.pendingSubmissions ?? 0) > 0,
     },
     {
       label: "Completed this month",
-      value: stats.completedThisMonth,
+      value: stats.completedThisMonth ?? 0,
       icon: CheckCircle2,
       tint: "bg-slate-100 text-slate-600",
     },

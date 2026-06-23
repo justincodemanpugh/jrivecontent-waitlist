@@ -1,16 +1,15 @@
 "use client";
 
-import { Instagram, Music2, Youtube, MapPin } from "lucide-react";
+import { Instagram, Music2, Youtube, MapPin, UserPlus, Clock, CheckCircle2 } from "lucide-react";
 
 // Browse card. Tapping anywhere on the card opens the profile modal; the
-// "Invite" button is a separate target that opens the invite dialog without
-// also triggering the card click.
+// "Connect" button is a separate target that triggers the connection flow.
 export default function CreatorCard({
   creator,
-  invited,
+  connectionStatus, // null | 'pending' | 'active'
   isPro,
   onOpen,
-  onInvite,
+  onConnect,
 }) {
   const initials = deriveInitials(creator.name);
 
@@ -99,28 +98,49 @@ export default function CreatorCard({
           ) : null}
         </div>
 
-        {/* Invite button */}
+        {/* Connect button */}
         <span
           role="button"
           tabIndex={0}
           onClick={(e) => {
             e.stopPropagation();
-            onInvite(creator);
+            if (!connectionStatus) {
+              onConnect(creator);
+            }
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.stopPropagation();
               e.preventDefault();
-              onInvite(creator);
+              if (!connectionStatus) {
+                onConnect(creator);
+              }
             }
           }}
           className={`mt-1 w-full inline-flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-            invited
+            connectionStatus === "active"
               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : connectionStatus === "pending"
+              ? "bg-amber-50 text-amber-700 border border-amber-200"
               : "bg-brand-ink text-white hover:bg-slate-800"
           }`}
         >
-          {invited ? "Invited" : "Invite"}
+          {connectionStatus === "active" ? (
+            <>
+              <CheckCircle2 size={12} />
+              Connected
+            </>
+          ) : connectionStatus === "pending" ? (
+            <>
+              <Clock size={12} />
+              Pending
+            </>
+          ) : (
+            <>
+              <UserPlus size={12} />
+              Connect
+            </>
+          )}
         </span>
       </div>
     </button>

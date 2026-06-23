@@ -8,8 +8,9 @@ import {
   Music2,
   Globe,
   MapPin,
-  Send,
-  Lock,
+  UserPlus,
+  Clock,
+  CheckCircle2,
   Check,
   ExternalLink,
   Play,
@@ -18,13 +19,13 @@ import { createClient } from "@/lib/supabase/client";
 import { PlatformLogo, PLATFORM_LABELS } from "@/components/icons/PlatformLogos";
 
 // Read-only profile detail. The brand opens this from the browse grid; the
-// invite button defers to the InviteDialog (mounted by the parent view).
+// connect button triggers the connection flow.
 export default function CreatorProfileModal({
   creator,
-  invited,
+  connectionStatus, // null | 'pending' | 'active'
   isPro,
   onClose,
-  onInvite,
+  onConnect,
 }) {
   // Resolve storage public URLs (thumbnails for link videos, file for legacy).
   const supabase = createClient();
@@ -118,15 +119,36 @@ export default function CreatorProfileModal({
             </p>
             <button
               type="button"
-              onClick={() => onInvite(creator)}
+              onClick={() => {
+                if (!connectionStatus) {
+                  onConnect(creator);
+                }
+              }}
+              disabled={!!connectionStatus}
               className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                invited
+                connectionStatus === "active"
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : connectionStatus === "pending"
+                  ? "bg-amber-50 text-amber-700 border border-amber-200"
                   : "bg-brand-ink text-white hover:bg-slate-800"
               }`}
             >
-              {invited ? <Send size={14} /> : <Send size={14} />}
-              {invited ? "Invited" : "Invite to gig"}
+              {connectionStatus === "active" ? (
+                <>
+                  <CheckCircle2 size={14} />
+                  Connected
+                </>
+              ) : connectionStatus === "pending" ? (
+                <>
+                  <Clock size={14} />
+                  Pending
+                </>
+              ) : (
+                <>
+                  <UserPlus size={14} />
+                  Connect
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, ChevronDown, ListChecks } from "lucide-react";
+import { Send, ChevronDown, ListChecks } from "lucide-react";
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
 
@@ -17,13 +17,13 @@ export default function TopBar({ title = "Dashboard", checklistHidden, checklist
 
         <div className="flex items-center gap-2">
           <Link
-            href="/dashboard/brand/gigs/new"
-            data-tour="post-new-gig"
+            href="/dashboard/brand/briefs/new"
+            data-tour="send-new-brief"
             className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition shadow-sm"
           >
-            <Plus size={16} />
-            <span className="hidden sm:inline">Post New Gig</span>
-            <span className="sm:hidden">Post</span>
+            <Send size={16} />
+            <span className="hidden sm:inline">Send New Brief</span>
+            <span className="sm:hidden">Brief</span>
           </Link>
 
           {checklistHidden && onShowChecklist && (

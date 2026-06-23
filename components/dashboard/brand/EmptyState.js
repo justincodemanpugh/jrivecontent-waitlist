@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { Plus, Target, DollarSign, Image as ImageIcon } from "lucide-react";
+import { Send, Users, Video, Target } from "lucide-react";
 
 const TIPS = [
   {
+    icon: Users,
+    title: "Build your roster",
+    body: "Browse creators and connect with ones that match your brand style.",
+  },
+  {
+    icon: Video,
+    title: "Add example videos",
+    body: "Upload reference videos so creators know exactly what you're looking for.",
+  },
+  {
     icon: Target,
     title: "Be specific",
-    body: "Tell creators exactly what you want — angle, vibe, length, must-have shots.",
-  },
-  {
-    icon: DollarSign,
-    title: "Set a fair budget",
-    body: "$40–$120 is the sweet spot for most short-form UGC videos.",
-  },
-  {
-    icon: ImageIcon,
-    title: "Share examples",
-    body: "Drop a TikTok or Reel link so creators nail your style on the first try.",
+    body: "Clear instructions help creators nail your content on the first try.",
   },
 ];
 
@@ -28,19 +28,26 @@ export default function EmptyState({ brandName }) {
           Welcome to JriveContent
         </span>
         <h2 className="mt-5 text-3xl md:text-4xl font-semibold tracking-tight text-brand-ink">
-          Let&apos;s get your first video made{brandName ? `, ${brandName}` : ""}.
+          Build your creator team{brandName ? `, ${brandName}` : ""}.
         </h2>
         <p className="mt-3 max-w-lg mx-auto text-slate-600">
-          Post a gig in under 60 seconds. Real creators apply within 24–48 hours.
+          Connect with creators, send them briefs, and get content delivered directly to you.
         </p>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/dashboard/brand/gigs/new"
+            href="/dashboard/brand/creators"
             className="inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"
           >
-            <Plus size={18} />
-            Post your first gig
+            <Users size={18} />
+            Browse Creators
+          </Link>
+          <Link
+            href="/dashboard/brand/briefs/new"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white text-brand-ink px-7 py-3.5 font-medium hover:bg-slate-50 transition"
+          >
+            <Send size={18} />
+            Send a Brief
           </Link>
         </div>
       </div>
