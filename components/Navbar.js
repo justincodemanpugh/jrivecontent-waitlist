@@ -12,7 +12,7 @@ export default function Navbar() {
       <nav className="relative mx-auto max-w-5xl bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-lg shadow-slate-900/5 rounded-full pl-5 pr-2 h-14 flex md:grid md:grid-cols-3 items-center justify-between">
         <a href="#" className="flex items-center gap-2 md:justify-self-start">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sky">
-            <img src="/logo.svg" alt="Jrive" className="h-4 w-4" style={{ filter: "brightness(0) invert(1)" }} />
+            <img src="/images/jrive-logo.png" alt="Jrive" className="h-4 w-4" style={{ filter: "brightness(0) invert(1)" }} />
           </span>
           <span className="font-semibold tracking-tight text-base">
             Jrive<span className="text-brand-skyDeep">Content</span>
