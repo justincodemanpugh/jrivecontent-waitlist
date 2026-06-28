@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Compass,
   Inbox,
+  ClipboardList,
   MessageSquare,
   User,
   Settings,
@@ -13,6 +14,7 @@ import {
 
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
+  { label: "Assignments", href: "/dashboard/creator/assignments", icon: ClipboardList },
   { label: "Explore Gigs", href: "/dashboard/creator/explore", icon: Compass },
   { label: "Applications", href: "/dashboard/creator/applications", icon: Inbox },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },

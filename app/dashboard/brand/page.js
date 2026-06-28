@@ -22,9 +22,11 @@ import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 
 const EMPTY_STATS = {
   activeBriefs: 0,
-  pendingSubmissions: 0,
   connectedCreators: 0,
+  videosPendingReview: 0,
   completedThisMonth: 0,
+  completionRate: 0,
+  newCreatorsThisWeek: 0,
 };
 
 export default function BrandDashboardPage() {

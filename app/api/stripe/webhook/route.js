@@ -33,6 +33,35 @@ export async function POST(request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
+
+        // --- Brief escrow deposits (separate from gig/conversation flow) ---
+        if (session.metadata?.kind === "brief") {
+          const briefPaymentId = session.metadata?.brief_payment_id;
+          const briefRecipientId = session.metadata?.brief_recipient_id;
+          if (!briefPaymentId || !briefRecipientId) break;
+
+          const briefIntentId =
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id;
+
+          await admin
+            .from("brief_payments")
+            .update({
+              status: "escrowed",
+              stripe_payment_intent_id: briefIntentId || null,
+              deposited_at: new Date().toISOString(),
+            })
+            .eq("id", briefPaymentId);
+
+          await admin
+            .from("brief_recipients")
+            .update({ escrow_status: "escrowed" })
+            .eq("id", briefRecipientId);
+
+          break;
+        }
+
         const paymentId = session.metadata?.payment_id;
         const conversationId = session.metadata?.conversation_id;
         const kind = session.metadata?.kind || "initial";
@@ -159,6 +188,27 @@ export async function POST(request) {
       case "checkout.session.expired":
       case "checkout.session.async_payment_failed": {
         const session = event.data.object;
+
+        if (session.metadata?.kind === "brief") {
+          const briefPaymentId = session.metadata?.brief_payment_id;
+          const briefRecipientId = session.metadata?.brief_recipient_id;
+          if (briefPaymentId) {
+            await admin
+              .from("brief_payments")
+              .update({ status: "failed" })
+              .eq("id", briefPaymentId)
+              .eq("status", "pending");
+          }
+          if (briefRecipientId) {
+            await admin
+              .from("brief_recipients")
+              .update({ escrow_status: "none" })
+              .eq("id", briefRecipientId)
+              .eq("escrow_status", "pending");
+          }
+          break;
+        }
+
         const paymentId = session.metadata?.payment_id;
         if (paymentId) {
           await admin

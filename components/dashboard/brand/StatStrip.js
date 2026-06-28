@@ -1,4 +1,11 @@
-import { FileText, Users, Clock, CheckCircle2 } from "lucide-react";
+import {
+  FileText,
+  Users,
+  Film,
+  CheckCircle2,
+  TrendingUp,
+  UserPlus,
+} from "lucide-react";
 
 export default function StatStrip({ stats }) {
   const items = [
@@ -15,11 +22,11 @@ export default function StatStrip({ stats }) {
       tint: "bg-emerald-50 text-emerald-600",
     },
     {
-      label: "Pending submissions",
-      value: stats.pendingSubmissions ?? 0,
-      icon: Clock,
+      label: "Videos to review",
+      value: stats.videosPendingReview ?? 0,
+      icon: Film,
       tint: "bg-amber-50 text-amber-600",
-      highlight: (stats.pendingSubmissions ?? 0) > 0,
+      highlight: (stats.videosPendingReview ?? 0) > 0,
     },
     {
       label: "Completed this month",
@@ -27,10 +34,22 @@ export default function StatStrip({ stats }) {
       icon: CheckCircle2,
       tint: "bg-slate-100 text-slate-600",
     },
+    {
+      label: "Completion rate",
+      value: `${stats.completionRate ?? 0}%`,
+      icon: TrendingUp,
+      tint: "bg-violet-50 text-violet-600",
+    },
+    {
+      label: "New creators this week",
+      value: stats.newCreatorsThisWeek ?? 0,
+      icon: UserPlus,
+      tint: "bg-rose-50 text-rose-600",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {items.map((it) => {
         const Icon = it.icon;
         return (
