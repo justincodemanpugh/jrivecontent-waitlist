@@ -147,7 +147,10 @@ export default function BrandDashboardPage() {
                 <ActiveBriefs briefs={activeBriefs} />
               </>
             ) : showEmpty ? (
-              <EmptyState brandName={brand.name} />
+              <>
+                <StatStrip stats={stats} />
+                <EmptyState brandName={brand.name} />
+              </>
             ) : null}
           </div>
 
