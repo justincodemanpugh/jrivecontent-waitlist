@@ -2,13 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck, ImagePlus } from "lucide-react";
-import CoverPhotoUploader from "@/components/dashboard/creator/profile/CoverPhotoUploader";
-import SocialAccountVerifier from "@/components/onboarding/SocialAccountVerifier";
-import VideoShowcaseUploader from "@/components/onboarding/VideoShowcaseUploader";
+import { ArrowLeft, ArrowRight, Loader2, Check, Sparkles, CreditCard, ShieldCheck } from "lucide-react";
 import {
   CREATOR_NICHES,
-  CONTENT_TYPES,
   TOTAL_CREATOR_STEPS,
 } from "@/lib/onboarding/creatorConstants";
 import {
@@ -20,23 +16,15 @@ import { logOnboardingEvent } from "@/lib/onboarding/analytics";
 
 const STEP_TITLES = [
   "What should we call you?",
-  "Pick a creator handle",
   "What niches do you create in?",
-  "What kind of content do you make?",
-  "Tell brands a bit about yourself",
-  "Add a cover photo",
-  "Where can brands find your work?",
+  "Where can brands find you?",
   "Set up payouts with Stripe",
 ];
 
 const STEP_SUBTITLES = [
   "This is the name brands will see on your profile.",
-  "Optional — you can use letters, numbers, dots and underscores.",
   "Pick all that apply — brands use these to find you.",
-  "Optional — pick the formats you can deliver.",
-  "Optional — a short intro goes a long way.",
-  "Optional — but creators with a cover photo are 85% more likely to get hired.",
-  "Connect your social accounts and showcase your best content.",
+  "Add your social handles so brands know where to look.",
   "Connect Stripe so brands can pay you. You can also do this later from your profile.",
 ];
 
@@ -45,138 +33,72 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [socialVerified, setSocialVerified] = useState({
-    instagram: false,
-    tiktok: false,
-    youtube: false,
-  });
-  const [portfolioVideos, setPortfolioVideos] = useState([]);
-  const [hasValidVideos, setHasValidVideos] = useState(false);
 
-  // Funnel instrumentation. Mirrors the brand flow: fire `onboarding_started`
-  // once on mount, then `step_viewed` every time the step changes.
   const startedRef = useRef(false);
   useEffect(() => {
     if (!startedRef.current) {
       startedRef.current = true;
-      logOnboardingEvent({
-        role: "creator",
-        event: "onboarding_started",
-        stepIndex: step,
-      });
+      logOnboardingEvent({ role: "creator", event: "onboarding_started", stepIndex: step });
     }
-    logOnboardingEvent({
-      role: "creator",
-      event: "step_viewed",
-      stepIndex: step,
-    });
+    logOnboardingEvent({ role: "creator", event: "step_viewed", stepIndex: step });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
   const update = (patch) => setData((d) => ({ ...d, ...patch }));
 
-  const toggleArr = (key, value) =>
+  const toggleNiche = (value) =>
     setData((d) => ({
       ...d,
-      [key]: d[key].includes(value)
-        ? d[key].filter((v) => v !== value)
-        : [...d[key], value],
+      niches: d.niches.includes(value)
+        ? d.niches.filter((v) => v !== value)
+        : [...d.niches, value],
     }));
 
   const validateStep = () => {
-    if (step === 0 && !data.display_name.trim()) {
-      return "Please enter a display name.";
-    }
-    if (step === 2 && data.niches.length === 0)
-      return "Pick at least one niche.";
-    if (step === 6) {
-      if (!data.terms_accepted) {
-        return "Please agree to the Terms and Privacy Policy.";
-      }
-      const hasAnySocialVerified = Object.values(socialVerified).some(v => v);
-      if (!hasAnySocialVerified) {
-        return "Please connect and verify at least one social account.";
-      }
-      if (!hasValidVideos) {
-        return "Please add at least one of your best videos.";
-      }
-    }
+    if (step === 0 && !data.display_name.trim()) return "Please enter a display name.";
+    if (step === 1 && data.niches.length === 0) return "Pick at least one niche.";
+    if (step === 2 && !data.terms_accepted) return "Please agree to the Terms and Privacy Policy.";
     return "";
   };
 
-  // Per-step partial payload sent to the upsert action.
   const stepPayload = (s = step) => {
     switch (s) {
-      case 0:
-        return { display_name: data.display_name };
-      case 1:
-        return { handle: data.handle };
-      case 2:
-        return { niches: data.niches };
-      case 3:
-        return { content_types: data.content_types };
-      case 4:
-        return { bio: data.bio };
-      case 5:
-        // Cover photo upload writes directly to creator_profiles via
-        // setCreatorCoverUrl, so nothing extra to persist on Continue.
-        return {};
-      case 6:
-        return {
-          instagram_handle: data.instagram_handle,
-          tiktok_handle: data.tiktok_handle,
-          youtube_handle: data.youtube_handle,
-          portfolio_url: data.portfolio_url,
-          instagram_verified: socialVerified.instagram,
-          tiktok_verified: socialVerified.tiktok,
-          youtube_verified: socialVerified.youtube,
-          portfolio_videos: portfolioVideos,
-          terms_accepted: data.terms_accepted,
-        };
-      case 7:
-        // Stripe Connect status is updated server-side via the connect API
-        // and webhook. Nothing extra to persist from this step.
-        return {};
-      default:
-        return {};
+      case 0: return { display_name: data.display_name, handle: data.handle };
+      case 1: return { niches: data.niches };
+      case 2: return {
+        instagram_handle: data.instagram_handle,
+        tiktok_handle: data.tiktok_handle,
+        youtube_handle: data.youtube_handle,
+        terms_accepted: data.terms_accepted,
+      };
+      case 3: return {};
+      default: return {};
     }
   };
 
-  const finalPayload = () => ({
-    display_name: data.display_name,
-    handle: data.handle,
-    niches: data.niches,
-    content_types: data.content_types,
-    bio: data.bio,
-    instagram_handle: data.instagram_handle,
-    tiktok_handle: data.tiktok_handle,
-    youtube_handle: data.youtube_handle,
-    portfolio_url: data.portfolio_url,
-    terms_accepted: data.terms_accepted,
-  });
-
   const handleNext = () => {
     const v = validateStep();
-    if (v) {
-      setError(v);
-      return;
-    }
+    if (v) { setError(v); return; }
     setError("");
     startTransition(async () => {
       const res = await saveCreatorOnboardingStep(stepPayload());
-      if (!res?.ok) {
-        setError(res?.error || "Something went wrong. Please try again.");
-        return;
-      }
-      logOnboardingEvent({
-        role: "creator",
-        event: "step_completed",
-        stepIndex: step,
-      });
+      if (!res?.ok) { setError(res?.error || "Something went wrong. Please try again."); return; }
+      logOnboardingEvent({ role: "creator", event: "step_completed", stepIndex: step });
       if (step < TOTAL_CREATOR_STEPS - 1) {
         setStep((s) => s + 1);
       } else {
-        const final = await completeCreatorOnboarding(finalPayload());
+        const final = await completeCreatorOnboarding({
+          display_name: data.display_name,
+          handle: data.handle,
+          niches: data.niches,
+          content_types: [],
+          bio: "",
+          instagram_handle: data.instagram_handle,
+          tiktok_handle: data.tiktok_handle,
+          youtube_handle: data.youtube_handle,
+          portfolio_url: "",
+          terms_accepted: data.terms_accepted,
+        });
         if (final && !final.ok) setError(final.error);
       }
     });
@@ -189,40 +111,29 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
   };
 
   const handleSkip = () => {
-    if (!canSkipStep(step)) return;
-    // Step 5 also hosts the required terms checkbox, so a "skip"
-    // there is really just clearing the optional social fields.
-    if (step === 6 && !data.terms_accepted) {
-      setError("Please agree to the Terms and Privacy Policy.");
-      return;
-    }
+    // Only step 3 (Stripe) is skippable
+    if (step !== 3) return;
     setError("");
     startTransition(async () => {
-      // Persist a cleared value for the skipped field so a resumed session
-      // doesn't re-prompt unnecessarily.
-      const cleared = clearedPayload(step);
-      const cleanedData = { ...data, ...localCleared(step) };
-      setData(cleanedData);
-      await saveCreatorOnboardingStep(cleared);
-      logOnboardingEvent({
-        role: "creator",
-        event: "step_skipped",
-        stepIndex: step,
+      logOnboardingEvent({ role: "creator", event: "step_skipped", stepIndex: step });
+      const final = await completeCreatorOnboarding({
+        display_name: data.display_name,
+        handle: data.handle,
+        niches: data.niches,
+        content_types: [],
+        bio: "",
+        instagram_handle: data.instagram_handle,
+        tiktok_handle: data.tiktok_handle,
+        youtube_handle: data.youtube_handle,
+        portfolio_url: "",
+        terms_accepted: data.terms_accepted,
       });
-      if (step < TOTAL_CREATOR_STEPS - 1) {
-        setStep((s) => s + 1);
-      } else {
-        const final = await completeCreatorOnboarding({
-          ...finalPayload(),
-          ...localCleared(step),
-        });
-        if (final && !final.ok) setError(final.error);
-      }
+      if (final && !final.ok) setError(final.error);
     });
   };
 
   const isLastStep = step === TOTAL_CREATOR_STEPS - 1;
-  const showSkip = canSkipStep(step);
+  const canSkip = step === 3;
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -233,9 +144,7 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
             <Sparkles size={20} />
           </span>
           {userEmail && (
-            <div className="mt-3 text-xs font-medium text-slate-500">
-              Signed in as {userEmail}
-            </div>
+            <div className="mt-3 text-xs font-medium text-slate-500">Signed in as {userEmail}</div>
           )}
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-brand-ink">
             {STEP_TITLES[step]}
@@ -248,9 +157,7 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
           {Array.from({ length: TOTAL_CREATOR_STEPS }).map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 flex-1 rounded-full ${
-                i <= step ? "bg-brand-skyDeep" : "bg-slate-200"
-              }`}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-brand-skyDeep" : "bg-slate-200"}`}
             />
           ))}
         </div>
@@ -260,44 +167,13 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
 
         {/* Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-          {step === 0 && <Step1 data={data} update={update} />}
-          {step === 1 && <Step2 data={data} update={update} />}
-          {step === 2 && (
-            <Step3 data={data} onToggle={(v) => toggleArr("niches", v)} />
-          )}
-          {step === 3 && (
-            <Step4
-              data={data}
-              onToggle={(v) => toggleArr("content_types", v)}
-            />
-          )}
-          {step === 4 && <Step5 data={data} update={update} />}
-          {step === 5 && (
-            <StepCover
-              data={data}
-              userId={userId}
-              onChange={(url) => update({ cover_photo_url: url })}
-            />
-          )}
-          {step === 6 && (
-            <Step6 
-              data={data} 
-              update={update}
-              userId={userId}
-              socialVerified={socialVerified}
-              setSocialVerified={setSocialVerified}
-              portfolioVideos={portfolioVideos}
-              setPortfolioVideos={setPortfolioVideos}
-              hasValidVideos={hasValidVideos}
-              setHasValidVideos={setHasValidVideos}
-            />
-          )}
-          {step === 7 && <Step7 />}
+          {step === 0 && <Step0 data={data} update={update} />}
+          {step === 1 && <Step1 data={data} onToggle={toggleNiche} />}
+          {step === 2 && <Step2 data={data} update={update} />}
+          {step === 3 && <Step3 markOnboarded={markCreatorOnboarded} />}
 
           {error && (
-            <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {error}
-            </p>
+            <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
           )}
 
           <div className="mt-7 flex items-center justify-between gap-3">
@@ -309,9 +185,8 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
             >
               <ArrowLeft size={16} /> Back
             </button>
-
             <div className="flex items-center gap-2">
-              {showSkip && (
+              {canSkip && (
                 <button
                   type="button"
                   onClick={handleSkip}
@@ -321,21 +196,17 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
                   Skip
                 </button>
               )}
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={isPending}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
-              >
-                {isPending ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : isLastStep ? (
-                  <Check size={16} />
-                ) : (
-                  <ArrowRight size={16} />
-                )}
-                {isLastStep ? "Finish" : "Continue"}
-              </button>
+              {!isLastStep && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isPending}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {isPending ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+                  Continue
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -345,55 +216,14 @@ export default function OnboardingClient({ initial, userEmail, userId }) {
 }
 
 function deriveStartStep(d) {
-  // Resume on the first incomplete required step. Terms acceptance is
-  // collected on the final step and enforced there.
   if (!d.display_name) return 0;
-  if (d.niches.length === 0) return 2;
-  return 1;
+  if (d.niches.length === 0) return 1;
+  return 2;
 }
 
-function canSkipStep(step) {
-  // Steps 1, 3, 4, 5, 7 are optional and can be skipped.
-  // Step 6 is now required (social accounts + videos). Step 7 = Stripe payouts; can connect later.
-  return (
-    step === 1 ||
-    step === 3 ||
-    step === 4 ||
-    step === 5 ||
-    step === 7
-  );
-}
+/* ---- Steps ---- */
 
-function clearedPayload(step) {
-  switch (step) {
-    case 1:
-      return { handle: "" };
-    case 3:
-      return { content_types: [] };
-    case 4:
-      return { bio: "" };
-    case 5:
-      // Cover photo is uploaded directly; skipping just leaves it empty.
-      return {};
-    case 6:
-      // Step 6 is now required, so don't clear when skipping
-      return {
-        portfolio_url: "",
-      };
-    default:
-      return {};
-  }
-}
-
-function localCleared(step) {
-  // Mirrors clearedPayload but typed for the local form state where empty
-  // arrays should remain arrays (not undefined).
-  return clearedPayload(step);
-}
-
-/* ---------------- Steps ---------------- */
-
-function Step1({ data, update }) {
+function Step0({ data, update }) {
   return (
     <div className="space-y-4">
       <Field label="Display name" required>
@@ -404,147 +234,74 @@ function Step1({ data, update }) {
           placeholder="e.g. Sarah Chen"
           className={inputClass}
           maxLength={80}
+          autoFocus
         />
       </Field>
+      <Field label="Creator handle (optional)" hint="Letters, numbers, dots, underscores">
+        <div className="flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-brand-skyDeep focus-within:ring-2 focus-within:ring-brand-sky/30">
+          <span className="pl-3 text-sm text-slate-400">@</span>
+          <input
+            type="text"
+            value={data.handle}
+            onChange={(e) => update({ handle: e.target.value })}
+            placeholder="sarah.creates"
+            className="flex-1 bg-transparent px-2 py-2.5 text-sm text-brand-ink placeholder-slate-400 focus:outline-none"
+            maxLength={40}
+          />
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+function Step1({ data, onToggle }) {
+  return (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      {CREATOR_NICHES.map((opt) => {
+        const active = data.niches.includes(opt);
+        return (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => onToggle(opt)}
+            className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${
+              active
+                ? "border-brand-skyDeep bg-brand-mist text-brand-ink"
+                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+            }`}
+          >
+            <span>{opt}</span>
+            {active && <Check size={16} className="text-brand-skyDeep" />}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 function Step2({ data, update }) {
   return (
-    <Field label="Handle" hint="Letters, numbers, dots, underscores">
-      <div className="flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-brand-skyDeep focus-within:ring-2 focus-within:ring-brand-sky/30">
-        <span className="pl-3 text-sm text-slate-400">@</span>
-        <input
-          type="text"
-          value={data.handle}
-          onChange={(e) => update({ handle: e.target.value })}
-          placeholder="sarah.creates"
-          className="flex-1 bg-transparent px-2 py-2.5 text-sm text-brand-ink placeholder-slate-400 focus:outline-none"
-          maxLength={40}
-        />
-      </div>
-    </Field>
-  );
-}
-
-function Step3({ data, onToggle }) {
-  return (
-    <ChipGroup
-      options={CREATOR_NICHES}
-      selected={data.niches}
-      onToggle={onToggle}
-    />
-  );
-}
-
-function Step4({ data, onToggle }) {
-  return (
-    <ChipGroup
-      options={CONTENT_TYPES}
-      selected={data.content_types}
-      onToggle={onToggle}
-    />
-  );
-}
-
-function Step5({ data, update }) {
-  return (
-    <Field label="Short bio">
-      <textarea
-        rows={4}
-        maxLength={500}
-        value={data.bio}
-        onChange={(e) => update({ bio: e.target.value })}
-        placeholder="Tell brands what makes your content unique."
-        className={inputClass}
-      />
-      <p className="mt-1 text-right text-xs text-slate-400">
-        {data.bio.length}/500
-      </p>
-    </Field>
-  );
-}
-
-function StepCover({ data, userId, onChange }) {
-  return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-amber-600">
-            <ImagePlus size={16} />
-          </span>
-          <div className="text-sm text-amber-900">
-            <p className="font-medium">Why a cover photo matters</p>
-            <ul className="mt-1 space-y-0.5 text-amber-800/90">
-              <li>• Brands are 85% more likely to hire creators with a photo.</li>
-              <li>• Shows your style at a glance.</li>
-              <li>• A normal portrait phone photo works great.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <p className="text-xs text-slate-500">
+        Add the handles brands will use to find your content. All optional, but at least one helps.
+      </p>
 
-      <CoverPhotoUploader
-        userId={userId}
-        initialUrl={data.cover_photo_url || null}
-        onChange={onChange}
-      />
-    </div>
-  );
-}
-
-function Step6({ 
-  data, 
-  update, 
-  userId,
-  socialVerified, 
-  setSocialVerified, 
-  portfolioVideos, 
-  setPortfolioVideos, 
-  hasValidVideos, 
-  setHasValidVideos 
-}) {
-  return (
-    <div className="space-y-6">
-      <SocialAccountVerifier
-        instagram={data.instagram_handle}
-        tiktok={data.tiktok_handle}
-        youtube={data.youtube_handle}
-        onInstagramChange={(v) => update({ instagram_handle: v })}
-        onTiktokChange={(v) => update({ tiktok_handle: v })}
-        onYoutubeChange={(v) => update({ youtube_handle: v })}
-        onVerificationChange={(platform, verified) => {
-          setSocialVerified(prev => ({ ...prev, [platform]: verified }));
-        }}
-      />
-      
-      <VideoShowcaseUploader
-        userId={userId}
-        videos={portfolioVideos}
-        onVideosChange={setPortfolioVideos}
-        onValidationChange={setHasValidVideos}
-      />
-
-      <Field label="Portfolio URL (optional)">
-        <input
-          type="url"
-          value={data.portfolio_url}
-          onChange={(e) => update({ portfolio_url: e.target.value })}
-          placeholder="https://"
-          className={inputClass}
-        />
+      <Field label="TikTok">
+        <SocialInput prefix="@tiktok.com/" value={data.tiktok_handle} onChange={(v) => update({ tiktok_handle: v })} placeholder="yourusername" />
       </Field>
-      
-      <TermsAccept
-        checked={data.terms_accepted}
-        onChange={(v) => update({ terms_accepted: v })}
-      />
+      <Field label="Instagram">
+        <SocialInput prefix="@instagram.com/" value={data.instagram_handle} onChange={(v) => update({ instagram_handle: v })} placeholder="yourusername" />
+      </Field>
+      <Field label="YouTube">
+        <SocialInput prefix="@youtube.com/" value={data.youtube_handle} onChange={(v) => update({ youtube_handle: v })} placeholder="yourusername" />
+      </Field>
+
+      <TermsAccept checked={data.terms_accepted} onChange={(v) => update({ terms_accepted: v })} />
     </div>
   );
 }
 
-function Step7() {
+function Step3({ markOnboarded }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -552,18 +309,11 @@ function Step7() {
     setErr("");
     setLoading(true);
     try {
-      // Mark onboarding complete first so the user can land on the
-      // creator dashboard (profile page) when they return from Stripe.
-      const marked = await markCreatorOnboarded();
-      if (!marked?.ok) {
-        throw new Error(marked?.error || "Could not finish onboarding.");
-      }
-
+      const marked = await markOnboarded();
+      if (!marked?.ok) throw new Error(marked?.error || "Could not finish onboarding.");
       const res = await fetch("/api/stripe/connect", { method: "POST" });
       const json = await res.json();
-      if (!res.ok || !json.url) {
-        throw new Error(json.error || "Could not start Stripe onboarding.");
-      }
+      if (!res.ok || !json.url) throw new Error(json.error || "Could not start Stripe onboarding.");
       window.location.href = json.url;
     } catch (e) {
       setErr(e.message || "Something went wrong.");
@@ -579,13 +329,9 @@ function Step7() {
             <CreditCard size={16} />
           </span>
           <div>
-            <p className="font-medium text-brand-ink">
-              Get paid directly to your bank account
-            </p>
+            <p className="font-medium text-brand-ink">Get paid directly to your bank account</p>
             <p className="mt-1 text-slate-600">
-              We use Stripe to securely pay creators. When a brand approves
-              your work, your share is transferred to your Stripe account
-              automatically.
+              When a brand approves your work, your share is transferred automatically via Stripe.
             </p>
           </div>
         </div>
@@ -612,31 +358,38 @@ function Step7() {
         disabled={loading}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#635BFF] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5247e6] disabled:opacity-50"
       >
-        {loading ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : (
-          <CreditCard size={16} />
-        )}
+        {loading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
         {loading ? "Redirecting to Stripe…" : "Connect Stripe account"}
       </button>
 
-      {err && (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {err}
-        </p>
-      )}
+      {err && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{err}</p>}
 
       <p className="text-center text-xs text-slate-500">
-        Prefer to do this later? Click <span className="font-medium">Skip</span>
-        {" "}— you can connect Stripe any time from your creator profile.
+        Prefer to do this later? Click <span className="font-medium">Skip</span> above — you can connect Stripe any time from your creator profile.
       </p>
+    </div>
+  );
+}
+
+function SocialInput({ prefix, value, onChange, placeholder }) {
+  return (
+    <div className="flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-brand-skyDeep focus-within:ring-2 focus-within:ring-brand-sky/30">
+      <span className="pl-3 text-xs text-slate-400 whitespace-nowrap">{prefix}</span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="flex-1 bg-transparent px-2 py-2.5 text-sm text-brand-ink placeholder-slate-400 focus:outline-none"
+        maxLength={60}
+      />
     </div>
   );
 }
 
 function TermsAccept({ checked, onChange }) {
   return (
-    <label className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+    <label className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 cursor-pointer">
       <input
         type="checkbox"
         checked={checked}
@@ -644,31 +397,19 @@ function TermsAccept({ checked, onChange }) {
         className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-skyDeep focus:ring-brand-sky/40"
       />
       <span>
-        I agree to the Terms of Service (
-        <Link
-          href="/terms"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-brand-skyDeep hover:underline"
-        >
-          View
+        I agree to the{" "}
+        <Link href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-brand-skyDeep hover:underline">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-brand-skyDeep hover:underline">
+          Privacy Policy
         </Link>
-        ) and Privacy Policy (
-        <Link
-          href="/privacy"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-brand-skyDeep hover:underline"
-        >
-          View
-        </Link>
-        ).
+        .
       </span>
     </label>
   );
 }
-
-/* ---------------- Shared ---------------- */
 
 const inputClass =
   "block w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30";
@@ -684,47 +425,6 @@ function Field({ label, hint, required, children }) {
         {hint && <span className="text-xs text-slate-400">{hint}</span>}
       </div>
       {children}
-    </div>
-  );
-}
-
-function PrefixInput({ prefix, value, onChange, placeholder }) {
-  return (
-    <div className="flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-brand-skyDeep focus-within:ring-2 focus-within:ring-brand-sky/30">
-      <span className="pl-3 text-sm text-slate-400">{prefix}</span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex-1 bg-transparent px-2 py-2.5 text-sm text-brand-ink placeholder-slate-400 focus:outline-none"
-        maxLength={60}
-      />
-    </div>
-  );
-}
-
-function ChipGroup({ options, selected, onToggle }) {
-  return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {options.map((opt) => {
-        const active = selected.includes(opt);
-        return (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onToggle(opt)}
-            className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${
-              active
-                ? "border-brand-skyDeep bg-brand-mist text-brand-ink"
-                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-            }`}
-          >
-            <span>{opt}</span>
-            {active && <Check size={16} className="text-brand-skyDeep" />}
-          </button>
-        );
-      })}
     </div>
   );
 }

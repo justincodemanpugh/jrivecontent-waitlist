@@ -84,7 +84,7 @@ export default function Sidebar() {
         <Link
           href="/dashboard/brand/briefs/new"
           data-tour="send-brief-cta"
-          className="flex items-center justify-center gap-2 px-3 py-2.5 mb-3 rounded-xl text-sm font-semibold bg-brand-ink text-white hover:bg-slate-800 transition shadow-sm"
+          className="flex items-center justify-center gap-2 px-3 py-2.5 mb-3 rounded-xl text-sm font-semibold bg-brand-skyDeep text-white hover:bg-brand-sky hover:text-brand-ink transition shadow-sm"
         >
           <Send size={16} />
           Send New Brief

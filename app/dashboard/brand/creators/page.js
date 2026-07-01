@@ -13,8 +13,7 @@ export default function BrandCreatorsPage() {
             Find your next collaborator
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Browse every creator on the platform, preview their work, and
-            invite them straight to one of your gigs.
+            Browse every creator on the platform, preview their work, and connect to add them to your team.
           </p>
         </div>
         <CreatorsView />
