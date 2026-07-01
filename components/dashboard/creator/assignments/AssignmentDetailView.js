@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Lock,
   Clock,
-  Calendar,
+  Share2,
   DollarSign,
   CheckCircle2,
   AlertCircle,
@@ -22,6 +22,7 @@ import {
   uploadAssignmentVideo,
   getAssignmentVideoUrl,
 } from "@/lib/dashboard/creator/assignmentsApi";
+import { briefPlatformLabel } from "@/lib/dashboard/brand/briefsApi";
 
 function formatMoney(cents) {
   if (cents == null) return null;
@@ -84,13 +85,7 @@ export default function AssignmentDetailView({ recipientId }) {
     formatMoney(a.payoutCents) ||
     (a.payPerCreator ? `$${Number(a.payPerCreator).toFixed(2)}` : null);
 
-  const deadline = a.deadline
-    ? new Date(a.deadline).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
+  const platformLabel = briefPlatformLabel(a.platform);
 
   return (
     <div className="space-y-6">
@@ -155,10 +150,10 @@ export default function AssignmentDetailView({ recipientId }) {
               {payDisplay}
             </span>
           )}
-          {deadline && (
+          {platformLabel && (
             <span className="flex items-center gap-1.5">
-              <Calendar size={15} />
-              Due {deadline}
+              <Share2 size={15} />
+              {platformLabel}
             </span>
           )}
         </div>

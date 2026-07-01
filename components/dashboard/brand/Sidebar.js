@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Briefcase,
   MessageSquare,
   Search,
   Sparkles,
@@ -16,7 +15,6 @@ import {
   FileText,
 } from "lucide-react";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
-import { fetchPendingApplicantCount } from "@/lib/dashboard/applicationsApi";
 
 // Primary nav - new briefs-first model
 const NAV_PRIMARY = [
@@ -27,36 +25,9 @@ const NAV_PRIMARY = [
   { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators" },
 ];
 
-// Secondary nav - legacy gig system (de-emphasized)
-const NAV_SECONDARY = [
-  { label: "My Gigs", href: "/dashboard/brand/gigs", icon: Briefcase, tourId: "nav-gigs" },
-  { label: "Applicants", href: "/dashboard/brand/applicants", icon: Users, badgeKey: "pendingApplicants", tourId: "nav-applicants" },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
   const [isPro, setIsPro] = useState(null);
-  const [pendingApplicants, setPendingApplicants] = useState(0);
-
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadPending = async () => {
-      try {
-        const n = await fetchPendingApplicantCount();
-        if (!cancelled) setPendingApplicants(n);
-      } catch {
-        // Silent — badge just won't update.
-      }
-    };
-    loadPending();
-    const onChange = () => loadPending();
-    window.addEventListener("applications:changed", onChange);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("applications:changed", onChange);
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -142,51 +113,6 @@ export default function Sidebar() {
               />
               <span className="flex-1">{item.label}</span>
               {locked && <Lock size={14} className="text-slate-400" />}
-            </Link>
-          );
-        })}
-
-        {/* Divider */}
-        <div className="pt-3 pb-2">
-          <p className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            Legacy
-          </p>
-        </div>
-
-        {/* Secondary nav (gigs) */}
-        {NAV_SECONDARY.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item);
-          const locked = item.proOnly && isPro === false;
-          const href = locked ? "/dashboard/brand/pricing" : item.href;
-          const dynamicBadge =
-            item.badgeKey === "pendingApplicants" && pendingApplicants > 0
-              ? pendingApplicants
-              : null;
-          const badge = item.badge ?? dynamicBadge;
-          return (
-            <Link
-              key={item.href}
-              href={href}
-              data-tour={item.tourId}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
-                active
-                  ? "bg-slate-100 text-slate-700"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              }`}
-            >
-              <Icon
-                size={16}
-                className={active ? "text-slate-500" : "text-slate-400"}
-              />
-              <span className="flex-1">{item.label}</span>
-              {locked ? (
-                <Lock size={12} className="text-slate-400" />
-              ) : badge ? (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-slate-200 text-slate-600 text-[10px] font-semibold">
-                  {badge}
-                </span>
-              ) : null}
             </Link>
           );
         })}

@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   DollarSign,
   Clock,
-  Calendar,
+  Share2,
   Video,
   CheckCircle2,
   AlertCircle,
@@ -22,6 +22,7 @@ import {
   approveBriefSubmission,
   requestBriefChanges,
   getBriefSubmissionUrl,
+  briefPlatformLabel,
 } from "@/lib/dashboard/brand/briefsApi";
 
 function formatMoney(cents) {
@@ -86,13 +87,7 @@ export default function BriefDetailView({ briefId }) {
     ? Math.round(Number(brief.payPerCreator) * 100)
     : 0;
 
-  const deadline = brief.deadline
-    ? new Date(brief.deadline).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
+  const platformLabel = briefPlatformLabel(brief.platform);
 
   return (
     <div className="space-y-6">
@@ -137,10 +132,10 @@ export default function BriefDetailView({ briefId }) {
               {formatMoney(payCents)} per creator
             </span>
           )}
-          {deadline && (
+          {platformLabel && (
             <span className="flex items-center gap-1.5">
-              <Calendar size={15} />
-              Due {deadline}
+              <Share2 size={15} />
+              {platformLabel}
             </span>
           )}
           <span className="flex items-center gap-1.5">
