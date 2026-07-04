@@ -13,6 +13,7 @@ import {
   Settings,
   Menu,
   X,
+  TrendingUp,
 } from "lucide-react";
 
 const TABS = [
@@ -23,6 +24,7 @@ const TABS = [
 
 const MORE_ITEMS = [
   { label: "Assignments", href: "/dashboard/creator/assignments", icon: ClipboardList },
+  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Applications", href: "/dashboard/creator/applications", icon: Inbox },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },
   { label: "Settings", href: "/dashboard/creator/settings", icon: Settings },

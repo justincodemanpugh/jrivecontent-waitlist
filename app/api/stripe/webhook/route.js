@@ -34,6 +34,28 @@ export async function POST(request) {
       case "checkout.session.completed": {
         const session = event.data.object;
 
+        // --- Program payout deposits ---
+        if (session.metadata?.kind === "program_payout") {
+          const programPayoutId = session.metadata?.program_payout_id;
+          if (!programPayoutId) break;
+
+          const payoutIntentId =
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id;
+
+          await admin
+            .from("program_payouts")
+            .update({
+              status: "escrowed",
+              stripe_payment_intent_id: payoutIntentId || null,
+              deposited_at: new Date().toISOString(),
+            })
+            .eq("id", programPayoutId);
+
+          break;
+        }
+
         // --- Brief escrow deposits (separate from gig/conversation flow) ---
         if (session.metadata?.kind === "brief") {
           const briefPaymentId = session.metadata?.brief_payment_id;
@@ -188,6 +210,18 @@ export async function POST(request) {
       case "checkout.session.expired":
       case "checkout.session.async_payment_failed": {
         const session = event.data.object;
+
+        if (session.metadata?.kind === "program_payout") {
+          const programPayoutId = session.metadata?.program_payout_id;
+          if (programPayoutId) {
+            await admin
+              .from("program_payouts")
+              .update({ status: "failed" })
+              .eq("id", programPayoutId)
+              .eq("status", "pending");
+          }
+          break;
+        }
 
         if (session.metadata?.kind === "brief") {
           const briefPaymentId = session.metadata?.brief_payment_id;

@@ -13,6 +13,7 @@ import {
   Users,
   Send,
   FileText,
+  TrendingUp,
 } from "lucide-react";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
@@ -21,6 +22,7 @@ const NAV_PRIMARY = [
   { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true, tourId: "nav-dashboard" },
   { label: "My Creators", href: "/dashboard/brand/my-creators", icon: Users, tourId: "nav-my-creators" },
   { label: "Briefs", href: "/dashboard/brand/briefs", icon: FileText, tourId: "nav-briefs" },
+  { label: "Programs", href: "/dashboard/brand/programs", icon: TrendingUp, tourId: "nav-programs" },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
   { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators" },
 ];

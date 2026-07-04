@@ -21,6 +21,7 @@ import {
   markAssignmentViewed,
   uploadAssignmentVideo,
   getAssignmentVideoUrl,
+  getExampleVideoUrl,
 } from "@/lib/dashboard/creator/assignmentsApi";
 import { briefPlatformLabel } from "@/lib/dashboard/brand/briefsApi";
 
@@ -159,6 +160,9 @@ export default function AssignmentDetailView({ recipientId }) {
         </div>
       </div>
 
+      {/* Example videos from the brand */}
+      {a.exampleVideos?.length > 0 && <ExampleVideos videos={a.exampleVideos} />}
+
       {/* Changes requested feedback */}
       {a.reviewStatus === "changes_requested" && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
@@ -197,6 +201,69 @@ function BackLink() {
       <ArrowLeft size={15} />
       Back to assignments
     </Link>
+  );
+}
+
+function ExampleVideos({ videos }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold text-brand-ink flex items-center gap-2">
+        <Video size={16} className="text-brand-skyDeep" />
+        Example Videos ({videos.length})
+      </h2>
+      <p className="text-xs text-slate-500">
+        Reference videos the brand attached. Use these to guide your submission.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {videos.map((v) => (
+          <ExampleVideoPlayer key={v.id} storagePath={v.storagePath} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ExampleVideoPlayer({ storagePath }) {
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [loadingUrl, setLoadingUrl] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingUrl(true);
+    (async () => {
+      try {
+        const url = await getExampleVideoUrl(storagePath);
+        if (!cancelled) setVideoUrl(url);
+      } catch {
+        // ignore — show fallback
+      } finally {
+        if (!cancelled) setLoadingUrl(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [storagePath]);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
+      {loadingUrl ? (
+        <div className="aspect-video flex items-center justify-center text-slate-400">
+          <Loader2 size={20} className="animate-spin" />
+        </div>
+      ) : videoUrl ? (
+        <video
+          src={videoUrl}
+          controls
+          preload="metadata"
+          className="w-full aspect-video bg-black"
+        />
+      ) : (
+        <div className="aspect-video flex items-center justify-center text-slate-400 text-sm">
+          Could not load video.
+        </div>
+      )}
+    </div>
   );
 }
 

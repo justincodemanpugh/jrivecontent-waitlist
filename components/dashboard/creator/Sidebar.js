@@ -8,11 +8,13 @@ import {
   MessageSquare,
   User,
   Settings,
+  TrendingUp,
 } from "lucide-react";
 
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
   { label: "Assignments", href: "/dashboard/creator/assignments", icon: ClipboardList },
+  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },
 ];

@@ -1,0 +1,19 @@
+"use client";
+
+import { Suspense } from "react";
+import ProgramsShell from "@/components/dashboard/brand/programs/ProgramsShell";
+import VideosView from "@/components/dashboard/brand/programs/VideosView";
+
+export default function ProgramsVideosPage() {
+  return (
+    <ProgramsShell
+      title="Programs"
+      heading="Videos"
+      subtitle="View and analyze performance metrics across your tracked videos."
+    >
+      <Suspense fallback={<div className="animate-pulse h-96 bg-slate-100 rounded-2xl" />}>
+        <VideosView />
+      </Suspense>
+    </ProgramsShell>
+  );
+}
