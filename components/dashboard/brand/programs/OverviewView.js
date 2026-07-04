@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, Eye, Heart, Film, ExternalLink, TrendingUp } from "lucide-react";
 import ProgramStatStrip from "@/components/dashboard/brand/programs/ProgramStatStrip";
+import ProgramMetricsChart from "@/components/dashboard/brand/programs/ProgramMetricsChart";
 import {
   fetchProgramStats,
   fetchProgramVideos,
   fetchProgramAccounts,
+  buildProgramMetrics,
 } from "@/lib/dashboard/brand/programsApi";
 
 function formatCompact(n) {
@@ -18,6 +20,7 @@ function formatCompact(n) {
 
 export default function OverviewView() {
   const [stats, setStats] = useState({});
+  const [series, setSeries] = useState([]);
   const [topVideos, setTopVideos] = useState([]);
   const [topAccounts, setTopAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +36,9 @@ export default function OverviewView() {
           fetchProgramAccounts().catch(() => []),
         ]);
         if (cancelled) return;
-        setStats(statsRes);
+        const { series: metricSeries, deltas } = buildProgramMetrics(videos, { days: 30 });
+        setStats({ ...statsRes, deltas });
+        setSeries(metricSeries);
         setTopVideos(
           [...videos].sort((a, b) => b.views - a.views).slice(0, 5),
         );
@@ -66,6 +71,8 @@ export default function OverviewView() {
   return (
     <div className="space-y-6">
       <ProgramStatStrip stats={stats} />
+
+      <ProgramMetricsChart series={series} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Videos */}
