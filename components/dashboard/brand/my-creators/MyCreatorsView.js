@@ -6,7 +6,6 @@ import {
   Loader2,
   Search,
   Users,
-  Send,
   MoreHorizontal,
   Trash2,
   StickyNote,
@@ -25,7 +24,6 @@ export default function MyCreatorsView() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all"); // all | active | pending
   const [notesCreator, setNotesCreator] = useState(null);
-  const [selectedIds, setSelectedIds] = useState(new Set());
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -85,27 +83,6 @@ export default function MyCreatorsView() {
     }
   };
 
-  const toggleSelect = (id) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const selectAll = () => {
-    const activeIds = filtered
-      .filter((c) => c.connectionStatus === "active")
-      .map((c) => c.id);
-    setSelectedIds(new Set(activeIds));
-  };
-
-  const clearSelection = () => setSelectedIds(new Set());
-
   return (
     <>
       {/* Stats bar */}
@@ -159,44 +136,13 @@ export default function MyCreatorsView() {
         </div>
 
         <div className="flex items-center gap-2">
-          {selectedIds.size > 0 ? (
-            <>
-              <span className="text-sm text-slate-600">
-                {selectedIds.size} selected
-              </span>
-              <Link
-                href={`/dashboard/brand/briefs/new?creators=${Array.from(selectedIds).join(",")}`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition"
-              >
-                <Send size={14} />
-                Send Brief
-              </Link>
-              <button
-                onClick={clearSelection}
-                className="text-sm text-slate-500 hover:text-slate-700"
-              >
-                Clear
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/dashboard/brand/creators"
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand-ink hover:bg-slate-50 transition"
-              >
-                <UserPlus size={14} />
-                Add Creators
-              </Link>
-              {activeCount > 0 && (
-                <button
-                  onClick={selectAll}
-                  className="text-sm text-brand-skyDeep hover:underline"
-                >
-                  Select all
-                </button>
-              )}
-            </>
-          )}
+          <Link
+            href="/dashboard/brand/creators"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand-ink hover:bg-slate-50 transition"
+          >
+            <UserPlus size={14} />
+            Add Creators
+          </Link>
         </div>
       </div>
 
@@ -240,8 +186,6 @@ export default function MyCreatorsView() {
             <MyCreatorCard
               key={c.id}
               creator={c}
-              selected={selectedIds.has(c.id)}
-              onToggleSelect={() => toggleSelect(c.id)}
               onEditNotes={() => setNotesCreator(c)}
               onRemove={() => handleRemove(c)}
             />

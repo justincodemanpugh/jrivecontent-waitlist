@@ -4,25 +4,20 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  LayoutDashboard,
   MessageSquare,
   Search,
   Sparkles,
   Settings,
   Lock,
   Users,
-  Send,
-  FileText,
   TrendingUp,
 } from "lucide-react";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
 
-// Primary nav - new briefs-first model
+// Primary nav - Programs is home
 const NAV_PRIMARY = [
-  { label: "Dashboard", href: "/dashboard/brand", icon: LayoutDashboard, exact: true, tourId: "nav-dashboard" },
-  { label: "My Creators", href: "/dashboard/brand/my-creators", icon: Users, tourId: "nav-my-creators" },
-  { label: "Briefs", href: "/dashboard/brand/briefs", icon: FileText, tourId: "nav-briefs" },
   { label: "Programs", href: "/dashboard/brand/programs", icon: TrendingUp, tourId: "nav-programs" },
+  { label: "My Creators", href: "/dashboard/brand/my-creators", icon: Users, tourId: "nav-my-creators" },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
   { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators" },
 ];
@@ -82,16 +77,6 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-        {/* Send Brief CTA */}
-        <Link
-          href="/dashboard/brand/briefs/new"
-          data-tour="send-brief-cta"
-          className="flex items-center justify-center gap-2 px-3 py-2.5 mb-3 rounded-xl text-sm font-semibold bg-brand-skyDeep text-white hover:bg-brand-sky hover:text-brand-ink transition shadow-sm"
-        >
-          <Send size={16} />
-          Send New Brief
-        </Link>
-
         {/* Primary nav */}
         {NAV_PRIMARY.map((item) => {
           const Icon = item.icon;

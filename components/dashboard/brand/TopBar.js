@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Send, ChevronDown, ListChecks } from "lucide-react";
+import { ChevronDown, ListChecks } from "lucide-react";
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
 
-export default function TopBar({ title = "Dashboard", checklistHidden, checklistProgress, onShowChecklist }) {
+export default function TopBar({ title = "Programs", checklistHidden, checklistProgress, onShowChecklist }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const brand = useBrand();
 
@@ -16,16 +15,6 @@ export default function TopBar({ title = "Dashboard", checklistHidden, checklist
         <h1 className="text-lg font-semibold text-brand-ink">{title}</h1>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard/brand/briefs/new"
-            data-tour="send-new-brief"
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition shadow-sm"
-          >
-            <Send size={16} />
-            <span className="hidden sm:inline">Send New Brief</span>
-            <span className="sm:hidden">Brief</span>
-          </Link>
-
           {checklistHidden && onShowChecklist && (
             <button
               onClick={onShowChecklist}

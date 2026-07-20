@@ -3,17 +3,15 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  LayoutDashboard,
+  TrendingUp,
   Users,
-  Send,
   MessageSquare,
   Search,
 } from "lucide-react";
 
 const TABS = [
-  { label: "Home", href: "/dashboard/brand", icon: LayoutDashboard, exact: true },
+  { label: "Programs", href: "/dashboard/brand/programs", icon: TrendingUp },
   { label: "Creators", href: "/dashboard/brand/my-creators", icon: Users },
-  { label: "Brief", href: "/dashboard/brand/briefs/new", icon: Send, primary: true },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
   { label: "Browse", href: "/dashboard/brand/creators", icon: Search },
 ];
@@ -24,23 +22,10 @@ export default function MobileTabBar() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-slate-200">
-      <ul className="grid grid-cols-5 h-full">
+      <ul className="grid grid-cols-4 h-full">
         {TABS.map((t) => {
           const Icon = t.icon;
           const active = isActive(t);
-          if (t.primary) {
-            return (
-              <li key={t.href} className="flex items-center justify-center">
-                <Link
-                  href={t.href}
-                  className="h-12 w-12 rounded-full bg-brand-ink text-white flex items-center justify-center shadow-lg shadow-brand-sky/30 -mt-4"
-                  aria-label={t.label}
-                >
-                  <Icon size={20} />
-                </Link>
-              </li>
-            );
-          }
           return (
             <li key={t.href}>
               <Link

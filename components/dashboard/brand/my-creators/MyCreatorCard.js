@@ -1,56 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   Instagram,
   Music2,
   Youtube,
   MapPin,
   MoreHorizontal,
-  Send,
   StickyNote,
   Trash2,
   Clock,
   CheckCircle2,
-  Check,
 } from "lucide-react";
 
 export default function MyCreatorCard({
   creator,
-  selected,
-  onToggleSelect,
   onEditNotes,
   onRemove,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const initials = deriveInitials(creator.name);
   const isPending = creator.connectionStatus === "pending";
-  const isActive = creator.connectionStatus === "active";
 
   return (
-    <div
-      className={`group relative rounded-2xl overflow-hidden border bg-white transition flex flex-col ${
-        selected
-          ? "border-brand-skyDeep ring-2 ring-brand-skyDeep/20"
-          : "border-slate-200 hover:border-brand-sky/60 hover:shadow-md"
-      }`}
-    >
-      {/* Selection checkbox */}
-      {isActive && (
-        <button
-          type="button"
-          onClick={onToggleSelect}
-          className={`absolute top-2 right-2 z-10 h-6 w-6 rounded-full flex items-center justify-center transition ${
-            selected
-              ? "bg-brand-skyDeep text-white"
-              : "bg-white/90 text-slate-400 opacity-0 group-hover:opacity-100"
-          }`}
-        >
-          {selected && <Check size={14} />}
-        </button>
-      )}
-
+    <div className="group relative rounded-2xl overflow-hidden border border-slate-200 bg-white transition flex flex-col hover:border-brand-sky/60 hover:shadow-md">
       {/* Status badge */}
       <div className="absolute top-2 left-2 z-10">
         {isPending ? (
@@ -149,15 +122,7 @@ export default function MyCreatorCard({
 
         {/* Actions */}
         <div className="mt-auto flex items-center gap-2">
-          {isActive ? (
-            <Link
-              href={`/dashboard/brand/briefs/new?creators=${creator.id}`}
-              className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-brand-ink text-white px-3 py-2 text-xs font-semibold hover:bg-slate-800 transition"
-            >
-              <Send size={12} />
-              Send Brief
-            </Link>
-          ) : (
+          {isPending && (
             <span className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-slate-100 text-slate-500 px-3 py-2 text-xs font-semibold">
               <Clock size={12} />
               Awaiting Response
@@ -165,7 +130,7 @@ export default function MyCreatorCard({
           )}
 
           {/* More menu */}
-          <div className="relative">
+          <div className="relative ml-auto">
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
