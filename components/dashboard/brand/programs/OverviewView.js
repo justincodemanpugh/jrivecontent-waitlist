@@ -36,7 +36,7 @@ export default function OverviewView() {
           fetchProgramAccounts().catch(() => []),
         ]);
         if (cancelled) return;
-        const { series: metricSeries, deltas } = buildProgramMetrics(videos, { days: 30 });
+        const { series: metricSeries, deltas } = buildProgramMetrics(videos);
         setStats({ ...statsRes, deltas });
         setSeries(metricSeries);
         setTopVideos(
