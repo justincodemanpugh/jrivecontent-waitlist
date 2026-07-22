@@ -8,6 +8,7 @@ import { fetchMyCreators } from "@/lib/dashboard/brand/creatorsApi";
 const STEPS = ["Basics", "Schedule", "Base", "Creators", "Review"];
 
 export default function CreateProgramModal({ onClose }) {
+  const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -29,6 +30,18 @@ export default function CreateProgramModal({ onClose }) {
       .catch(() => setRoster([]))
       .finally(() => setRosterLoading(false));
   }, []);
+
+  // Trigger the slide-in transition on mount.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOpen(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Play the slide-out transition before actually closing.
+  const handleClose = () => {
+    setOpen(false);
+    setTimeout(onClose, 200);
+  };
 
   const hasValidBase = Number(videosPerPeriod) > 0 && Number(payPerVideo) > 0;
 
@@ -57,7 +70,7 @@ export default function CreateProgramModal({ onClose }) {
         payoutSchedule,
         memberCreatorIds: selectedCreatorIds,
       });
-      onClose();
+      handleClose();
     } catch (e) {
       setErr(e.message || "Failed to create program.");
     } finally {
@@ -66,12 +79,21 @@ export default function CreateProgramModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50">
+      <div
+        className={`absolute inset-0 bg-black/40 transition-opacity duration-200 ${
+          open ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={handleClose}
+      />
 
-      <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[90vh]">
+      <div
+        className={`fixed inset-y-0 right-0 h-full w-full max-w-2xl bg-white shadow-xl border-l border-slate-200 flex flex-col transition-transform duration-200 ease-out ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100">
+        <div className="px-6 py-5 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep">
@@ -85,7 +107,7 @@ export default function CreateProgramModal({ onClose }) {
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition flex-shrink-0"
             >
               <X size={18} />
@@ -128,7 +150,7 @@ export default function CreateProgramModal({ onClose }) {
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-4 overflow-y-auto">
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {step === 0 && (
             <>
               <Field label="Program name">
@@ -352,9 +374,9 @@ export default function CreateProgramModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100">
+        <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 flex-shrink-0">
           <button
-            onClick={() => (step === 0 ? onClose() : setStep(step - 1))}
+            onClick={() => (step === 0 ? handleClose() : setStep(step - 1))}
             className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition"
           >
             {step === 0 ? "Cancel" : "Back"}
