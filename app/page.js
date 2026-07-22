@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import PlatformStrip from "@/components/PlatformStrip";
 import VideoCarousel from "@/components/VideoCarousel";
 import TikTokRedistributionFlow from "@/components/TikTokRedistributionFlow";
 import StatsBar from "@/components/StatsBar";
@@ -16,6 +17,7 @@ export default function Home() {
     <main className="min-h-screen">
       <Navbar />
       <Hero />
+      <PlatformStrip />
       <VideoCarousel />
       <TikTokRedistributionFlow />
       <CreatorShowcase />
