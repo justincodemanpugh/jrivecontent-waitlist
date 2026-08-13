@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Check } from "lucide-react";
 import { FadeIn } from "@/hooks/useFadeIn";
+import { useBrandCheckout } from "@/hooks/useBrandCheckout";
 
 export default function PricingCard({
   variant = "pro", // "free" | "pro"
@@ -26,8 +26,7 @@ export default function PricingCard({
   ctaHref = null,
   footerNote = "Secure payment via Stripe · Cancel anytime",
 }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { loading, error, startCheckout } = useBrandCheckout();
 
   const isFree = variant === "free";
 
@@ -36,24 +35,7 @@ export default function PricingCard({
       window.location.href = ctaHref;
       return;
     }
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/stripe/brand-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || "Could not start checkout.");
-        setLoading(false);
-      }
-    } catch (e) {
-      setError(e.message || "Could not start checkout.");
-      setLoading(false);
-    }
+    await startCheckout();
   }
 
   const cardBorder = isFree

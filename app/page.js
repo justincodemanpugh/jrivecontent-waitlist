@@ -1,33 +1,38 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import PlatformStrip from "@/components/PlatformStrip";
-import VideoCarousel from "@/components/VideoCarousel";
-import TikTokRedistributionFlow from "@/components/TikTokRedistributionFlow";
+import ViralFonts from "@/components/viral/ViralFonts";
+import ViralNavbar from "@/components/viral/ViralNavbar";
+import ViralHero from "@/components/viral/ViralHero";
 import StatsBar from "@/components/StatsBar";
-import CreatorShowcase from "@/components/CreatorShowcase";
-import HowItWorks from "@/components/HowItWorks";
-import BudgetCalculator from "@/components/BudgetCalculator";
-import PricingComparison from "@/components/PricingComparison";
+import VideoCarousel from "@/components/VideoCarousel";
+import HowItWorks from "@/components/viral/HowItWorks";
+import OperatingSystem from "@/components/viral/OperatingSystem";
+import CreatorManagement from "@/components/viral/CreatorManagement";
+import ViralPricing from "@/components/viral/ViralPricing";
 import FounderNote from "@/components/FounderNote";
-import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
+import ViralFAQ from "@/components/viral/ViralFAQ";
+import ViralFooter from "@/components/viral/ViralFooter";
+
+export const metadata = {
+  title: "JriveContent — Track every video. Pay for real results.",
+  description:
+    "Track, manage, and pay UGC creators on TikTok. See every video, pay for what performs, and scale your creator program. Pay $0 today.",
+};
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <Navbar />
-      <Hero />
-      <PlatformStrip />
-      <VideoCarousel />
-      <TikTokRedistributionFlow />
-      <CreatorShowcase />
-      <StatsBar />
-      <HowItWorks />
-      <BudgetCalculator />
-      <PricingComparison />
-      <FounderNote />
-      <FAQ />
-      <Footer />
-    </main>
+    <ViralFonts>
+      <main className="min-h-screen bg-white text-brand-ink">
+        <ViralNavbar />
+        <ViralHero />
+        <StatsBar />
+        <VideoCarousel />
+        <HowItWorks />
+        <OperatingSystem />
+        <CreatorManagement />
+        <ViralPricing />
+        <FounderNote />
+        <ViralFAQ />
+        <ViralFooter />
+      </main>
+    </ViralFonts>
   );
 }

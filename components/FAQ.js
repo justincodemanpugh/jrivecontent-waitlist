@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { FadeIn } from "@/hooks/useFadeIn";
 
-const FAQS = [
+export const FAQS = [
   {
     q: "I've tried other tools, why is this different?",
-    a: "We don't charge $500/month like other platforms. We're built specifically for small startups and sam creators with simple, affordable pricing.",
+    a: "We don't charge $500/month like other platforms. We're built specifically for small startups and small creators with simple, affordable pricing.",
   },
   {
     q: "How much is the average video?",

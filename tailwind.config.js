@@ -16,6 +16,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-viral-display)", "var(--font-inter)", "system-ui", "sans-serif"],
+        viral: ["var(--font-viral-body)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
     },
   },
