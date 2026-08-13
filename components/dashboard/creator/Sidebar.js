@@ -10,6 +10,7 @@ import {
   Settings,
   TrendingUp,
 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
@@ -27,14 +28,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white z-40">
       <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sky">
-          <img
-            src="/images/jrive-logo.png"
-            alt="Jrive"
-            className="h-4 w-4"
-            style={{ filter: "brightness(0) invert(1)" }}
-          />
-        </span>
+        <Logo size={32} />
         <span className="font-semibold tracking-tight">
           Jrive<span className="text-brand-skyDeep">Content</span>
         </span>

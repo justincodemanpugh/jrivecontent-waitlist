@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import ComingSoonModal from "./ComingSoonModal";
+import Logo from "@/components/Logo";
 
 // Single grouped nav — Analytics (Programs performance) + Creator Hub
 // (everything creator/program management related).
@@ -82,14 +83,7 @@ export default function Sidebar() {
     <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white z-40">
       {/* Logo */}
       <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sky">
-          <img
-            src="/images/jrive-logo.png"
-            alt="Jrive"
-            className="h-4 w-4"
-            style={{ filter: "brightness(0) invert(1)" }}
-          />
-        </span>
+        <Logo size={32} />
         <span className="font-semibold tracking-tight">
           Jrive<span className="text-brand-skyDeep">Content</span>
         </span>

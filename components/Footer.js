@@ -1,13 +1,12 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-100 bg-white">
       <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-brand-sky">
-            <img src="/logo.svg" alt="" className="h-4 w-4" style={{ filter: "brightness(0) invert(1)" }} />
-          </span>
+          <Logo size={28} />
           <span className="font-semibold text-sm">
             Jrive<span className="text-brand-skyDeep">Content</span>
           </span>
