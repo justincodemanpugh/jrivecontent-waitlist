@@ -16,6 +16,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { startBrandSubscription, fetchBilling } from "@/lib/dashboard/brand/billingApi";
+import ComingSoonModal from "./ComingSoonModal";
 
 // Single grouped nav — Analytics (Programs performance) + Creator Hub
 // (everything creator/program management related).
@@ -32,7 +33,7 @@ const NAV_GROUPS = [
     label: "Creator Hub",
     items: [
       { label: "My Creators", href: "/dashboard/brand/my-creators", icon: Users, tourId: "nav-my-creators" },
-      { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators" },
+      { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators", comingSoon: true },
       { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
       { label: "Programs", href: "/dashboard/brand/programs/manage", icon: TrendingUp },
       { label: "Payouts", href: "/dashboard/brand/programs/payouts", icon: Wallet },
@@ -43,6 +44,7 @@ const NAV_GROUPS = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [isPro, setIsPro] = useState(null);
+  const [comingSoon, setComingSoon] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,7 +84,7 @@ export default function Sidebar() {
       <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sky">
           <img
-            src="/logo.svg"
+            src="/images/jrive-logo.png"
             alt="Jrive"
             className="h-4 w-4"
             style={{ filter: "brightness(0) invert(1)" }}
@@ -106,16 +108,34 @@ export default function Sidebar() {
                 const active = isActive(item);
                 const locked = item.proOnly && isPro === false;
                 const href = locked ? "/dashboard/brand/pricing" : item.href;
+                const className = `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+                  active && !item.comingSoon
+                    ? "bg-brand-mist text-brand-ink"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+                }`;
+
+                if (item.comingSoon) {
+                  return (
+                    <button
+                      key={item.href}
+                      type="button"
+                      data-tour={item.tourId}
+                      onClick={() => setComingSoon(item.label)}
+                      className={className}
+                    >
+                      <Icon size={18} className="text-slate-400" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <Lock size={14} className="text-slate-400" />
+                    </button>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}
                     href={href}
                     data-tour={item.tourId}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                      active
-                        ? "bg-brand-mist text-brand-ink"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
-                    }`}
+                    className={className}
                   >
                     <Icon
                       size={18}
@@ -162,6 +182,11 @@ export default function Sidebar() {
         </Link>
       </div>
 
+      <ComingSoonModal
+        open={comingSoon !== null}
+        title={comingSoon || ""}
+        onClose={() => setComingSoon(null)}
+      />
     </aside>
   );
 }

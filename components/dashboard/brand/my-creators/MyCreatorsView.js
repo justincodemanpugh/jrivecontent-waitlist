@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   Loader2,
   Search,
@@ -16,6 +15,7 @@ import {
 import { fetchMyCreators, removeCreatorFromRoster } from "@/lib/dashboard/brand/creatorsApi";
 import MyCreatorCard from "./MyCreatorCard";
 import NotesDialog from "./NotesDialog";
+import ComingSoonModal from "../ComingSoonModal";
 
 export default function MyCreatorsView() {
   const [creators, setCreators] = useState([]);
@@ -24,6 +24,7 @@ export default function MyCreatorsView() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all"); // all | active | pending
   const [notesCreator, setNotesCreator] = useState(null);
+  const [comingSoon, setComingSoon] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -136,13 +137,14 @@ export default function MyCreatorsView() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard/brand/creators"
+          <button
+            type="button"
+            onClick={() => setComingSoon(true)}
             className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand-ink hover:bg-slate-50 transition"
           >
             <UserPlus size={14} />
             Add Creators
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -171,13 +173,14 @@ export default function MyCreatorsView() {
               : "Try a different keyword or clear filters."}
           </p>
           {creators.length === 0 && (
-            <Link
-              href="/dashboard/brand/creators"
+            <button
+              type="button"
+              onClick={() => setComingSoon(true)}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-5 py-2.5 text-sm font-medium hover:bg-slate-800 transition"
             >
               <UserPlus size={16} />
               Browse Creators
-            </Link>
+            </button>
           )}
         </div>
       ) : (
@@ -200,6 +203,12 @@ export default function MyCreatorsView() {
           onClose={() => setNotesCreator(null)}
         />
       )}
+
+      <ComingSoonModal
+        open={comingSoon}
+        title="Browse Creators"
+        onClose={() => setComingSoon(false)}
+      />
     </>
   );
 }

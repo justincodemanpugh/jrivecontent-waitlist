@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -7,17 +8,20 @@ import {
   Users,
   MessageSquare,
   Search,
+  Lock,
 } from "lucide-react";
+import ComingSoonModal from "./ComingSoonModal";
 
 const TABS = [
   { label: "Programs", href: "/dashboard/brand/programs", icon: TrendingUp },
   { label: "Creators", href: "/dashboard/brand/my-creators", icon: Users },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
-  { label: "Browse", href: "/dashboard/brand/creators", icon: Search },
+  { label: "Browse", href: "/dashboard/brand/creators", icon: Search, comingSoon: true },
 ];
 
 export default function MobileTabBar() {
   const pathname = usePathname();
+  const [comingSoon, setComingSoon] = useState(false);
   const isActive = (t) => (t.exact ? pathname === t.href : pathname.startsWith(t.href));
 
   return (
@@ -25,22 +29,43 @@ export default function MobileTabBar() {
       <ul className="grid grid-cols-4 h-full">
         {TABS.map((t) => {
           const Icon = t.icon;
-          const active = isActive(t);
+          const active = isActive(t) && !t.comingSoon;
+          const className = `w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] ${
+            active ? "text-brand-skyDeep" : "text-slate-500"
+          }`;
           return (
             <li key={t.href}>
-              <Link
-                href={t.href}
-                className={`h-full flex flex-col items-center justify-center gap-1 text-[11px] ${
-                  active ? "text-brand-skyDeep" : "text-slate-500"
-                }`}
-              >
-                <Icon size={18} />
-                {t.label}
-              </Link>
+              {t.comingSoon ? (
+                <button
+                  type="button"
+                  onClick={() => setComingSoon(true)}
+                  className={className}
+                >
+                  <span className="relative">
+                    <Icon size={18} />
+                    <Lock
+                      size={10}
+                      className="absolute -right-1.5 -top-1 text-slate-400"
+                    />
+                  </span>
+                  {t.label}
+                </button>
+              ) : (
+                <Link href={t.href} className={className}>
+                  <Icon size={18} />
+                  {t.label}
+                </Link>
+              )}
             </li>
           );
         })}
       </ul>
+
+      <ComingSoonModal
+        open={comingSoon}
+        title="Browse Creators"
+        onClose={() => setComingSoon(false)}
+      />
     </nav>
   );
 }

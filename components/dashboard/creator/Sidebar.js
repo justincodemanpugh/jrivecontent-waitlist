@@ -29,7 +29,7 @@ export default function Sidebar() {
       <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sky">
           <img
-            src="/logo.svg"
+            src="/images/jrive-logo.png"
             alt="Jrive"
             className="h-4 w-4"
             style={{ filter: "brightness(0) invert(1)" }}
