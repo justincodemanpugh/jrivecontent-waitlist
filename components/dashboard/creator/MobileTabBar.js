@@ -42,16 +42,16 @@ export default function MobileTabBar() {
       {moreOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-slate-900/40"
+            className="absolute inset-0 bg-scrim/40"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="absolute bottom-0 inset-x-0 rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] shadow-xl">
+          <div className="absolute bottom-0 inset-x-0 rounded-t-2xl bg-surface pb-[env(safe-area-inset-bottom)] shadow-xl">
             <div className="flex items-center justify-between px-5 pt-4 pb-2">
-              <h2 className="text-base font-semibold text-brand-ink">More</h2>
+              <h2 className="text-base font-semibold text-ink">More</h2>
               <button
                 type="button"
                 onClick={() => setMoreOpen(false)}
-                className="h-8 w-8 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-muted hover:bg-surface-hover"
               >
                 <X size={18} />
               </button>
@@ -67,13 +67,13 @@ export default function MobileTabBar() {
                       onClick={() => setMoreOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                         active
-                          ? "bg-brand-mist text-brand-ink"
-                          : "text-slate-600 hover:bg-slate-50"
+                          ? "bg-accent-tint text-ink"
+                          : "text-muted hover:bg-surface-sunken"
                       }`}
                     >
                       <Icon
                         size={20}
-                        className={active ? "text-brand-skyDeep" : "text-slate-400"}
+                        className={active ? "text-accent" : "text-faint"}
                       />
                       {item.label}
                     </Link>
@@ -85,7 +85,7 @@ export default function MobileTabBar() {
         </div>
       )}
 
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-slate-200">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-surface border-t border-line">
         <ul className="grid grid-cols-4 h-full">
           {TABS.map((t) => {
             const Icon = t.icon;
@@ -95,7 +95,7 @@ export default function MobileTabBar() {
                 <Link
                   href={t.href}
                   className={`h-full flex flex-col items-center justify-center gap-1 text-[11px] ${
-                    active ? "text-brand-skyDeep" : "text-slate-500"
+                    active ? "text-accent" : "text-muted"
                   }`}
                 >
                   <Icon size={18} />
@@ -109,7 +109,7 @@ export default function MobileTabBar() {
               type="button"
               onClick={() => setMoreOpen(true)}
               className={`w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] ${
-                moreActive || moreOpen ? "text-brand-skyDeep" : "text-slate-500"
+                moreActive || moreOpen ? "text-accent" : "text-muted"
               }`}
             >
               <Menu size={18} />

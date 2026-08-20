@@ -37,11 +37,11 @@ export default function ConversationListItem({ conversation, basePath, active })
       className={[
         "flex items-center gap-3 px-3 py-3 rounded-xl border transition",
         active
-          ? "bg-brand-mist border-brand-sky"
-          : "bg-white border-slate-200 hover:border-brand-sky",
+          ? "bg-accent-tint border-accent-soft"
+          : "bg-surface border-line hover:border-accent-soft",
       ].join(" ")}
     >
-      <span className="h-10 w-10 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
+      <span className="h-10 w-10 rounded-full bg-accent-soft text-on-accent text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
         {conversation.counterpart.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -55,12 +55,12 @@ export default function ConversationListItem({ conversation, basePath, active })
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-semibold text-brand-ink truncate">
+          <p className="font-semibold text-ink truncate">
             {conversation.counterpart.name}
           </p>
-          <span className="text-[11px] text-slate-400 shrink-0">{time}</span>
+          <span className="text-[11px] text-faint shrink-0">{time}</span>
         </div>
-        <p className="text-xs text-slate-500 truncate">
+        <p className="text-xs text-muted truncate">
           {conversation.gigTitle}
         </p>
       </div>

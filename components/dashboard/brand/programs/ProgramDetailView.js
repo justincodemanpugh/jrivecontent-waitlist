@@ -78,7 +78,7 @@ export default function ProgramDetailView({ programId }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -88,7 +88,7 @@ export default function ProgramDetailView({ programId }) {
     return (
       <div className="space-y-4">
         <BackLink />
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{err}</p>
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{err}</p>
       </div>
     );
   }
@@ -103,27 +103,27 @@ export default function ProgramDetailView({ programId }) {
       <BackLink />
 
       {/* Header */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <div className="rounded-2xl border border-line bg-surface p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-brand-ink">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">
               {program.title}
             </h1>
-            <p className="mt-2 text-sm text-slate-600 whitespace-pre-wrap">
+            <p className="mt-2 text-sm text-muted whitespace-pre-wrap">
               {program.description || "No description."}
             </p>
           </div>
           <button
             onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition flex-shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition flex-shrink-0"
           >
             <Plus size={14} />
             Add Creator
           </button>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
-          <span className="flex items-center gap-1.5 font-medium text-emerald-600">
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted">
+          <span className="flex items-center gap-1.5 font-medium text-success">
             <DollarSign size={15} />
             {formatMoney(program.payPerVideoCents)} per video
           </span>
@@ -137,11 +137,11 @@ export default function ProgramDetailView({ programId }) {
 
       {/* Creators */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-brand-ink">
+        <h2 className="text-sm font-semibold text-ink">
           Creators ({activeMembers.length})
         </h2>
         {activeMembers.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">
             No creators yet. Add one to start tracking their TikTok performance.
           </div>
         ) : (
@@ -174,7 +174,7 @@ function BackLink() {
   return (
     <Link
       href="/dashboard/brand/programs/manage"
-      className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-ink transition"
+      className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink transition"
     >
       <ArrowLeft size={15} />
       Back to programs
@@ -184,9 +184,9 @@ function BackLink() {
 
 function MemberStatusBadge({ status }) {
   const map = {
-    active: { cls: "bg-emerald-50 text-emerald-700", label: "Active" },
-    invited: { cls: "bg-amber-50 text-amber-700", label: "Invited" },
-    paused: { cls: "bg-slate-100 text-slate-500", label: "Paused" },
+    active: { cls: "bg-success-soft text-success", label: "Active" },
+    invited: { cls: "bg-warn-soft text-warn", label: "Invited" },
+    paused: { cls: "bg-surface-hover text-muted", label: "Paused" },
   };
   const cfg = map[status] || map.invited;
   return (
@@ -254,13 +254,13 @@ function MemberCard({ member, program, period, onChanged }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="rounded-2xl border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar member={member} />
           <div className="min-w-0">
-            <p className="text-sm font-medium text-brand-ink truncate">{member.name}</p>
-            <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+            <p className="text-sm font-medium text-ink truncate">{member.name}</p>
+            <p className="text-xs text-muted truncate flex items-center gap-1">
               <Link2 size={11} />
               {member.tiktokHandle ? `@${member.tiktokHandle}` : "TikTok not connected"}
             </p>
@@ -270,7 +270,7 @@ function MemberCard({ member, program, period, onChanged }) {
           <MemberStatusBadge status={member.status} />
           <button
             onClick={handleRemove}
-            className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-rose-500 transition"
+            className="h-8 w-8 rounded-full flex items-center justify-center text-faint hover:bg-surface-hover hover:text-danger transition"
             title="Remove from program"
           >
             <UserX size={15} />
@@ -288,19 +288,19 @@ function MemberCard({ member, program, period, onChanged }) {
 
       {/* Payout for current period */}
       {member.status === "active" && (
-        <div className="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4 flex items-center justify-between gap-3 flex-wrap">
+        <div className="mt-4 rounded-xl bg-surface-sunken border border-line p-4 flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted">
               This period: {billableCount} video{billableCount !== 1 ? "s" : ""} ·{" "}
-              <span className="font-medium text-brand-ink">{formatMoney(owedCents)}</span> owed
+              <span className="font-medium text-ink">{formatMoney(owedCents)}</span> owed
             </p>
-            {error && <p className="text-xs text-rose-600 mt-1">{error}</p>}
+            {error && <p className="text-xs text-danger mt-1">{error}</p>}
           </div>
           {!currentPayout && owedCents > 0 && (
             <button
               onClick={handleFund}
               disabled={funding}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition disabled:opacity-60"
             >
               {funding && <Loader2 size={14} className="animate-spin" />}
               Fund payout
@@ -310,14 +310,14 @@ function MemberCard({ member, program, period, onChanged }) {
             <button
               onClick={handleRelease}
               disabled={funding}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700 transition disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-success-solid text-white px-4 py-2 text-sm font-medium hover:bg-success-solid/90 transition disabled:opacity-60"
             >
               {funding ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
               Release to creator
             </button>
           )}
           {(currentPayout?.status === "released" || currentPayout?.status === "released_pending") && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
               <CheckCircle2 size={14} />
               Paid
             </span>
@@ -331,11 +331,11 @@ function MemberCard({ member, program, period, onChanged }) {
 function Metric({ icon: Icon, label, value }) {
   return (
     <div>
-      <div className="flex items-center justify-center gap-1 text-slate-400 mb-1">
+      <div className="flex items-center justify-center gap-1 text-faint mb-1">
         <Icon size={13} />
       </div>
-      <p className="text-sm font-semibold text-brand-ink tabular-nums">{value}</p>
-      <p className="text-[11px] text-slate-500">{label}</p>
+      <p className="text-sm font-semibold text-ink tabular-nums">{value}</p>
+      <p className="text-[11px] text-muted">{label}</p>
     </div>
   );
 }
@@ -352,7 +352,7 @@ function Avatar({ member }) {
     );
   }
   return (
-    <span className="h-10 w-10 rounded-full bg-brand-mist text-brand-skyDeep flex items-center justify-center text-sm font-semibold flex-shrink-0">
+    <span className="h-10 w-10 rounded-full bg-accent-tint text-accent flex items-center justify-center text-sm font-semibold flex-shrink-0">
       {member.name?.slice(0, 2).toUpperCase() || "?"}
     </span>
   );
@@ -390,33 +390,33 @@ function AddCreatorModal({ programId, existingCreatorIds, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <p className="font-semibold text-brand-ink">Add creator to program</p>
+      <div className="absolute inset-0 bg-scrim/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md rounded-2xl bg-surface shadow-xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+          <p className="font-semibold text-ink">Add creator to program</p>
           <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+            className="h-8 w-8 rounded-full flex items-center justify-center text-faint hover:bg-surface-hover hover:text-muted transition"
           >
             ×
           </button>
         </div>
         <div className="p-5 max-h-80 overflow-y-auto space-y-1.5">
           {loading ? (
-            <div className="py-8 flex justify-center text-slate-400">
+            <div className="py-8 flex justify-center text-faint">
               <Loader2 size={18} className="animate-spin" />
             </div>
           ) : roster.length === 0 ? (
-            <p className="text-sm text-slate-500 py-4 text-center">
+            <p className="text-sm text-muted py-4 text-center">
               No more creators available to add from your roster.
             </p>
           ) : (
             roster.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center gap-3 px-3 py-2 rounded-xl border border-slate-200"
+                className="flex items-center gap-3 px-3 py-2 rounded-xl border border-line"
               >
-                <span className="h-8 w-8 rounded-full bg-brand-mist text-brand-skyDeep flex items-center justify-center text-xs font-semibold overflow-hidden flex-shrink-0">
+                <span className="h-8 w-8 rounded-full bg-accent-tint text-accent flex items-center justify-center text-xs font-semibold overflow-hidden flex-shrink-0">
                   {c.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={c.avatarUrl} alt={c.name} className="h-full w-full object-cover" />
@@ -424,13 +424,13 @@ function AddCreatorModal({ programId, existingCreatorIds, onClose }) {
                     c.name?.slice(0, 2).toUpperCase()
                   )}
                 </span>
-                <span className="flex-1 min-w-0 text-sm font-medium text-brand-ink truncate">
+                <span className="flex-1 min-w-0 text-sm font-medium text-ink truncate">
                   {c.name}
                 </span>
                 <button
                   onClick={() => handleAdd(c.id)}
                   disabled={adding === c.id}
-                  className="text-xs font-medium text-brand-skyDeep hover:underline disabled:opacity-60"
+                  className="text-xs font-medium text-accent hover:underline disabled:opacity-60"
                 >
                   {adding === c.id ? "Adding…" : "Add"}
                 </button>

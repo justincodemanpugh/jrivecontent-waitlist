@@ -73,7 +73,7 @@ export default function AvatarUploader({ userId, initialUrl, initials }) {
   return (
     <div className="flex items-center gap-4">
       <div className="relative">
-        <div className="h-20 w-20 rounded-full overflow-hidden bg-brand-sky text-white text-2xl font-semibold flex items-center justify-center ring-2 ring-white shadow-sm">
+        <div className="h-20 w-20 rounded-full overflow-hidden bg-accent-soft text-on-accent text-2xl font-semibold flex items-center justify-center ring-2 ring-surface shadow-sm">
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -90,7 +90,7 @@ export default function AvatarUploader({ userId, initialUrl, initials }) {
           onClick={() => inputRef.current?.click()}
           disabled={busy}
           aria-label="Change photo"
-          className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-white border border-slate-200 shadow flex items-center justify-center text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-surface border border-line shadow flex items-center justify-center text-ink-soft hover:bg-surface-sunken disabled:opacity-50"
         >
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Pencil size={14} />}
         </button>
@@ -104,8 +104,8 @@ export default function AvatarUploader({ userId, initialUrl, initials }) {
       </div>
 
       <div className="flex flex-col gap-1 min-w-0">
-        <p className="text-sm font-medium text-brand-ink">Profile photo</p>
-        <p className="text-xs text-slate-500">
+        <p className="text-sm font-medium text-ink">Profile photo</p>
+        <p className="text-xs text-muted">
           PNG, JPG, GIF, or WebP. Max 5 MB. Auto-cropped to a circle.
         </p>
         {url ? (
@@ -113,12 +113,12 @@ export default function AvatarUploader({ userId, initialUrl, initials }) {
             type="button"
             onClick={handleRemove}
             disabled={busy}
-            className="self-start mt-1 inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 disabled:opacity-50"
+            className="self-start mt-1 inline-flex items-center gap-1 text-xs text-danger hover:text-danger disabled:opacity-50"
           >
             <Trash2 size={12} /> Remove photo
           </button>
         ) : null}
-        {error ? <p className="text-xs text-red-600">{error}</p> : null}
+        {error ? <p className="text-xs text-danger">{error}</p> : null}
       </div>
     </div>
   );

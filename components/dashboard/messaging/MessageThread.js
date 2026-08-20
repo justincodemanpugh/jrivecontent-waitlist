@@ -217,7 +217,7 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -225,7 +225,7 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   if (err || !conversation) {
     return (
       <div className="px-4 py-10">
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err || "Conversation not found."}
         </p>
       </div>
@@ -236,15 +236,15 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     <div className="flex flex-col h-full w-full">
       {/* Header */}
       <PaymentBanner conversation={conversation} role={role} />
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 bg-white">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-line bg-surface">
         <Link
           href={basePath}
-          className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100"
+          className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-hover"
           aria-label="Back to messages"
         >
           <ArrowLeft size={18} />
         </Link>
-        <span className="h-10 w-10 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
+        <span className="h-10 w-10 rounded-full bg-accent-soft text-on-accent text-sm font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden">
           {counterpartAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -257,10 +257,10 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
           )}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-brand-ink truncate">
+          <p className="font-semibold text-ink truncate">
             {counterpartName}
           </p>
-          <p className="text-xs text-slate-500 truncate">
+          <p className="text-xs text-muted truncate">
             {conversation.gig?.title}
             {conversation.gig?.pay_per_video
               ? ` · $${Number(conversation.gig.pay_per_video)}/video`
@@ -272,10 +272,10 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-3 bg-brand-mist/30"
+        className="flex-1 overflow-y-auto px-4 py-3 bg-accent-tint/30"
       >
         {messages.length === 0 ? (
-          <p className="text-center text-sm text-slate-500 py-12">
+          <p className="text-center text-sm text-muted py-12">
             No messages yet — say hi 👋
           </p>
         ) : (
@@ -322,7 +322,7 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
               type="button"
               onClick={() => setSubmitOpen(true)}
               disabled={!conversation?.payment_deposited}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:text-brand-ink hover:bg-slate-100 transition disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:text-ink hover:bg-surface-hover transition disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
               aria-label={
                 conversation?.payment_deposited
                   ? "Submit videos"

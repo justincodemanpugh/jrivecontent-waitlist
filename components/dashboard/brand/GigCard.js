@@ -8,7 +8,7 @@ export default function GigCard({ gig }) {
   return (
     <Link
       href={`/dashboard/brand/gigs/${gig.id}`}
-      className="group rounded-2xl border border-slate-200 bg-white overflow-hidden hover:border-brand-sky hover:-translate-y-0.5 transition flex flex-col"
+      className="group rounded-2xl border border-line bg-surface overflow-hidden hover:border-accent-soft hover:-translate-y-0.5 transition flex flex-col"
     >
       <div className={`h-28 bg-gradient-to-br ${gig.cover} relative`}>
         <span
@@ -18,20 +18,20 @@ export default function GigCard({ gig }) {
         </span>
       </div>
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-semibold text-brand-ink leading-snug group-hover:text-brand-skyDeep transition">
+        <h3 className="font-semibold text-ink leading-snug group-hover:text-accent transition">
           {gig.title}
         </h3>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted">
           <span className="inline-flex items-center gap-1">
-            <DollarSign size={13} className="text-slate-400" />
+            <DollarSign size={13} className="text-faint" />
             ${gig.budget}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Clock size={13} className="text-slate-400" />
+            <Clock size={13} className="text-faint" />
             {gig.deadline}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Users size={13} className="text-slate-400" />
+            <Users size={13} className="text-faint" />
             {gig.applicants} {gig.applicants === 1 ? "applicant" : "applicants"}
           </span>
         </div>

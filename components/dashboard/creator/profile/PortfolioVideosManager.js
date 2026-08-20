@@ -139,22 +139,22 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
+    <div className="rounded-2xl border border-line bg-surface p-6 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-brand-ink">Top performing videos</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h3 className="text-sm font-semibold text-ink">Top performing videos</h3>
+          <p className="text-xs text-muted mt-0.5">
             Link up to {MAX_VIDEOS} of your best posts from Instagram, TikTok, or
             YouTube. Add a thumbnail so brands can preview each one.
           </p>
         </div>
-        <span className="text-xs text-slate-500 shrink-0">
+        <span className="text-xs text-muted shrink-0">
           {videos.length}/{MAX_VIDEOS}
         </span>
       </div>
 
       {hasLegacy ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+        <div className="rounded-xl border border-warn-line bg-warn-soft px-4 py-3 text-xs text-warn">
           We&apos;ve switched to linking your best posts. Your older uploaded
           videos still show below — we recommend deleting them and re-adding
           them as links to your live posts.
@@ -168,7 +168,7 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
             return (
               <li
                 key={v.id}
-                className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-[9/16] group"
+                className="relative rounded-xl overflow-hidden border border-line bg-slate-900 aspect-[9/16] group"
               >
                 {isLink ? (
                   v.thumbnail_path ? (
@@ -225,10 +225,10 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
       ) : null}
 
       {remaining > 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+        <div className="rounded-xl border border-line bg-surface-sunken/60 p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-1">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Platform</label>
+              <label className="block text-xs font-medium text-ink-soft mb-1">Platform</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {["instagram", "tiktok", "youtube"].map((p) => (
                   <button
@@ -238,8 +238,8 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
                     aria-label={PLATFORM_LABELS[p]}
                     className={`flex items-center justify-center rounded-lg border py-2 transition ${
                       platform === p
-                        ? "border-brand-skyDeep bg-white ring-2 ring-brand-sky/30"
-                        : "border-slate-200 bg-white hover:border-slate-300"
+                        ? "border-accent bg-surface ring-2 ring-accent-soft/30"
+                        : "border-line bg-surface hover:border-line-strong"
                     }`}
                   >
                     <PlatformLogo platform={p} size={20} />
@@ -248,26 +248,26 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Video link</label>
+              <label className="block text-xs font-medium text-ink-soft mb-1">Video link</label>
               <input
                 type="url"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder={PLATFORM_PLACEHOLDERS[platform]}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Title (optional)</label>
+            <label className="block text-xs font-medium text-ink-soft mb-1">Title (optional)</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. My top performing reel"
               maxLength={100}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
+              className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30"
             />
           </div>
 
@@ -275,7 +275,7 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
             <button
               type="button"
               onClick={() => thumbInputRef.current?.click()}
-              className="relative h-20 w-12 shrink-0 rounded-lg border border-dashed border-slate-300 bg-white overflow-hidden flex items-center justify-center text-slate-400 hover:border-brand-skyDeep"
+              className="relative h-20 w-12 shrink-0 rounded-lg border border-dashed border-line-strong bg-surface overflow-hidden flex items-center justify-center text-faint hover:border-accent"
             >
               {thumbPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -284,8 +284,8 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
                 <ImagePlus size={16} />
               )}
             </button>
-            <div className="text-xs text-slate-500">
-              <p className="font-medium text-brand-ink">Thumbnail (recommended)</p>
+            <div className="text-xs text-muted">
+              <p className="font-medium text-ink">Thumbnail (recommended)</p>
               <p>A 9:16 image works best. PNG, JPG, or WebP up to 8 MB.</p>
             </div>
             <input
@@ -301,19 +301,19 @@ export default function PortfolioVideosManager({ userId, initialVideos }) {
             type="button"
             onClick={handleAddVideo}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-brand-skyDeep px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-skyDeep/90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-on-accent transition hover:bg-accent/90 disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
             {saving ? "Adding…" : "Add video"}
           </button>
         </div>
       ) : (
-        <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500">
+        <div className="rounded-xl bg-surface-sunken border border-line px-4 py-3 text-xs text-muted">
           You&apos;ve reached the {MAX_VIDEOS}-video limit. Delete one to add another.
         </div>
       )}
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }

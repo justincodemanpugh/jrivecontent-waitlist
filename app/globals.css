@@ -5,6 +5,102 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+
+  /* Dashboard theme tokens — space-separated RGB channels so Tailwind's
+     opacity modifiers (bg-surface/80) work. Light values. */
+  color-scheme: light;
+
+  --c-surface: 255 255 255;
+  --c-surface-raised: 255 255 255;
+  --c-surface-sunken: 248 250 252;
+  --c-surface-hover: 241 245 249;
+
+  --c-line: 226 232 240;
+  --c-line-strong: 203 213 225;
+
+  --c-ink: 15 23 42;
+  --c-ink-soft: 51 65 85;
+  --c-muted: 100 116 139;
+  --c-faint: 148 163 184;
+
+  --c-accent: 56 189 248;
+  --c-accent-soft: 125 211 252;
+  --c-accent-tint: 240 249 255;
+  --c-on-accent: 255 255 255;
+
+  --c-success: 4 120 87;
+  --c-success-soft: 236 253 245;
+  --c-success-line: 167 243 208;
+  --c-success-solid: 5 150 105;
+
+  --c-warn: 180 83 9;
+  --c-warn-soft: 255 251 235;
+  --c-warn-line: 253 230 138;
+  --c-warn-solid: 217 119 6;
+
+  --c-danger: 190 18 60;
+  --c-danger-soft: 255 241 242;
+  --c-danger-line: 254 205 211;
+  --c-danger-solid: 225 29 72;
+
+  --c-info: 29 78 216;
+  --c-info-soft: 239 246 255;
+  --c-info-line: 186 230 253;
+
+  --c-plum: 126 34 206;
+  --c-plum-soft: 250 245 255;
+  --c-plum-solid: 139 92 246;
+
+  --c-scrim: 15 23 42;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Page sits darkest, cards lift off it, popovers/modals lift again. */
+  --c-surface: 17 24 39;
+  --c-surface-raised: 30 41 59;
+  --c-surface-sunken: 8 13 24;
+  --c-surface-hover: 30 41 59;
+
+  --c-line: 38 50 70;
+  --c-line-strong: 55 71 95;
+
+  --c-ink: 226 232 240;
+  --c-ink-soft: 203 213 225;
+  --c-muted: 148 163 184;
+  --c-faint: 111 126 148;
+
+  /* Accent hue holds across themes; what flips is the text sitting on it. */
+  --c-accent: 56 189 248;
+  --c-accent-soft: 125 211 252;
+  --c-accent-tint: 18 38 56;
+  --c-on-accent: 8 14 26;
+
+  --c-success: 52 211 153;
+  --c-success-soft: 6 44 36;
+  --c-success-line: 15 74 60;
+  --c-success-solid: 5 150 105;
+
+  --c-warn: 251 191 36;
+  --c-warn-soft: 51 36 5;
+  --c-warn-line: 87 62 10;
+  --c-warn-solid: 217 119 6;
+
+  --c-danger: 251 113 133;
+  --c-danger-soft: 56 15 25;
+  --c-danger-line: 94 27 42;
+  --c-danger-solid: 225 29 72;
+
+  --c-info: 125 211 252;
+  --c-info-soft: 16 36 61;
+  --c-info-line: 30 58 95;
+
+  --c-plum: 196 165 250;
+  --c-plum-soft: 45 27 66;
+  --c-plum-solid: 139 92 246;
+
+  --c-scrim: 2 6 16;
 }
 
 html,
@@ -18,6 +114,13 @@ body {
 
 body {
   overflow-x: clip;
+}
+
+/* Set by ThemeProvider while a themed (dashboard) shell is mounted, so the
+   page background behind/around it follows the theme. */
+body.themed {
+  background: rgb(var(--c-surface-sunken));
+  color: rgb(var(--c-ink));
 }
 
 * {

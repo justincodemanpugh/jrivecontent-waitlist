@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Sidebar from "@/components/dashboard/creator/Sidebar";
 import MobileTabBar from "@/components/dashboard/creator/MobileTabBar";
 import { CreatorProvider } from "@/components/dashboard/creator/CreatorProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -43,12 +44,14 @@ export default async function CreatorDashboardLayout({ children }) {
 
   return (
     <CreatorProvider value={creatorValue}>
-      <div className="min-h-screen bg-brand-mist/40">
-        <Sidebar />
-        <div className="lg:pl-64">{children}</div>
-        <MobileTabBar />
-        <div className="h-16 lg:hidden" />
-      </div>
+      <ThemeProvider>
+        <div className="min-h-screen bg-surface-sunken text-ink">
+          <Sidebar />
+          <div className="lg:pl-64">{children}</div>
+          <MobileTabBar />
+          <div className="h-16 lg:hidden" />
+        </div>
+      </ThemeProvider>
     </CreatorProvider>
   );
 }

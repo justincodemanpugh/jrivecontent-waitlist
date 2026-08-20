@@ -85,22 +85,22 @@ export default async function CreatorProfilePage() {
       <main className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-3xl mx-auto space-y-6">
         {/* Cover photo nudge — shown until a cover is uploaded */}
         {!profile?.cover_photo_url && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <div className="rounded-2xl border border-warn-line bg-warn-soft p-5">
             <div className="flex items-start gap-4">
-              <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600">
+              <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-warn">
                 <ImagePlus size={18} />
               </span>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-amber-900">
+                <h3 className="text-sm font-semibold text-warn">
                   Add a cover photo to stand out
                 </h3>
-                <p className="mt-1 text-xs text-amber-800/90">
+                <p className="mt-1 text-xs text-warn/90">
                   Brands are 85% more likely to hire creators with a cover
                   photo. A normal portrait phone photo works great.
                 </p>
                 <Link
                   href="/dashboard/creator/profile/edit"
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-warn-solid px-4 py-1.5 text-xs font-semibold text-white hover:bg-warn-solid/90"
                 >
                   <ImagePlus size={12} /> Add cover photo
                 </Link>
@@ -110,10 +110,10 @@ export default async function CreatorProfilePage() {
         )}
 
         {/* Header card */}
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+        <div className="rounded-2xl border border-line bg-surface overflow-hidden">
           <div className="p-6 flex items-start gap-5">
             {profile?.cover_photo_url ? (
-              <div className="hidden sm:block w-32 shrink-0 aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-brand-mist to-slate-100">
+              <div className="hidden sm:block w-32 shrink-0 aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-accent-tint to-surface-hover">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={profile.cover_photo_url}
@@ -122,7 +122,7 @@ export default async function CreatorProfilePage() {
                 />
               </div>
             ) : null}
-            <span className="h-20 w-20 shrink-0 rounded-full overflow-hidden bg-brand-sky text-white text-2xl font-semibold flex items-center justify-center sm:hidden">
+            <span className="h-20 w-20 shrink-0 rounded-full overflow-hidden bg-accent-soft text-on-accent text-2xl font-semibold flex items-center justify-center sm:hidden">
               {profile?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -134,7 +134,7 @@ export default async function CreatorProfilePage() {
                 <span>{initials}</span>
               )}
             </span>
-            <span className="hidden sm:flex h-20 w-20 shrink-0 rounded-full overflow-hidden bg-brand-sky text-white text-2xl font-semibold items-center justify-center">
+            <span className="hidden sm:flex h-20 w-20 shrink-0 rounded-full overflow-hidden bg-accent-soft text-on-accent text-2xl font-semibold items-center justify-center">
               {profile?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -147,17 +147,17 @@ export default async function CreatorProfilePage() {
               )}
             </span>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-semibold text-brand-ink">{name}</h2>
+              <h2 className="text-xl font-semibold text-ink">{name}</h2>
               {profile?.handle ? (
-                <p className="text-sm text-slate-500">@{profile.handle}</p>
+                <p className="text-sm text-muted">@{profile.handle}</p>
               ) : null}
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-muted">
                 {profile?.bio || "Add a short bio so brands know who you are."}
               </p>
             </div>
             <Link
               href="/dashboard/creator/profile/edit"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface-sunken transition"
             >
               <Pencil size={14} />
               Edit
@@ -169,7 +169,7 @@ export default async function CreatorProfilePage() {
               {niches.map((n) => (
                 <span
                   key={n}
-                  className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-brand-mist text-brand-skyDeep"
+                  className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-accent-tint text-accent"
                 >
                   {n}
                 </span>
@@ -188,8 +188,8 @@ export default async function CreatorProfilePage() {
         <StripePayoutsCard />
 
         {/* Socials */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h3 className="text-sm font-semibold text-brand-ink mb-3">
+        <div className="rounded-2xl border border-line bg-surface p-6">
+          <h3 className="text-sm font-semibold text-ink mb-3">
             Where to find me
           </h3>
           <ul className="space-y-2 text-sm">
@@ -197,19 +197,19 @@ export default async function CreatorProfilePage() {
               <li key={key} className="flex items-center gap-2">
                 <Icon
                   size={16}
-                  className={handle ? "text-brand-skyDeep" : "text-slate-400"}
+                  className={handle ? "text-accent" : "text-faint"}
                 />
                 {handle && href ? (
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-skyDeep hover:underline truncate"
+                    className="text-accent hover:underline truncate"
                   >
                     {key === "portfolio" ? handle : `@${handle}`}
                   </a>
                 ) : (
-                  <span className="text-slate-400">{label} not linked</span>
+                  <span className="text-faint">{label} not linked</span>
                 )}
               </li>
             ))}
@@ -217,12 +217,12 @@ export default async function CreatorProfilePage() {
         </div>
 
         {/* Portfolio */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-line bg-surface p-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-brand-ink">
+            <h3 className="text-sm font-semibold text-ink">
               Showcase your work
             </h3>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted">
               {portfolioVideos.length}/3
             </span>
           </div>
@@ -230,13 +230,13 @@ export default async function CreatorProfilePage() {
           {portfolioVideos.length > 0 ? (
             <PortfolioVideosGrid videos={portfolioVideos} />
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-6 text-center">
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+            <div className="rounded-xl border border-dashed border-line bg-surface-sunken/40 p-6 text-center">
+              <p className="text-sm text-muted max-w-md mx-auto">
                 Upload up to 3 sample videos so brands can preview your style.
               </p>
               <Link
                 href="/dashboard/creator/profile/edit"
-                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-skyDeep px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-skyDeep/90"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent hover:bg-accent/90"
               >
                 <Pencil size={12} /> Add videos
               </Link>

@@ -104,10 +104,10 @@ export default function ProfileForm({ initial }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Brand profile picture */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+      <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           <div className="relative shrink-0">
-            <div className="h-24 w-24 rounded-2xl bg-brand-sky text-white text-2xl font-semibold flex items-center justify-center overflow-hidden ring-1 ring-slate-200">
+            <div className="h-24 w-24 rounded-2xl bg-accent-soft text-on-accent text-2xl font-semibold flex items-center justify-center overflow-hidden ring-1 ring-line">
               {form.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -122,7 +122,7 @@ export default function ProfileForm({ initial }) {
             <button
               type="button"
               onClick={handleAvatarPick}
-              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-brand-ink text-white flex items-center justify-center shadow-md hover:bg-slate-800 transition"
+              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-ink text-on-accent flex items-center justify-center shadow-md hover:bg-ink/90 transition"
               aria-label="Change profile picture"
             >
               <Camera size={14} />
@@ -130,10 +130,10 @@ export default function ProfileForm({ initial }) {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-brand-ink">
+            <h2 className="text-base font-semibold text-ink">
               Profile picture
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-muted">
               Upload a logo or photo. PNG, JPG, WEBP or GIF, up to 5 MB.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -141,7 +141,7 @@ export default function ProfileForm({ initial }) {
                 type="button"
                 onClick={handleAvatarPick}
                 disabled={uploadingAvatar}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium text-brand-ink hover:bg-slate-50 transition disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl border border-line-strong px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-sunken transition disabled:opacity-60"
               >
                 <Upload size={14} />
                 {uploadingAvatar
@@ -155,7 +155,7 @@ export default function ProfileForm({ initial }) {
                   type="button"
                   onClick={handleAvatarRemove}
                   disabled={uploadingAvatar}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line-strong px-3 py-1.5 text-sm font-medium text-muted hover:bg-surface-sunken hover:text-danger transition disabled:opacity-60"
                 >
                   <Trash2 size={14} />
                   Remove
@@ -174,12 +174,12 @@ export default function ProfileForm({ initial }) {
       </section>
 
       {/* Brand details */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-5">
+      <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 space-y-5">
         <div>
-          <h2 className="text-base font-semibold text-brand-ink">
+          <h2 className="text-base font-semibold text-ink">
             Brand details
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted">
             This is what creators see when you reach out and when you post
             gigs.
           </p>
@@ -210,10 +210,10 @@ export default function ProfileForm({ initial }) {
           </div>
           <div className="sm:col-span-2">
             <label className="block">
-              <span className="block text-xs font-medium text-slate-700">
+              <span className="block text-xs font-medium text-ink-soft">
                 Country
                 {!stripeCountryLocked && (
-                  <span className="ml-1 font-normal text-slate-500">
+                  <span className="ml-1 font-normal text-muted">
                     — used when you connect Stripe for payouts
                   </span>
                 )}
@@ -222,7 +222,7 @@ export default function ProfileForm({ initial }) {
                 value={form.country}
                 onChange={(e) => set("country", e.target.value)}
                 disabled={stripeCountryLocked}
-                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-brand-skyDeep focus:ring-2 focus:ring-brand-sky/40 disabled:bg-slate-100 disabled:text-slate-500"
+                className="mt-1.5 w-full rounded-xl border border-line-strong px-3 py-2 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft/40 disabled:bg-surface-hover disabled:text-muted"
               >
                 <option value="">Select your country…</option>
                 {COUNTRIES.map((c) => (
@@ -232,12 +232,12 @@ export default function ProfileForm({ initial }) {
                 ))}
               </select>
               {stripeCountryLocked ? (
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted">
                   Locked by Stripe — the country of a connected account can
                   only be set when it's first created.
                 </span>
               ) : (
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted">
                   Pick the country where your business is legally based.
                   Stripe locks this once you connect, so choose carefully.
                 </span>
@@ -248,10 +248,10 @@ export default function ProfileForm({ initial }) {
       </section>
 
       {/* Sign in */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-5">
+      <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 space-y-5">
         <div>
-          <h2 className="text-base font-semibold text-brand-ink">Sign in</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-base font-semibold text-ink">Sign in</h2>
+          <p className="mt-1 text-sm text-muted">
             Used to sign in and receive transactional emails.
           </p>
         </div>
@@ -264,12 +264,12 @@ export default function ProfileForm({ initial }) {
         />
       </section>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex items-center justify-between gap-3">
-        <div className="text-xs text-slate-500 min-h-[1rem]">
+        <div className="text-xs text-muted min-h-[1rem]">
           {savedAt && (
-            <span className="inline-flex items-center gap-1.5 text-emerald-600">
+            <span className="inline-flex items-center gap-1.5 text-success">
               <Check size={14} />
               Saved
               {emailChanged && " — check your new email to confirm the change."}
@@ -279,7 +279,7 @@ export default function ProfileForm({ initial }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-ink text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-xl bg-ink text-on-accent px-4 py-2 text-sm font-semibold hover:bg-ink/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
@@ -291,14 +291,14 @@ export default function ProfileForm({ initial }) {
 function Field({ label, value, onChange, type = "text", placeholder, required }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-slate-700">{label}</span>
+      <span className="block text-xs font-medium text-ink-soft">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-brand-skyDeep focus:ring-2 focus:ring-brand-sky/40"
+        className="mt-1.5 w-full rounded-xl border border-line-strong px-3 py-2 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft/40"
       />
     </label>
   );

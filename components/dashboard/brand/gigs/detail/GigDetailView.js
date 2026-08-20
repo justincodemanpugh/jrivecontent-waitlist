@@ -53,7 +53,7 @@ export default function BrandGigDetailView({ gigId }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -61,7 +61,7 @@ export default function BrandGigDetailView({ gigId }) {
   if (err || !gig) {
     return (
       <div className="px-4 py-10 max-w-3xl mx-auto">
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err || "Gig not found."}
         </p>
       </div>
@@ -72,14 +72,14 @@ export default function BrandGigDetailView({ gigId }) {
     <main className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-4xl mx-auto space-y-5">
       <Link
         href="/dashboard/brand/gigs"
-        className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-brand-ink"
+        className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
       >
         <ArrowLeft size={14} />
         All gigs
       </Link>
 
       {gig.cover_image_url ? (
-        <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl bg-slate-100">
+        <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl bg-surface-hover">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={gig.cover_image_url}
@@ -90,34 +90,34 @@ export default function BrandGigDetailView({ gigId }) {
       ) : null}
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-brand-ink">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
           {gig.title}
         </h1>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-slate-600">
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted">
           <span className="inline-flex items-center gap-1">
-            <DollarSign size={14} className="text-slate-400" />$
+            <DollarSign size={14} className="text-faint" />$
             {Number(gig.pay_per_video)}
             /video
           </span>
           <span className="inline-flex items-center gap-1">
-            <Film size={14} className="text-slate-400" />
+            <Film size={14} className="text-faint" />
             {Number(gig.video_quantity) || 1} video
             {Number(gig.video_quantity) === 1 ? "" : "s"}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Users size={14} className="text-slate-400" />
+            <Users size={14} className="text-faint" />
             {gig.applicants_count ?? 0}{" "}
             {gig.applicants_count === 1 ? "applicant" : "applicants"}
           </span>
           {!gig.is_active ? (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-hover text-muted text-[11px] font-medium border border-line">
               Deactivated
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="border-b border-slate-200 flex items-center gap-1">
+      <div className="border-b border-line flex items-center gap-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -126,13 +126,13 @@ export default function BrandGigDetailView({ gigId }) {
             className={[
               "px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition",
               tab === t.key
-                ? "border-brand-skyDeep text-brand-ink"
-                : "border-transparent text-slate-500 hover:text-brand-ink",
+                ? "border-accent text-ink"
+                : "border-transparent text-muted hover:text-ink",
             ].join(" ")}
           >
             {t.label}
             {t.key === "applicants" && gig.applicants_count > 0 ? (
-              <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-skyDeep text-white text-[10px] font-semibold">
+              <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-on-accent text-[10px] font-semibold">
                 {gig.applicants_count}
               </span>
             ) : null}
@@ -141,19 +141,19 @@ export default function BrandGigDetailView({ gigId }) {
       </div>
 
       {tab === "overview" ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+        <div className="rounded-2xl border border-line bg-surface p-5 space-y-4">
           {(gig.content_type ||
             (Array.isArray(gig.platforms) && gig.platforms.length > 0)) && (
             <div className="flex flex-wrap items-center gap-2">
               {gig.content_type && (
-                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-medium">
+                <span className="inline-flex items-center rounded-full bg-surface-hover text-ink-soft px-3 py-1 text-xs font-medium">
                   {contentTypeLabel(gig.content_type)}
                 </span>
               )}
               {(gig.platforms || []).map((p) => (
                 <span
                   key={p}
-                  className="inline-flex items-center rounded-full bg-brand-mist text-brand-skyDeep px-3 py-1 text-xs font-medium"
+                  className="inline-flex items-center rounded-full bg-accent-tint text-accent px-3 py-1 text-xs font-medium"
                 >
                   {platformLabel(p)}
                 </span>
@@ -162,10 +162,10 @@ export default function BrandGigDetailView({ gigId }) {
           )}
 
           <section>
-            <h2 className="text-sm font-semibold text-brand-ink mb-2">
+            <h2 className="text-sm font-semibold text-ink mb-2">
               Description
             </h2>
-            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-ink-soft whitespace-pre-wrap leading-relaxed">
               {gig.description || "No description provided."}
             </p>
           </section>

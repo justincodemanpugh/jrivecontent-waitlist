@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, CreditCard, AlertTriangle } from "lucide-react";
+import { User, CreditCard, Palette, AlertTriangle } from "lucide-react";
 
 const TABS = [
   {
@@ -16,6 +16,11 @@ const TABS = [
     icon: CreditCard,
   },
   {
+    label: "Appearance",
+    href: "/dashboard/brand/settings/appearance",
+    icon: Palette,
+  },
+  {
     label: "Account",
     href: "/dashboard/brand/settings/account",
     icon: AlertTriangle,
@@ -26,7 +31,7 @@ export default function SettingsTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-slate-200">
+    <nav className="border-b border-line">
       <ul className="-mb-px flex gap-1 overflow-x-auto">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -37,8 +42,8 @@ export default function SettingsTabs() {
                 href={tab.href}
                 className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${
                   active
-                    ? "border-brand-skyDeep text-brand-ink"
-                    : "border-transparent text-slate-500 hover:text-brand-ink hover:border-slate-300"
+                    ? "border-accent text-ink"
+                    : "border-transparent text-muted hover:text-ink hover:border-line-strong"
                 }`}
               >
                 <Icon size={16} />

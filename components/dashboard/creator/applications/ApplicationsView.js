@@ -6,10 +6,10 @@ import { Loader2, Inbox } from "lucide-react";
 import { fetchMyApplications } from "@/lib/dashboard/applicationsApi";
 
 const STATUS_META = {
-  pending: { label: "Pending review", classes: "bg-slate-100 text-slate-600 border-slate-200" },
-  accepted: { label: "Accepted", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  declined: { label: "Declined", classes: "bg-rose-50 text-rose-700 border-rose-200" },
-  withdrawn: { label: "Withdrawn", classes: "bg-slate-100 text-slate-500 border-slate-200" },
+  pending: { label: "Pending review", classes: "bg-surface-hover text-muted border-line" },
+  accepted: { label: "Accepted", classes: "bg-success-soft text-success border-success-line" },
+  declined: { label: "Declined", classes: "bg-danger-soft text-danger border-danger-line" },
+  withdrawn: { label: "Withdrawn", classes: "bg-surface-hover text-muted border-line" },
 };
 
 function timeAgo(iso) {
@@ -56,7 +56,7 @@ export default function ApplicationsView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -64,7 +64,7 @@ export default function ApplicationsView() {
 
   if (err) {
     return (
-      <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+      <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
         {err}
       </p>
     );
@@ -72,20 +72,20 @@ export default function ApplicationsView() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep mb-3">
+      <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tint text-accent mb-3">
           <Inbox size={20} />
         </span>
-        <h2 className="text-lg font-semibold text-brand-ink">
+        <h2 className="text-lg font-semibold text-ink">
           No applications yet
         </h2>
-        <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
+        <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
           Browse open gigs and send your first application — once a brand
           accepts, you&apos;ll start a conversation here.
         </p>
         <Link
           href="/dashboard/creator/explore"
-          className="mt-4 inline-flex items-center rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          className="mt-4 inline-flex items-center rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent hover:bg-ink/90"
         >
           Explore gigs
         </Link>
@@ -100,16 +100,16 @@ export default function ApplicationsView() {
         return (
           <li
             key={a.id}
-            className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between gap-4"
+            className="rounded-2xl border border-line bg-surface p-4 flex items-center justify-between gap-4"
           >
             <Link
               href={`/dashboard/creator/explore/${a.gig_id}`}
               className="min-w-0 flex-1 group"
             >
-              <p className="font-medium text-brand-ink truncate group-hover:text-brand-skyDeep transition">
+              <p className="font-medium text-ink truncate group-hover:text-accent transition">
                 {a.gig?.title || "Gig"}
               </p>
-              <p className="text-xs text-slate-500 truncate">
+              <p className="text-xs text-muted truncate">
                 {a.gig?.brand_name || "Brand"}
                 {a.gig?.pay_per_video
                   ? ` · $${Number(a.gig.pay_per_video)}/video`

@@ -75,20 +75,20 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-scrim/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       <form
         onSubmit={handleSubmit}
-        className="relative bg-white w-full sm:max-w-md sm:rounded-2xl shadow-xl p-5 sm:p-6 space-y-4"
+        className="relative bg-surface w-full sm:max-w-md sm:rounded-2xl shadow-xl p-5 sm:p-6 space-y-4"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-brand-ink">
+            <h2 className="text-lg font-semibold text-ink">
               Invite {creator.name}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Send a direct invitation to one of your gigs.
             </p>
           </div>
@@ -96,7 +96,7 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500"
+            className="h-8 w-8 rounded-full hover:bg-surface-hover flex items-center justify-center text-muted"
           >
             <X size={16} />
           </button>
@@ -104,17 +104,17 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
 
         {/* Gig picker */}
         <div>
-          <label className="text-xs font-medium text-slate-600 mb-1.5 block">
+          <label className="text-xs font-medium text-muted mb-1.5 block">
             Which gig?
           </label>
 
           {loadingGigs ? (
-            <div className="flex items-center gap-2 text-sm text-slate-500 py-2">
+            <div className="flex items-center gap-2 text-sm text-muted py-2">
               <Loader2 size={14} className="animate-spin" />
               Loading your gigs…
             </div>
           ) : gigs.length === 0 ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            <div className="rounded-xl border border-warn-line bg-warn-soft p-3 text-xs text-warn">
               You don&apos;t have an active, open gig yet. Post one first and
               then come back to invite this creator.
             </div>
@@ -127,8 +127,8 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
                     key={g.id}
                     className={`flex items-center gap-3 rounded-xl border px-3 py-2 cursor-pointer transition ${
                       checked
-                        ? "border-brand-skyDeep bg-brand-mist/40"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-accent bg-accent-tint/40"
+                        : "border-line hover:border-line-strong"
                     }`}
                   >
                     <input
@@ -139,12 +139,12 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
                       onChange={() => setSelectedGigId(g.id)}
                       className="accent-brand-skyDeep"
                     />
-                    <Briefcase size={14} className="text-slate-400 shrink-0" />
+                    <Briefcase size={14} className="text-faint shrink-0" />
                     <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-medium text-brand-ink truncate">
+                      <span className="block text-sm font-medium text-ink truncate">
                         {g.title}
                       </span>
-                      <span className="block text-[11px] text-slate-500">
+                      <span className="block text-[11px] text-muted">
                         ${Number(g.pay_per_video) || 0}/video · {g.status}
                       </span>
                     </span>
@@ -157,7 +157,7 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
 
         {/* Optional message */}
         <div>
-          <label className="text-xs font-medium text-slate-600 mb-1.5 block">
+          <label className="text-xs font-medium text-muted mb-1.5 block">
             Optional note (visible to the creator)
           </label>
           <textarea
@@ -166,15 +166,15 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
             rows={3}
             maxLength={500}
             placeholder="Hey, your style is exactly what we're looking for…"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-sky/40 focus:border-brand-sky resize-y"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent-soft/40 focus:border-accent-soft resize-y"
           />
-          <p className="mt-1 text-[11px] text-slate-400 text-right">
+          <p className="mt-1 text-[11px] text-faint text-right">
             {message.length}/500
           </p>
         </div>
 
         {error ? (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
+          <p className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger">
             {error}
           </p>
         ) : null}
@@ -183,14 +183,14 @@ export default function InviteDialog({ creator, onClose, onInvited }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            className="rounded-full px-4 py-2 text-sm font-semibold text-muted hover:bg-surface-hover"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting || loadingGigs || gigs.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-60"
           >
             {submitting ? (
               <Loader2 size={14} className="animate-spin" />

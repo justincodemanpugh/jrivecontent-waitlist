@@ -168,15 +168,15 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
   if (isHidden || progress?.checklist_hidden) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-line bg-surface shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-brand-mist to-white">
+      <div className="px-4 py-3 border-b border-line bg-gradient-to-r from-accent-tint to-surface">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-brand-ink">Setup guide</h3>
+            <h3 className="font-semibold text-ink">Setup guide</h3>
             <button
               onClick={handleHide}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              className="p-1 rounded-md text-faint hover:text-muted hover:bg-surface-hover transition"
               title="Hide checklist"
             >
               <X size={14} />
@@ -185,7 +185,7 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
           {onStartTour && (
             <button
               onClick={onStartTour}
-              className="text-xs font-medium text-brand-skyDeep hover:text-brand-ink transition"
+              className="text-xs font-medium text-accent hover:text-ink transition"
             >
               Take a tour
             </button>
@@ -193,20 +193,20 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
         </div>
         {/* Progress bar */}
         <div className="mt-2 flex items-center gap-3">
-          <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-surface-hover rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-brand-sky to-brand-skyDeep rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-accent-soft to-accent rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-xs font-medium text-slate-500 tabular-nums">
+          <span className="text-xs font-medium text-muted tabular-nums">
             {completedCount}/{totalItems}
           </span>
         </div>
       </div>
 
       {/* Sections */}
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-line">
         {CHECKLIST_SECTIONS.map((section) => {
           const isExpanded = expandedSections.includes(section.id);
           const sectionCompleted = section.items.every((item) =>
@@ -218,21 +218,21 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
               {/* Section header */}
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-50 transition"
+                className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-surface-sunken transition"
               >
                 <span
                   className={`text-sm font-medium ${
                     sectionCompleted
-                      ? "text-slate-400 line-through"
-                      : "text-brand-ink"
+                      ? "text-faint line-through"
+                      : "text-ink"
                   }`}
                 >
                   {section.title}
                 </span>
                 {isExpanded ? (
-                  <ChevronUp size={16} className="text-slate-400" />
+                  <ChevronUp size={16} className="text-faint" />
                 ) : (
-                  <ChevronDown size={16} className="text-slate-400" />
+                  <ChevronDown size={16} className="text-faint" />
                 )}
               </button>
 
@@ -249,18 +249,18 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
                         onClick={() => handleItemClick(item)}
                         className={`w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition group ${
                           completed
-                            ? "bg-emerald-50/50"
+                            ? "bg-success-soft/50"
                             : item.primary
-                            ? "bg-brand-mist hover:bg-brand-sky/20"
-                            : "hover:bg-slate-50"
+                            ? "bg-accent-tint hover:bg-accent-soft/20"
+                            : "hover:bg-surface-sunken"
                         }`}
                       >
                         {/* Checkbox */}
                         <div
                           className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
                             completed
-                              ? "bg-emerald-500 text-white"
-                              : "border-2 border-slate-300 text-transparent group-hover:border-brand-skyDeep"
+                              ? "bg-success-solid text-white"
+                              : "border-2 border-line-strong text-transparent group-hover:border-accent"
                           }`}
                         >
                           {completed ? (
@@ -276,19 +276,19 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
                             <span
                               className={`text-sm font-medium ${
                                 completed
-                                  ? "text-slate-400 line-through"
-                                  : "text-brand-ink"
+                                  ? "text-faint line-through"
+                                  : "text-ink"
                               }`}
                             >
                               {item.label}
                             </span>
                             {item.optional && (
-                              <span className="text-[10px] font-medium text-slate-400 uppercase">
+                              <span className="text-[10px] font-medium text-faint uppercase">
                                 Optional
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-xs text-muted mt-0.5">
                             {item.description}
                           </p>
                         </div>
@@ -298,8 +298,8 @@ export default function TutorialChecklist({ onStartTour, onHide }) {
                           size={16}
                           className={`mt-0.5 flex-shrink-0 ${
                             completed
-                              ? "text-emerald-500"
-                              : "text-slate-400 group-hover:text-brand-skyDeep"
+                              ? "text-success"
+                              : "text-faint group-hover:text-accent"
                           }`}
                         />
                       </button>

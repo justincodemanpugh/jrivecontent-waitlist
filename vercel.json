@@ -7,6 +7,10 @@
     {
       "path": "/api/programs/tiktok-sync",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/programs/apify-sync",
+      "schedule": "0 7 * * *"
     }
   ]
 }

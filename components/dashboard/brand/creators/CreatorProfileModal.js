@@ -52,18 +52,18 @@ export default function CreatorProfileModal({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-scrim/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div className="relative bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto sm:rounded-2xl shadow-xl">
+      <div className="relative bg-surface w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto sm:rounded-2xl shadow-xl">
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-3 right-3 z-10 h-9 w-9 rounded-full bg-white text-slate-700 shadow border border-slate-200 flex items-center justify-center hover:bg-slate-50"
+          className="absolute top-3 right-3 z-10 h-9 w-9 rounded-full bg-surface text-ink-soft shadow border border-line flex items-center justify-center hover:bg-surface-sunken"
         >
           <X size={16} />
         </button>
@@ -71,7 +71,7 @@ export default function CreatorProfileModal({
         {/* Header: portrait cover + identity */}
         <div className="p-5 sm:p-6 flex items-start gap-4 sm:gap-5">
           {creator.coverUrl ? (
-            <div className="w-28 sm:w-36 shrink-0 aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-brand-mist to-slate-100">
+            <div className="w-28 sm:w-36 shrink-0 aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-accent-tint to-surface-hover">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={creator.coverUrl}
@@ -80,7 +80,7 @@ export default function CreatorProfileModal({
               />
             </div>
           ) : (
-            <span className="h-20 w-20 rounded-full overflow-hidden bg-brand-sky text-white text-2xl font-semibold flex items-center justify-center shrink-0">
+            <span className="h-20 w-20 rounded-full overflow-hidden bg-accent-soft text-on-accent text-2xl font-semibold flex items-center justify-center shrink-0">
               {creator.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -99,19 +99,19 @@ export default function CreatorProfileModal({
               <img
                 src={creator.avatarUrl}
                 alt={creator.name}
-                className="mb-2 h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+                className="mb-2 h-12 w-12 rounded-full object-cover ring-2 ring-surface shadow-sm"
               />
             ) : null}
-            <h2 className="text-xl font-semibold text-brand-ink truncate">
+            <h2 className="text-xl font-semibold text-ink truncate">
               {creator.name}
             </h2>
-            <p className="text-sm text-slate-500 inline-flex items-center gap-1.5 truncate">
+            <p className="text-sm text-muted inline-flex items-center gap-1.5 truncate">
               {creator.handle ? `@${creator.handle}` : "Creator"}
               {creator.location ? (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-faint">•</span>
                   <span className="inline-flex items-center gap-1">
-                    <MapPin size={12} className="text-slate-400" />
+                    <MapPin size={12} className="text-faint" />
                     {creator.location}
                   </span>
                 </>
@@ -127,10 +127,10 @@ export default function CreatorProfileModal({
               disabled={!!connectionStatus}
               className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
                 connectionStatus === "active"
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  ? "bg-success-soft text-success border border-success-line"
                   : connectionStatus === "pending"
-                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                  : "bg-brand-ink text-white hover:bg-slate-800"
+                  ? "bg-warn-soft text-warn border border-warn-line"
+                  : "bg-ink text-on-accent hover:bg-ink/90"
               }`}
             >
               {connectionStatus === "active" ? (
@@ -156,11 +156,11 @@ export default function CreatorProfileModal({
         {/* Body */}
         <div className="px-5 sm:px-6 pb-6 space-y-5">
           {creator.bio ? (
-            <p className="text-sm text-slate-700 leading-relaxed">
+            <p className="text-sm text-ink-soft leading-relaxed">
               {creator.bio}
             </p>
           ) : (
-            <p className="text-sm text-slate-400 italic">
+            <p className="text-sm text-faint italic">
               This creator hasn&apos;t written a bio yet.
             </p>
           )}
@@ -170,7 +170,7 @@ export default function CreatorProfileModal({
               {creator.niches.map((n) => (
                 <span
                   key={n}
-                  className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-mist text-brand-skyDeep"
+                  className="text-xs font-medium px-2.5 py-1 rounded-full bg-accent-tint text-accent"
                 >
                   {n}
                 </span>
@@ -180,15 +180,15 @@ export default function CreatorProfileModal({
 
           {/* Rate */}
           {creator.rateMin || creator.rateMax ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              <span className="font-semibold text-brand-ink">Typical rate: </span>
+            <div className="rounded-xl border border-line bg-surface-sunken px-4 py-3 text-sm text-ink-soft">
+              <span className="font-semibold text-ink">Typical rate: </span>
               {formatRate(creator.rateMin, creator.rateMax)} per video
             </div>
           ) : null}
 
           {/* Social Profiles */}
-          <div className="rounded-2xl border border-slate-200 p-4">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+          <div className="rounded-2xl border border-line p-4">
+            <h3 className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
               Social Profiles
             </h3>
             <ul className="space-y-1.5 text-sm">
@@ -238,7 +238,7 @@ export default function CreatorProfileModal({
           {/* Top Posts */}
           {creator.portfolioVideos && creator.portfolioVideos.length > 0 ? (
             <div>
-              <h3 className="text-sm font-semibold text-brand-ink mb-2">
+              <h3 className="text-sm font-semibold text-ink mb-2">
                 Top Posts
               </h3>
               <ul className="grid grid-cols-3 gap-3">
@@ -272,7 +272,7 @@ export default function CreatorProfileModal({
                       )}
                       {isLink ? (
                         <>
-                          <span className="absolute top-2 left-2 inline-flex items-center justify-center rounded-full bg-white/90 p-1 shadow-sm">
+                          <span className="absolute top-2 left-2 inline-flex items-center justify-center rounded-full bg-surface/90 p-1 shadow-sm">
                             <PlatformLogo platform={video.platform} size={14} />
                           </span>
                           <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-gradient-to-t from-black/75 to-transparent p-2 text-xs font-medium text-white">
@@ -289,7 +289,7 @@ export default function CreatorProfileModal({
                   return (
                     <li
                       key={video.id}
-                      className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-[9/16] group"
+                      className="relative rounded-xl overflow-hidden border border-line bg-slate-900 aspect-[9/16] group"
                     >
                       {isLink ? (
                         <a
@@ -309,12 +309,12 @@ export default function CreatorProfileModal({
               </ul>
             </div>
           ) : (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-line bg-surface-sunken p-4">
               <div className="flex items-center gap-3">
-                <Play size={20} className="text-slate-400" />
+                <Play size={20} className="text-faint" />
                 <div>
-                  <p className="text-sm font-medium text-slate-700">No top posts yet</p>
-                  <p className="text-xs text-slate-500">This creator hasn&apos;t added their best performing content.</p>
+                  <p className="text-sm font-medium text-ink-soft">No top posts yet</p>
+                  <p className="text-xs text-muted">This creator hasn&apos;t added their best performing content.</p>
                 </div>
               </div>
             </div>
@@ -331,7 +331,7 @@ function SocialRow({ icon: Icon, label, handle, href, rawUrl, verified }) {
     <li className="flex items-center gap-2">
       <Icon
         size={14}
-        className={has ? "text-brand-skyDeep" : "text-slate-400"}
+        className={has ? "text-accent" : "text-faint"}
       />
       {has ? (
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -339,19 +339,19 @@ function SocialRow({ icon: Icon, label, handle, href, rawUrl, verified }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-brand-skyDeep hover:underline truncate"
+            className="text-accent hover:underline truncate"
           >
             {rawUrl ? handle : `@${handle}`}
           </a>
           {verified && (
-            <span className="inline-flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-0.5 text-xs text-success bg-success-soft px-1.5 py-0.5 rounded-full">
               <Check size={10} />
               Verified
             </span>
           )}
         </div>
       ) : (
-        <span className="text-slate-400">{label} not linked</span>
+        <span className="text-faint">{label} not linked</span>
       )}
     </li>
   );

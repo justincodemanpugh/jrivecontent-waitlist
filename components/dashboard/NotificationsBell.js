@@ -123,23 +123,23 @@ export default function NotificationsBell() {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-slate-100 transition"
+        className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-surface-hover transition"
       >
-        <Bell size={18} className="text-slate-600" />
+        <Bell size={18} className="text-muted" />
         {unreadCount > 0 && (
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-brand-skyDeep ring-2 ring-white" />
+          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent ring-2 ring-surface" />
         )}
       </button>
 
       {open && (
-        <div className="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 z-30 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <p className="text-sm font-semibold text-brand-ink">Notifications</p>
+        <div className="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface shadow-lg shadow-scrim/10 z-30 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+            <p className="text-sm font-semibold text-ink">Notifications</p>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={handleMarkAll}
-                className="text-xs font-medium text-brand-skyDeep hover:underline"
+                className="text-xs font-medium text-accent hover:underline"
               >
                 Mark all as read
               </button>
@@ -148,43 +148,43 @@ export default function NotificationsBell() {
 
           <div className="max-h-96 overflow-y-auto">
             {loading && items.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-slate-500">Loading…</p>
+              <p className="px-4 py-6 text-sm text-muted">Loading…</p>
             ) : items.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <p className="text-sm font-medium text-brand-ink">
+                <p className="text-sm font-medium text-ink">
                   You're all caught up
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   New activity will show up here.
                 </p>
               </div>
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-line">
                 {items.map((n) => (
                   <li key={n.id}>
                     <button
                       type="button"
                       onClick={() => handleClickItem(n)}
-                      className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition flex gap-3 ${
-                        n.read_at ? "" : "bg-brand-sky/5"
+                      className={`w-full text-left px-4 py-3 hover:bg-surface-sunken transition flex gap-3 ${
+                        n.read_at ? "" : "bg-accent-soft/5"
                       }`}
                     >
                       <span
                         className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                          n.read_at ? "bg-transparent" : "bg-brand-skyDeep"
+                          n.read_at ? "bg-transparent" : "bg-accent"
                         }`}
                       />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-baseline justify-between gap-2">
-                          <span className="text-sm font-semibold text-brand-ink truncate">
+                          <span className="text-sm font-semibold text-ink truncate">
                             {n.title}
                           </span>
-                          <span className="text-[11px] text-slate-400 shrink-0">
+                          <span className="text-[11px] text-faint shrink-0">
                             {timeAgo(n.created_at)}
                           </span>
                         </span>
                         {n.body && (
-                          <span className="block mt-0.5 text-xs text-slate-500 line-clamp-2">
+                          <span className="block mt-0.5 text-xs text-muted line-clamp-2">
                             {n.body}
                           </span>
                         )}

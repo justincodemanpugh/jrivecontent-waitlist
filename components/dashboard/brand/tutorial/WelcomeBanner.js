@@ -75,8 +75,8 @@ export default function WelcomeBanner({ brandName, onStartTour }) {
     >
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-sky/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-brand-skyDeep/20 rounded-full blur-3xl" />
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-accent-soft/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-accent/20 rounded-full blur-3xl" />
       </div>
 
       {/* Close button */}
@@ -91,7 +91,7 @@ export default function WelcomeBanner({ brandName, onStartTour }) {
       <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Icon */}
         <div className="flex-shrink-0">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-sky to-brand-skyDeep flex items-center justify-center shadow-lg shadow-brand-sky/30">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-soft to-accent flex items-center justify-center shadow-lg shadow-accent-soft/30">
             <Sparkles size={28} className="text-white" />
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function WelcomeBanner({ brandName, onStartTour }) {
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             onClick={handleStartTour}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-brand-ink text-sm font-semibold shadow-md hover:bg-slate-100 transition"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-surface text-ink text-sm font-semibold shadow-md hover:bg-surface-hover transition"
           >
             <Play size={16} className="fill-current" />
             Take a quick tour

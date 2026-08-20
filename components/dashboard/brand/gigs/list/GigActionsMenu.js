@@ -50,7 +50,7 @@ export default function GigActionsMenu({ gig, onView, onDeactivate, onDelete }) 
           stop(e);
           setOpen((o) => !o);
         }}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-white/70 hover:text-brand-ink transition"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface/70 hover:text-ink transition"
       >
         <MoreVertical size={16} />
       </button>
@@ -58,7 +58,7 @@ export default function GigActionsMenu({ gig, onView, onDeactivate, onDelete }) 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+          className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
         >
           <MenuItem icon={Eye} label="View" onClick={run(onView)} />
           {gig.isActive ? (
@@ -90,8 +90,8 @@ function MenuItem({ icon: Icon, label, onClick, destructive }) {
       className={[
         "flex w-full items-center gap-2 px-3 py-2 text-sm transition",
         destructive
-          ? "text-rose-600 hover:bg-rose-50"
-          : "text-brand-ink hover:bg-slate-50",
+          ? "text-danger hover:bg-danger-soft"
+          : "text-ink hover:bg-surface-sunken",
       ].join(" ")}
     >
       <Icon size={14} />

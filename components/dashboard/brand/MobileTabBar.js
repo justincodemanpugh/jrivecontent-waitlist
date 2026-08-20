@@ -25,13 +25,13 @@ export default function MobileTabBar() {
   const isActive = (t) => (t.exact ? pathname === t.href : pathname.startsWith(t.href));
 
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-white border-t border-slate-200">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-surface border-t border-line">
       <ul className="grid grid-cols-4 h-full">
         {TABS.map((t) => {
           const Icon = t.icon;
           const active = isActive(t) && !t.comingSoon;
           const className = `w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] ${
-            active ? "text-brand-skyDeep" : "text-slate-500"
+            active ? "text-accent" : "text-muted"
           }`;
           return (
             <li key={t.href}>
@@ -45,7 +45,7 @@ export default function MobileTabBar() {
                     <Icon size={18} />
                     <Lock
                       size={10}
-                      className="absolute -right-1.5 -top-1 text-slate-400"
+                      className="absolute -right-1.5 -top-1 text-faint"
                     />
                   </span>
                   {t.label}

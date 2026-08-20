@@ -29,14 +29,14 @@ export default function GigListCard({ gig, onDeactivate, onDelete }) {
         }
       }}
       className={[
-        "group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border bg-white transition",
-        "border-slate-200 hover:border-brand-sky hover:-translate-y-0.5",
+        "group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border bg-surface transition",
+        "border-line hover:border-accent-soft hover:-translate-y-0.5",
         !gig.isActive ? "opacity-80" : "",
       ].join(" ")}
     >
       <div
         className={`relative h-28 overflow-hidden ${
-          gig.coverImageUrl ? "bg-slate-100" : `bg-gradient-to-br ${gig.cover}`
+          gig.coverImageUrl ? "bg-surface-hover" : `bg-gradient-to-br ${gig.cover}`
         }`}
       >
         {gig.coverImageUrl ? (
@@ -54,7 +54,7 @@ export default function GigListCard({ gig, onDeactivate, onDelete }) {
         </span>
 
         {!gig.isActive && (
-          <span className="absolute left-3 top-10 inline-flex items-center rounded-full border border-slate-300 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+          <span className="absolute left-3 top-10 inline-flex items-center rounded-full border border-line-strong bg-surface/80 px-2 py-0.5 text-[11px] font-medium text-muted">
             Deactivated
           </span>
         )}
@@ -70,19 +70,19 @@ export default function GigListCard({ gig, onDeactivate, onDelete }) {
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-semibold leading-snug text-brand-ink transition group-hover:text-brand-skyDeep">
+        <h3 className="font-semibold leading-snug text-ink transition group-hover:text-accent">
           {gig.title}
         </h3>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted">
           <span className="inline-flex items-center gap-1">
-            <DollarSign size={13} className="text-slate-400" />${gig.budget}
+            <DollarSign size={13} className="text-faint" />${gig.budget}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Clock size={13} className="text-slate-400" />
+            <Clock size={13} className="text-faint" />
             {gig.deadline}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Users size={13} className="text-slate-400" />
+            <Users size={13} className="text-faint" />
             {gig.applicants}{" "}
             {gig.applicants === 1 ? "applicant" : "applicants"}
           </span>
@@ -104,19 +104,19 @@ function UsageRightsBadges({ usageRights }) {
   return (
     <div className="mt-2 flex flex-wrap gap-1">
       {hasFullRights ? (
-        <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-plum-soft px-2 py-0.5 text-[10px] font-medium text-plum">
           <Shield size={10} />
           Full Rights
         </span>
       ) : (
         <>
           {hasPaidAds && (
-            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+            <span className="inline-flex items-center rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-medium text-success">
               💰 Paid Ads
             </span>
           )}
           {hasWhitelisting && (
-            <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+            <span className="inline-flex items-center rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-medium text-info">
               ⚡ Whitelist
             </span>
           )}

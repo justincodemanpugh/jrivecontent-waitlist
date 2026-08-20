@@ -29,7 +29,7 @@ export default function StepDeliverables({ form, update }) {
     >
       {/* Video quantity */}
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1.5">
+        <label className="block text-sm font-medium text-ink mb-1.5">
           How many videos?
         </label>
         <div className="flex flex-wrap gap-2">
@@ -43,8 +43,8 @@ export default function StepDeliverables({ form, update }) {
                 className={[
                   "rounded-full px-4 py-2 text-sm font-medium border transition",
                   active
-                    ? "bg-brand-ink text-white border-brand-ink"
-                    : "bg-white text-brand-ink border-slate-200 hover:border-brand-sky",
+                    ? "bg-ink text-on-accent border-ink"
+                    : "bg-surface text-ink border-line hover:border-accent-soft",
                 ].join(" ")}
               >
                 {p} videos
@@ -53,11 +53,11 @@ export default function StepDeliverables({ form, update }) {
           })}
         </div>
         <div className="mt-3 max-w-[12rem]">
-          <label className="block text-xs font-medium text-slate-500 mb-1">
+          <label className="block text-xs font-medium text-muted mb-1">
             Or enter a custom amount
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-faint">
               <Film size={16} />
             </span>
             <input
@@ -73,10 +73,10 @@ export default function StepDeliverables({ form, update }) {
                 })
               }
               className={[
-                "w-full rounded-xl border bg-white pl-9 pr-4 py-2.5 text-sm font-semibold text-brand-ink outline-none transition focus:ring-2 focus:ring-brand-sky/30",
+                "w-full rounded-xl border bg-surface pl-9 pr-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:ring-2 focus:ring-accent-soft/30",
                 !isPreset && quantity !== ""
-                  ? "border-brand-skyDeep"
-                  : "border-slate-200 focus:border-brand-skyDeep",
+                  ? "border-accent"
+                  : "border-line focus:border-accent",
               ].join(" ")}
             />
           </div>
@@ -85,10 +85,10 @@ export default function StepDeliverables({ form, update }) {
 
       {/* Platforms */}
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1.5">
+        <label className="block text-sm font-medium text-ink mb-1.5">
           Where should they post?
         </label>
-        <p className="text-xs text-slate-400 mb-2">Pick one or more platforms.</p>
+        <p className="text-xs text-faint mb-2">Pick one or more platforms.</p>
         <div className="flex flex-wrap gap-2">
           {PLATFORMS.map((p) => {
             const active =
@@ -101,8 +101,8 @@ export default function StepDeliverables({ form, update }) {
                 className={[
                   "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium border transition",
                   active
-                    ? "bg-brand-mist text-brand-skyDeep border-brand-sky"
-                    : "bg-white text-brand-ink border-slate-200 hover:border-brand-sky",
+                    ? "bg-accent-tint text-accent border-accent-soft"
+                    : "bg-surface text-ink border-line hover:border-accent-soft",
                 ].join(" ")}
               >
                 {active && <Check size={14} />}
@@ -115,7 +115,7 @@ export default function StepDeliverables({ form, update }) {
 
       {/* Content type */}
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1.5">
+        <label className="block text-sm font-medium text-ink mb-1.5">
           What type of content?
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -129,8 +129,8 @@ export default function StepDeliverables({ form, update }) {
                 className={[
                   "rounded-xl px-3 py-2.5 text-sm font-medium border text-center transition",
                   active
-                    ? "bg-brand-ink text-white border-brand-ink"
-                    : "bg-white text-brand-ink border-slate-200 hover:border-brand-sky",
+                    ? "bg-ink text-on-accent border-ink"
+                    : "bg-surface text-ink border-line hover:border-accent-soft",
                 ].join(" ")}
               >
                 {c.label}

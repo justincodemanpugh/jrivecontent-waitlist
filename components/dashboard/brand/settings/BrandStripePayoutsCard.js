@@ -100,17 +100,17 @@ export default function BrandStripePayoutsCard({ initial }) {
   const ready = hasAccount && chargesEnabled;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+    <div className="rounded-2xl border border-line bg-surface p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-tint text-accent">
             <CreditCard size={18} />
           </span>
           <div className="min-w-0">
-            <h3 className="text-base font-semibold text-brand-ink">
+            <h3 className="text-base font-semibold text-ink">
               Escrow account
             </h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-muted">
               {ready
                 ? "Your Stripe account is connected. Gig deposits go here and we release the per-video share to the creator when you approve."
                 : hasAccount
@@ -123,18 +123,18 @@ export default function BrandStripePayoutsCard({ initial }) {
       </div>
 
       {!ready && (
-        <ul className="mt-4 space-y-2 text-sm text-slate-600">
+        <ul className="mt-4 space-y-2 text-sm text-muted">
           <li className="flex items-start gap-2">
-            <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+            <ShieldCheck size={16} className="mt-0.5 text-accent" />
             Free to set up. Stripe handles KYC and verification.
           </li>
           <li className="flex items-start gap-2">
-            <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+            <ShieldCheck size={16} className="mt-0.5 text-accent" />
             Funds stay in <em>your</em> Stripe balance until you approve a
             video — not in a shared platform pool.
           </li>
           <li className="flex items-start gap-2">
-            <ShieldCheck size={16} className="mt-0.5 text-brand-skyDeep" />
+            <ShieldCheck size={16} className="mt-0.5 text-accent" />
             On approval, the creator's share is transferred instantly. We
             keep our 15% as a platform fee.
           </li>
@@ -142,13 +142,13 @@ export default function BrandStripePayoutsCard({ initial }) {
       )}
 
       {banner && (
-        <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        <p className="mt-4 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-ink-soft">
           {banner}
         </p>
       )}
 
       {err && (
-        <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="mt-4 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err}
         </p>
       )}
@@ -195,20 +195,20 @@ export default function BrandStripePayoutsCard({ initial }) {
 function StatusPill({ ready, hasAccount }) {
   if (ready) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-1 text-xs font-semibold text-success">
         <CheckCircle2 size={12} /> Active
       </span>
     );
   }
   if (hasAccount) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-warn-soft px-2.5 py-1 text-xs font-semibold text-warn">
         <AlertCircle size={12} /> Action needed
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+    <span className="inline-flex items-center gap-1 rounded-full bg-surface-hover px-2.5 py-1 text-xs font-semibold text-muted">
       Not connected
     </span>
   );

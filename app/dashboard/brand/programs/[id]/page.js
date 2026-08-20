@@ -11,7 +11,7 @@ export default function ProgramDetailPage() {
 
   return (
     <ProgramsShell title="Program">
-      <Suspense fallback={<div className="animate-pulse h-96 bg-slate-100 rounded-2xl" />}>
+      <Suspense fallback={<div className="animate-pulse h-96 bg-surface-hover rounded-2xl" />}>
         <ProgramDetailView programId={programId} />
       </Suspense>
     </ProgramsShell>

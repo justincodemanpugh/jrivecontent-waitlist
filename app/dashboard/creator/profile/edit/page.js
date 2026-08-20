@@ -46,12 +46,12 @@ export default async function CreatorProfileEditPage() {
       <main className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-3xl mx-auto space-y-6">
         <Link
           href="/dashboard/creator/profile"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-brand-skyDeep"
+          className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-accent"
         >
           <ArrowLeft size={14} /> Back to profile
         </Link>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-6">
+        <div className="rounded-2xl border border-line bg-surface p-6 space-y-6">
           <CoverPhotoUploader
             userId={user.id}
             initialUrl={profile?.cover_photo_url || null}

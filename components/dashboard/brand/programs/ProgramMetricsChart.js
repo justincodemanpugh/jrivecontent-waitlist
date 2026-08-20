@@ -13,7 +13,8 @@ function formatDay(iso) {
 }
 
 // Lightweight dual-series area chart (Views + Posted Videos), drawn as inline
-// SVG — no charting dependency. Light theme to match the rest of the dashboard.
+// SVG — no charting dependency. Colours come from the theme tokens via
+// fill-*/stroke-* utilities so the chart follows light and dark mode.
 // Views use the left axis, posted videos the right axis (each scaled to its own
 // max), mirroring ViralApp's Metrics panel.
 export default function ProgramMetricsChart({ series = [] }) {
@@ -45,19 +46,19 @@ export default function ProgramMetricsChart({ series = [] }) {
   const xLabelIdx = n > 1 ? [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1] : [0];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+    <section className="rounded-2xl border border-line bg-surface">
+      <div className="px-5 py-4 border-b border-line flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BarChart3 size={15} className="text-brand-skyDeep" />
-          <h2 className="text-sm font-semibold text-brand-ink">Metrics</h2>
+          <BarChart3 size={15} className="text-accent" />
+          <h2 className="text-sm font-semibold text-ink">Metrics</h2>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 text-slate-600">
-            <span className="h-2.5 w-2.5 rounded-sm bg-violet-500" />
+          <span className="flex items-center gap-1.5 text-muted">
+            <span className="h-2.5 w-2.5 rounded-sm bg-plum-solid" />
             Views
           </span>
-          <span className="flex items-center gap-1.5 text-slate-600">
-            <span className="h-2.5 w-2.5 rounded-sm bg-brand-skyDeep" />
+          <span className="flex items-center gap-1.5 text-muted">
+            <span className="h-2.5 w-2.5 rounded-sm bg-accent" />
             Posted Videos
           </span>
         </div>
@@ -66,7 +67,7 @@ export default function ProgramMetricsChart({ series = [] }) {
       <div className="relative px-3 py-4">
         {!hasData && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <p className="text-sm text-slate-400 bg-white/70 px-3 py-1.5 rounded-lg">
+            <p className="text-sm text-faint bg-surface/70 px-3 py-1.5 rounded-lg">
               No performance data yet — connect a creator&apos;s TikTok to start tracking.
             </p>
           </div>
@@ -77,11 +78,11 @@ export default function ProgramMetricsChart({ series = [] }) {
             const y = mT + innerH - g * innerH;
             return (
               <g key={g}>
-                <line x1={mL} y1={y} x2={W - mR} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={mL - 8} y={y + 3} textAnchor="end" fontSize="10" fill="#94a3b8">
+                <line x1={mL} y1={y} x2={W - mR} y2={y} className="stroke-line" strokeWidth="1" />
+                <text x={mL - 8} y={y + 3} textAnchor="end" fontSize="10" className="fill-faint">
                   {formatCompact(viewsMax * g)}
                 </text>
-                <text x={W - mR + 8} y={y + 3} textAnchor="start" fontSize="10" fill="#94a3b8">
+                <text x={W - mR + 8} y={y + 3} textAnchor="start" fontSize="10" className="fill-faint">
                   {formatCompact(videosMax * g)}
                 </text>
               </g>
@@ -89,21 +90,21 @@ export default function ProgramMetricsChart({ series = [] }) {
           })}
 
           {/* Views area (left axis) */}
-          <path d={areaPath((s) => s.views, yViews)} fill="rgba(139,92,246,0.12)" />
+          <path d={areaPath((s) => s.views, yViews)} className="fill-plum-solid/10" />
           <path
             d={linePath((s) => s.views, yViews)}
             fill="none"
-            stroke="#8b5cf6"
+            className="stroke-plum-solid"
             strokeWidth="2"
             strokeLinejoin="round"
           />
 
           {/* Posted Videos area (right axis) */}
-          <path d={areaPath((s) => s.postedVideos, yVideos)} fill="rgba(56,189,248,0.14)" />
+          <path d={areaPath((s) => s.postedVideos, yVideos)} className="fill-accent/15" />
           <path
             d={linePath((s) => s.postedVideos, yVideos)}
             fill="none"
-            stroke="#38BDF8"
+            className="stroke-accent"
             strokeWidth="2"
             strokeLinejoin="round"
           />
@@ -116,7 +117,7 @@ export default function ProgramMetricsChart({ series = [] }) {
               y={H - 10}
               textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"}
               fontSize="10"
-              fill="#94a3b8"
+              className="fill-faint"
             >
               {series[i] ? formatDay(series[i].date) : ""}
             </text>

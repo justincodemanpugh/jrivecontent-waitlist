@@ -55,16 +55,16 @@ export default function StepExamples({ form, update }) {
           {form.examples.map((ex, i) => (
             <li
               key={i}
-              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"
+              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
             >
-              <span className="h-9 w-9 rounded-lg bg-brand-mist text-brand-skyDeep flex items-center justify-center shrink-0">
+              <span className="h-9 w-9 rounded-lg bg-accent-tint text-accent flex items-center justify-center shrink-0">
                 {ex.type === "url" ? <Link2 size={16} /> : <Video size={16} />}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-brand-ink truncate">
+                <p className="text-sm font-medium text-ink truncate">
                   {ex.value}
                 </p>
-                <p className="text-xs text-slate-500 capitalize">
+                <p className="text-xs text-muted capitalize">
                   {ex.type === "url" ? "Link" : "Uploaded video"}
                 </p>
               </div>
@@ -72,7 +72,7 @@ export default function StepExamples({ form, update }) {
                 type="button"
                 onClick={() => remove(i)}
                 aria-label="Remove"
-                className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center"
+                className="h-8 w-8 rounded-full hover:bg-surface-hover text-muted flex items-center justify-center"
               >
                 <X size={16} />
               </button>
@@ -85,7 +85,7 @@ export default function StepExamples({ form, update }) {
         <>
           {/* URL input */}
           <div>
-            <label className="block text-sm font-medium text-brand-ink mb-1.5">
+            <label className="block text-sm font-medium text-ink mb-1.5">
               Paste a TikTok, Reel, or YouTube link
             </label>
             <div className="flex gap-2">
@@ -95,13 +95,13 @@ export default function StepExamples({ form, update }) {
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addUrl())}
                 placeholder="https://www.tiktok.com/@user/video/..."
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-brand-skyDeep focus:ring-2 focus:ring-brand-sky/30 outline-none transition"
+                className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm focus:border-accent focus:ring-2 focus:ring-accent-soft/30 outline-none transition"
               />
               <button
                 type="button"
                 onClick={addUrl}
                 disabled={!url.trim()}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-ink text-white px-4 text-sm font-medium hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-ink text-on-accent px-4 text-sm font-medium hover:bg-ink/90 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
                 <Plus size={16} />
                 Add
@@ -110,10 +110,10 @@ export default function StepExamples({ form, update }) {
           </div>
 
           {/* Divider */}
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <span className="flex-1 h-px bg-slate-200" />
+          <div className="flex items-center gap-3 text-xs text-faint">
+            <span className="flex-1 h-px bg-surface-hover" />
             or
-            <span className="flex-1 h-px bg-slate-200" />
+            <span className="flex-1 h-px bg-surface-hover" />
           </div>
 
           {/* Upload */}
@@ -128,16 +128,16 @@ export default function StepExamples({ form, update }) {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="w-full rounded-xl border-2 border-dashed border-slate-200 hover:border-brand-sky hover:bg-brand-mist/40 transition flex items-center justify-center gap-2 py-5 text-sm font-medium text-brand-ink"
+              className="w-full rounded-xl border-2 border-dashed border-line hover:border-accent-soft hover:bg-accent-tint/40 transition flex items-center justify-center gap-2 py-5 text-sm font-medium text-ink"
             >
-              <Upload size={16} className="text-brand-skyDeep" />
+              <Upload size={16} className="text-accent" />
               Upload a video file
             </button>
           </div>
         </>
       )}
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-faint">
         {form.examples.length}/{MAX_EXAMPLES} added
       </p>
     </StepShell>

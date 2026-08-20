@@ -10,7 +10,7 @@ function formatTime(iso) {
 
 function Avatar({ url, initials }) {
   return (
-    <span className="h-7 w-7 rounded-full bg-brand-sky text-white text-[11px] font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden self-end mb-5">
+    <span className="h-7 w-7 rounded-full bg-accent-soft text-on-accent text-[11px] font-semibold inline-flex items-center justify-center shrink-0 overflow-hidden self-end mb-5">
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt="" className="h-full w-full object-cover" />
@@ -31,7 +31,7 @@ export default function MessageBubble({
   if (message.kind === "system") {
     return (
       <div className="flex justify-center my-2">
-        <span className="text-[11px] uppercase tracking-wide text-slate-400 bg-slate-100 rounded-full px-3 py-1">
+        <span className="text-[11px] uppercase tracking-wide text-faint bg-surface-hover rounded-full px-3 py-1">
           {message.body}
         </span>
       </div>
@@ -51,15 +51,15 @@ export default function MessageBubble({
               className={[
                 "rounded-2xl px-4 py-2 text-sm",
                 isMine
-                  ? "bg-brand-ink text-white rounded-br-md"
-                  : "bg-white border border-slate-200 text-brand-ink rounded-bl-md",
+                  ? "bg-ink text-on-accent rounded-br-md"
+                  : "bg-surface border border-line text-ink rounded-bl-md",
               ].join(" ")}
             >
               {message.body}
             </div>
           ) : null}
           {children}
-          <span className="text-[10px] text-slate-400 px-1">
+          <span className="text-[10px] text-faint px-1">
             {formatTime(message.created_at)}
           </span>
         </div>
@@ -77,14 +77,14 @@ export default function MessageBubble({
           className={[
             "rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap break-words",
             isMine
-              ? "bg-brand-ink text-white rounded-br-md"
-              : "bg-white border border-slate-200 text-brand-ink rounded-bl-md",
+              ? "bg-ink text-on-accent rounded-br-md"
+              : "bg-surface border border-line text-ink rounded-bl-md",
           ].join(" ")}
         >
           {message.body}
         </div>
         <span
-          className={`text-[10px] text-slate-400 px-1 ${
+          className={`text-[10px] text-faint px-1 ${
             isMine ? "text-right" : "text-left"
           }`}
         >

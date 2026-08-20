@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Sidebar from "@/components/dashboard/brand/Sidebar";
 import MobileTabBar from "@/components/dashboard/brand/MobileTabBar";
 import { BrandProvider } from "@/components/dashboard/brand/BrandProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -38,13 +39,15 @@ export default async function BrandDashboardLayout({ children }) {
 
   return (
     <BrandProvider value={brandValue}>
-      <div className="min-h-screen bg-brand-mist/40">
-        <Sidebar />
-        <div className="lg:pl-64">{children}</div>
-        <MobileTabBar />
-        {/* Spacer so mobile tab bar doesn't cover content */}
-        <div className="h-16 lg:hidden" />
-      </div>
+      <ThemeProvider>
+        <div className="min-h-screen bg-surface-sunken text-ink">
+          <Sidebar />
+          <div className="lg:pl-64">{children}</div>
+          <MobileTabBar />
+          {/* Spacer so mobile tab bar doesn't cover content */}
+          <div className="h-16 lg:hidden" />
+        </div>
+      </ThemeProvider>
     </BrandProvider>
   );
 }

@@ -117,10 +117,10 @@ export default function BrandGigsPage() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-brand-ink md:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">
               My gigs
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-muted">
               Manage what&apos;s live and what&apos;s been wrapped up.
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function BrandGigsPage() {
             href="/dashboard/brand/gigs/new"
             onClick={handleNewGig}
             data-tour="new-gig-button"
-            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-ink/90"
           >
             {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
             New gig
@@ -138,13 +138,13 @@ export default function BrandGigsPage() {
         <GigsTabs value={tab} onChange={setTab} counts={counts} />
 
         {loadError && (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
             {loadError}
           </p>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-slate-400">
+          <div className="flex items-center justify-center py-16 text-faint">
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : visible.length === 0 ? (
@@ -169,13 +169,13 @@ export default function BrandGigsPage() {
         description={
           <div className="space-y-2">
             <p>
-              <span className="font-medium text-brand-ink">
+              <span className="font-medium text-ink">
                 {pendingDeactivate?.title}
               </span>{" "}
               will be removed from the creator marketplace and any open
               applications will be notified that it&apos;s closed.
             </p>
-            <p className="text-slate-500">
+            <p className="text-muted">
               You can delete it permanently afterward. Gigs can&apos;t be
               reactivated or edited once published.
             </p>
@@ -191,7 +191,7 @@ export default function BrandGigsPage() {
         title="Delete this gig?"
         description={
           <p>
-            <span className="font-medium text-brand-ink">
+            <span className="font-medium text-ink">
               {pendingDelete?.title}
             </span>{" "}
             will be permanently deleted. This can&apos;t be undone.
@@ -209,14 +209,14 @@ export default function BrandGigsPage() {
 function EmptyTab({ tab, canPostGig }) {
   const isActive = tab === "active";
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/60 px-6 py-16 text-center">
-      <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-mist text-brand-skyDeep">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-16 text-center">
+      <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent-tint text-accent">
         <Inbox size={20} />
       </div>
-      <h3 className="text-sm font-semibold text-brand-ink">
+      <h3 className="text-sm font-semibold text-ink">
         {isActive ? "No active gigs yet" : "Nothing deactivated"}
       </h3>
-      <p className="mt-1 max-w-sm text-sm text-slate-500">
+      <p className="mt-1 max-w-sm text-sm text-muted">
         {isActive
           ? "Post your first gig and creators can start applying within minutes."
           : "Gigs you deactivate will show up here."}
@@ -224,7 +224,7 @@ function EmptyTab({ tab, canPostGig }) {
       {isActive && (
         <Link
           href={canPostGig === false ? "/dashboard/brand/pricing?from=post-gig&trial=true" : "/dashboard/brand/gigs/new"}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent transition hover:bg-ink/90"
         >
           {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
           {canPostGig === false ? "Start Free Trial" : "New gig"}

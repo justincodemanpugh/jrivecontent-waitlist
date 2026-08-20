@@ -23,7 +23,7 @@ export default function ExampleVideosSection({ examples }) {
 
   return (
     <section>
-      <h2 className="text-sm font-semibold text-brand-ink mb-2">
+      <h2 className="text-sm font-semibold text-ink mb-2">
         Example videos
       </h2>
 
@@ -58,12 +58,12 @@ export default function ExampleVideosSection({ examples }) {
                     href={value}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-brand-skyDeep hover:underline break-all"
+                    className="text-accent hover:underline break-all"
                   >
                     {value}
                   </a>
                 ) : (
-                  <span className="text-slate-600">{value}</span>
+                  <span className="text-muted">{value}</span>
                 )}
               </li>
             );

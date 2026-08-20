@@ -38,7 +38,7 @@ export default function ApplicantsList({ gigId, brandId }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-slate-400">
+      <div className="flex items-center justify-center py-16 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -46,7 +46,7 @@ export default function ApplicantsList({ gigId, brandId }) {
 
   if (err) {
     return (
-      <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+      <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
         {err}
       </p>
     );
@@ -54,14 +54,14 @@ export default function ApplicantsList({ gigId, brandId }) {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep mb-3">
+      <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tint text-accent mb-3">
           <Inbox size={20} />
         </span>
-        <h3 className="text-sm font-semibold text-brand-ink">
+        <h3 className="text-sm font-semibold text-ink">
           No applicants yet
         </h3>
-        <p className="mt-1 max-w-sm text-sm text-slate-500 mx-auto">
+        <p className="mt-1 max-w-sm text-sm text-muted mx-auto">
           As creators apply, they&apos;ll show up here so you can review and
           accept.
         </p>

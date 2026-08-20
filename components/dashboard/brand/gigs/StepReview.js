@@ -20,15 +20,15 @@ export default function StepReview({ form, goToStep }) {
       subtitle="This is exactly what creators will see. Edit anything before you publish."
     >
       {/* Mode toggle */}
-      <div className="inline-flex rounded-full bg-slate-100 p-1 text-sm">
+      <div className="inline-flex rounded-full bg-surface-hover p-1 text-sm">
         <button
           type="button"
           onClick={() => setMode("summary")}
           className={[
             "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition",
             mode === "summary"
-              ? "bg-white text-brand-ink shadow-sm"
-              : "text-slate-500 hover:text-brand-ink",
+              ? "bg-surface text-ink shadow-sm"
+              : "text-muted hover:text-ink",
           ].join(" ")}
         >
           <CheckCircle2 size={14} />
@@ -40,8 +40,8 @@ export default function StepReview({ form, goToStep }) {
           className={[
             "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition",
             mode === "creator"
-              ? "bg-white text-brand-ink shadow-sm"
-              : "text-slate-500 hover:text-brand-ink",
+              ? "bg-surface text-ink shadow-sm"
+              : "text-muted hover:text-ink",
           ].join(" ")}
         >
           <Eye size={14} />
@@ -54,7 +54,7 @@ export default function StepReview({ form, goToStep }) {
           <GigPreviewCard form={form} />
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+        <div className="divide-y divide-line rounded-xl border border-line bg-surface">
           <ReviewRow
             label="Job title"
             value={form.title}
@@ -127,12 +127,12 @@ function ReviewRow({ label, value, onEdit, multiline }) {
   return (
     <div className="flex items-start justify-between gap-4 p-4">
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-faint">
           {label}
         </p>
         <p
           className={[
-            "mt-1 text-sm text-brand-ink",
+            "mt-1 text-sm text-ink",
             multiline ? "whitespace-pre-wrap" : "truncate",
           ].join(" ")}
         >
@@ -142,7 +142,7 @@ function ReviewRow({ label, value, onEdit, multiline }) {
       <button
         type="button"
         onClick={onEdit}
-        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-brand-skyDeep hover:text-brand-ink transition"
+        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-accent hover:text-ink transition"
       >
         <Edit3 size={13} />
         Edit

@@ -92,8 +92,8 @@ export default function MyCreatorsView() {
           onClick={() => setFilter("all")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition ${
             filter === "all"
-              ? "bg-brand-ink text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-ink text-on-accent"
+              : "bg-surface-hover text-muted hover:bg-surface-hover"
           }`}
         >
           <Users size={14} />
@@ -103,8 +103,8 @@ export default function MyCreatorsView() {
           onClick={() => setFilter("active")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition ${
             filter === "active"
-              ? "bg-emerald-600 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-success-solid text-white"
+              : "bg-surface-hover text-muted hover:bg-surface-hover"
           }`}
         >
           <CheckCircle2 size={14} />
@@ -114,8 +114,8 @@ export default function MyCreatorsView() {
           onClick={() => setFilter("pending")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition ${
             filter === "pending"
-              ? "bg-amber-500 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-warn-solid text-white"
+              : "bg-surface-hover text-muted hover:bg-surface-hover"
           }`}
         >
           <Clock size={14} />
@@ -125,14 +125,14 @@ export default function MyCreatorsView() {
 
       {/* Search + Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 rounded-2xl border border-slate-200 bg-white p-3 flex items-center gap-2">
-          <Search size={16} className="text-slate-400 ml-1" />
+        <div className="flex-1 rounded-2xl border border-line bg-surface p-3 flex items-center gap-2">
+          <Search size={16} className="text-faint ml-1" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search your creators..."
-            className="flex-1 bg-transparent text-sm text-brand-ink placeholder:text-slate-400 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-ink placeholder:text-faint focus:outline-none"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function MyCreatorsView() {
           <button
             type="button"
             onClick={() => setComingSoon(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand-ink hover:bg-slate-50 transition"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-surface-sunken transition"
           >
             <UserPlus size={14} />
             Add Creators
@@ -150,24 +150,24 @@ export default function MyCreatorsView() {
 
       {/* Body */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-slate-400">
+        <div className="flex items-center justify-center py-20 text-faint">
           <Loader2 size={20} className="animate-spin" />
         </div>
       ) : err ? (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err}
         </p>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep mb-3">
+        <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tint text-accent mb-3">
             <Users size={20} />
           </span>
-          <h2 className="text-lg font-semibold text-brand-ink">
+          <h2 className="text-lg font-semibold text-ink">
             {creators.length === 0
               ? "No creators yet"
               : "No creators match your search"}
           </h2>
-          <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
+          <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
             {creators.length === 0
               ? "Browse creators and send connection requests to build your roster."
               : "Try a different keyword or clear filters."}
@@ -176,7 +176,7 @@ export default function MyCreatorsView() {
             <button
               type="button"
               onClick={() => setComingSoon(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-ink text-white px-5 py-2.5 text-sm font-medium hover:bg-slate-800 transition"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
             >
               <UserPlus size={16} />
               Browse Creators

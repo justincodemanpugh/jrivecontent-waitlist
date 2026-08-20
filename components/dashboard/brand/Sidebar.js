@@ -80,12 +80,12 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white z-40">
+    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-line bg-surface z-40">
       {/* Logo */}
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
+      <div className="h-16 flex items-center gap-2 px-6 border-b border-line">
         <Logo size={32} />
         <span className="font-semibold tracking-tight">
-          Jrive<span className="text-brand-skyDeep">Content</span>
+          Jrive<span className="text-accent">Content</span>
         </span>
       </div>
 
@@ -93,7 +93,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-5 space-y-5 overflow-y-auto">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
               {group.label}
             </p>
             <div className="space-y-1">
@@ -104,8 +104,8 @@ export default function Sidebar() {
                 const href = locked ? "/dashboard/brand/pricing" : item.href;
                 const className = `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                   active && !item.comingSoon
-                    ? "bg-brand-mist text-brand-ink"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+                    ? "bg-accent-tint text-ink"
+                    : "text-muted hover:bg-surface-sunken hover:text-ink"
                 }`;
 
                 if (item.comingSoon) {
@@ -117,9 +117,9 @@ export default function Sidebar() {
                       onClick={() => setComingSoon(item.label)}
                       className={className}
                     >
-                      <Icon size={18} className="text-slate-400" />
+                      <Icon size={18} className="text-faint" />
                       <span className="flex-1 text-left">{item.label}</span>
-                      <Lock size={14} className="text-slate-400" />
+                      <Lock size={14} className="text-faint" />
                     </button>
                   );
                 }
@@ -133,10 +133,10 @@ export default function Sidebar() {
                   >
                     <Icon
                       size={18}
-                      className={active ? "text-brand-skyDeep" : "text-slate-400"}
+                      className={active ? "text-accent" : "text-faint"}
                     />
                     <span className="flex-1">{item.label}</span>
-                    {locked && <Lock size={14} className="text-slate-400" />}
+                    {locked && <Lock size={14} className="text-faint" />}
                   </Link>
                 );
               })}
@@ -146,17 +146,17 @@ export default function Sidebar() {
       </nav>
 
       {/* Upgrade to Pro */}
-      <div className="px-3 pb-3 border-t border-slate-200 pt-3">
+      <div className="px-3 pb-3 border-t border-line pt-3">
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
           data-tour="upgrade-button"
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-brand-sky/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-accent-soft/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Sparkles size={16} />
           {upgrading ? "Redirecting..." : "Start Free Trial"}
         </button>
-        <p className="mt-1.5 text-center text-[11px] text-slate-500">
+        <p className="mt-1.5 text-center text-[11px] text-muted">
           3 days free · then $25/mo
         </p>
       </div>
@@ -167,11 +167,11 @@ export default function Sidebar() {
           href="/dashboard/brand/settings"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
             pathname.startsWith("/dashboard/brand/settings")
-              ? "bg-brand-mist text-brand-ink"
-              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+              ? "bg-accent-tint text-ink"
+              : "text-muted hover:bg-surface-sunken hover:text-ink"
           }`}
         >
-          <Settings size={18} className="text-slate-400" />
+          <Settings size={18} className="text-faint" />
           Settings
         </Link>
       </div>

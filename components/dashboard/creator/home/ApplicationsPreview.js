@@ -4,10 +4,10 @@ import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 const STATUS_META = {
-  pending: { label: "Pending review", classes: "bg-slate-100 text-slate-600 border-slate-200" },
-  accepted: { label: "Accepted", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  declined: { label: "Declined", classes: "bg-rose-50 text-rose-700 border-rose-200" },
-  withdrawn: { label: "Withdrawn", classes: "bg-slate-100 text-slate-500 border-slate-200" },
+  pending: { label: "Pending review", classes: "bg-surface-hover text-muted border-line" },
+  accepted: { label: "Accepted", classes: "bg-success-soft text-success border-success-line" },
+  declined: { label: "Declined", classes: "bg-danger-soft text-danger border-danger-line" },
+  withdrawn: { label: "Withdrawn", classes: "bg-surface-hover text-muted border-line" },
 };
 
 function timeAgo(iso) {
@@ -34,33 +34,33 @@ export default function ApplicationsPreview({
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold text-brand-ink">
+        <h2 className="text-base font-semibold text-ink">
           Your applications
         </h2>
         <Link
           href="/dashboard/creator/applications"
-          className="text-sm text-brand-skyDeep hover:underline inline-flex items-center gap-1"
+          className="text-sm text-accent hover:underline inline-flex items-center gap-1"
         >
           View all <ArrowRight size={14} />
         </Link>
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 flex items-center justify-center text-slate-400">
+        <div className="rounded-2xl border border-line bg-surface p-8 flex items-center justify-center text-faint">
           <Loader2 size={18} className="animate-spin" />
         </div>
       ) : error ? (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {error}
         </p>
       ) : applications.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
+          <p className="text-sm text-muted">
             You haven&apos;t applied to any gigs yet.
           </p>
           <Link
             href="/dashboard/creator/explore"
-            className="mt-3 inline-flex items-center rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-3 inline-flex items-center rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent hover:bg-ink/90"
           >
             Explore gigs
           </Link>
@@ -72,16 +72,16 @@ export default function ApplicationsPreview({
             return (
               <li
                 key={a.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between gap-4"
+                className="rounded-2xl border border-line bg-surface p-4 flex items-center justify-between gap-4"
               >
                 <Link
                   href={`/dashboard/creator/explore/${a.gig_id}`}
                   className="min-w-0 flex-1 group"
                 >
-                  <p className="font-medium text-brand-ink truncate group-hover:text-brand-skyDeep transition">
+                  <p className="font-medium text-ink truncate group-hover:text-accent transition">
                     {a.gig?.title || "Gig"}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-xs text-muted truncate">
                     {a.gig?.brand_name || "Brand"} · Applied {timeAgo(a.created_at)}
                   </p>
                 </Link>

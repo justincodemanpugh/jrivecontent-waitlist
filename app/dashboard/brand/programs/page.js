@@ -11,7 +11,7 @@ export default function ProgramsOverviewPage() {
       heading="Overview"
       subtitle="Track every creator's TikTok performance in one place."
     >
-      <Suspense fallback={<div className="animate-pulse h-96 bg-slate-100 rounded-2xl" />}>
+      <Suspense fallback={<div className="animate-pulse h-96 bg-surface-hover rounded-2xl" />}>
         <OverviewView />
       </Suspense>
     </ProgramsShell>

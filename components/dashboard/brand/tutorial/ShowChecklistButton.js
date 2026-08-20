@@ -41,7 +41,7 @@ export default function ShowChecklistButton() {
   return (
     <button
       onClick={handleShow}
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-brand-skyDeep hover:bg-brand-mist transition"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-accent hover:bg-accent-tint transition"
     >
       <ListChecks size={14} />
       Show setup guide

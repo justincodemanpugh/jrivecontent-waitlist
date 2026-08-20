@@ -10,10 +10,10 @@ import {
 } from "@/lib/dashboard/creator/invitationsApi";
 
 const STATUS_META = {
-  pending: { label: "New", classes: "bg-amber-50 text-amber-700 border-amber-200" },
-  accepted: { label: "Accepted", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  declined: { label: "Declined", classes: "bg-slate-100 text-slate-500 border-slate-200" },
-  cancelled: { label: "Cancelled", classes: "bg-slate-100 text-slate-500 border-slate-200" },
+  pending: { label: "New", classes: "bg-warn-soft text-warn border-warn-line" },
+  accepted: { label: "Accepted", classes: "bg-success-soft text-success border-success-line" },
+  declined: { label: "Declined", classes: "bg-surface-hover text-muted border-line" },
+  cancelled: { label: "Cancelled", classes: "bg-surface-hover text-muted border-line" },
 };
 
 function timeAgo(iso) {
@@ -87,7 +87,7 @@ export default function InvitationsList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-6 text-slate-400">
+      <div className="flex items-center justify-center py-6 text-faint">
         <Loader2 size={18} className="animate-spin" />
       </div>
     );
@@ -97,16 +97,16 @@ export default function InvitationsList() {
 
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold text-brand-ink inline-flex items-center gap-2">
-        <Mail size={14} className="text-brand-skyDeep" />
+      <h2 className="text-sm font-semibold text-ink inline-flex items-center gap-2">
+        <Mail size={14} className="text-accent" />
         Invitations
-        <span className="text-xs font-normal text-slate-500">
+        <span className="text-xs font-normal text-muted">
           ({items.filter((i) => i.status === "pending").length} new)
         </span>
       </h2>
 
       {err ? (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err}
         </p>
       ) : null}
@@ -119,14 +119,14 @@ export default function InvitationsList() {
           return (
             <li
               key={inv.id}
-              className="rounded-2xl border border-slate-200 bg-white p-4"
+              className="rounded-2xl border border-line bg-surface p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-brand-ink truncate">
+                  <p className="font-medium text-ink truncate">
                     {inv.gig?.title || "Gig"}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-xs text-muted truncate">
                     {brandName}
                     {inv.gig?.pay_per_video
                       ? ` · $${Number(inv.gig.pay_per_video)}/video`
@@ -134,7 +134,7 @@ export default function InvitationsList() {
                     {" · "}Invited {timeAgo(inv.created_at)}
                   </p>
                   {inv.message ? (
-                    <p className="mt-2 text-sm text-slate-700 bg-slate-50 rounded-lg px-3 py-2">
+                    <p className="mt-2 text-sm text-ink-soft bg-surface-sunken rounded-lg px-3 py-2">
                       “{inv.message}”
                     </p>
                   ) : null}
@@ -152,7 +152,7 @@ export default function InvitationsList() {
                     type="button"
                     onClick={() => handleDecline(inv)}
                     disabled={busyId === inv.id}
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                    className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface-sunken disabled:opacity-60"
                   >
                     <X size={12} /> Decline
                   </button>
@@ -160,7 +160,7 @@ export default function InvitationsList() {
                     type="button"
                     onClick={() => handleAccept(inv)}
                     disabled={busyId === inv.id}
-                    className="inline-flex items-center gap-1 rounded-full bg-brand-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+                    className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-60"
                   >
                     {busyId === inv.id ? (
                       <Loader2 size={12} className="animate-spin" />

@@ -37,11 +37,11 @@ export function assignmentState(a) {
 }
 
 const TONE = {
-  emerald: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  sky: "bg-brand-mist text-brand-skyDeep",
-  ink: "bg-brand-ink text-white",
-  slate: "bg-slate-100 text-slate-500",
+  emerald: "bg-success-soft text-success",
+  amber: "bg-warn-soft text-warn",
+  sky: "bg-accent-tint text-accent",
+  ink: "bg-ink text-on-accent",
+  slate: "bg-surface-hover text-muted",
 };
 
 export default function AssignmentsListView() {
@@ -70,7 +70,7 @@ export default function AssignmentsListView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -78,7 +78,7 @@ export default function AssignmentsListView() {
 
   if (err) {
     return (
-      <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+      <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
         {err}
       </p>
     );
@@ -86,14 +86,14 @@ export default function AssignmentsListView() {
 
   if (assignments.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep mb-3">
+      <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tint text-accent mb-3">
           <FileText size={20} />
         </span>
-        <h2 className="text-lg font-semibold text-brand-ink">
+        <h2 className="text-lg font-semibold text-ink">
           No assignments yet
         </h2>
-        <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
+        <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
           When a brand sends you a brief, it&apos;ll appear here. Make sure your
           profile is complete so brands can find you.
         </p>
@@ -111,15 +111,15 @@ export default function AssignmentsListView() {
           <Link
             key={a.id}
             href={`/dashboard/creator/assignments/${a.id}`}
-            className="block rounded-2xl border border-slate-200 bg-white p-5 hover:border-brand-sky/60 hover:shadow-md transition"
+            className="block rounded-2xl border border-line bg-surface p-5 hover:border-accent-soft/60 hover:shadow-md transition"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs text-slate-500">{a.brandName}</p>
-                <h3 className="font-semibold text-brand-ink truncate">
+                <p className="text-xs text-muted">{a.brandName}</p>
+                <h3 className="font-semibold text-ink truncate">
                   {a.title}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                <p className="text-xs text-muted mt-0.5 line-clamp-2">
                   {a.instructions || "No instructions"}
                 </p>
               </div>
@@ -132,18 +132,18 @@ export default function AssignmentsListView() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-xs text-slate-500">
+              <div className="flex items-center gap-3 text-xs text-muted">
                 {a.escrowStatus === "escrowed" && !a.submissionStoragePath && (
-                  <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                  <span className="flex items-center gap-1 text-success font-medium">
                     <ShieldCheck size={13} />
                     Payment Secured
                   </span>
                 )}
                 {pay && (
-                  <span className="font-medium text-brand-ink">{pay}</span>
+                  <span className="font-medium text-ink">{pay}</span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-skyDeep">
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-accent">
                 Open
                 <ArrowRight size={14} />
               </span>

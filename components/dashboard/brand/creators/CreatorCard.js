@@ -17,10 +17,10 @@ export default function CreatorCard({
     <button
       type="button"
       onClick={() => onOpen(creator)}
-      className="group text-left rounded-2xl overflow-hidden border border-slate-200 bg-white hover:border-brand-sky/60 hover:shadow-md transition flex flex-col"
+      className="group text-left rounded-2xl overflow-hidden border border-line bg-surface hover:border-accent-soft/60 hover:shadow-md transition flex flex-col"
     >
       {/* Cover (portrait 9:16, like TikTok) */}
-      <div className="relative aspect-[9/16] w-full bg-gradient-to-br from-brand-mist to-slate-100">
+      <div className="relative aspect-[9/16] w-full bg-gradient-to-br from-accent-tint to-surface-hover">
         {creator.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -36,7 +36,7 @@ export default function CreatorCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center text-4xl font-bold text-slate-300">
+          <div className="h-full w-full flex items-center justify-center text-4xl font-bold text-faint">
             {initials}
           </div>
         )}
@@ -44,17 +44,17 @@ export default function CreatorCard({
         {/* Social pills top-left */}
         <div className="absolute top-2 left-2 flex items-center gap-1">
           {creator.instagram ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Instagram size={12} />
             </span>
           ) : null}
           {creator.tiktok ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Music2 size={12} />
             </span>
           ) : null}
           {creator.youtube ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Youtube size={12} />
             </span>
           ) : null}
@@ -64,13 +64,13 @@ export default function CreatorCard({
       {/* Body */}
       <div className="p-3 flex-1 flex flex-col gap-2">
         <div>
-          <p className="font-semibold text-sm text-brand-ink truncate">
+          <p className="font-semibold text-sm text-ink truncate">
             {creator.name}
           </p>
-          <p className="text-[11px] text-slate-500 truncate inline-flex items-center gap-1">
+          <p className="text-[11px] text-muted truncate inline-flex items-center gap-1">
             {creator.location ? (
               <>
-                <MapPin size={11} className="text-slate-400" />
+                <MapPin size={11} className="text-faint" />
                 {creator.location}
               </>
             ) : creator.handle ? (
@@ -86,13 +86,13 @@ export default function CreatorCard({
           {creator.niches.slice(0, 2).map((n) => (
             <span
               key={n}
-              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-brand-mist text-brand-skyDeep"
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-accent-tint text-accent"
             >
               {n}
             </span>
           ))}
           {creator.rateMin || creator.rateMax ? (
-            <span className="ml-auto text-[10px] font-semibold text-emerald-700">
+            <span className="ml-auto text-[10px] font-semibold text-success">
               {formatRate(creator.rateMin, creator.rateMax)}
             </span>
           ) : null}
@@ -119,10 +119,10 @@ export default function CreatorCard({
           }}
           className={`mt-1 w-full inline-flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold transition ${
             connectionStatus === "active"
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              ? "bg-success-soft text-success border border-success-line"
               : connectionStatus === "pending"
-              ? "bg-amber-50 text-amber-700 border border-amber-200"
-              : "bg-brand-ink text-white hover:bg-slate-800"
+              ? "bg-warn-soft text-warn border border-warn-line"
+              : "bg-ink text-on-accent hover:bg-ink/90"
           }`}
         >
           {connectionStatus === "active" ? (

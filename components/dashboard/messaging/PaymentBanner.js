@@ -112,7 +112,7 @@ export default function PaymentBanner({ conversation, role }) {
           <div className="flex-1 min-w-0">
             <p className="text-sm">
               <strong>${escrowDollars.toFixed(2)}</strong> held in escrow.{" "}
-              <span className="text-emerald-800/80">
+              <span className="text-success/80">
                 {completed} of {totalVideos} video{totalVideos > 1 ? "s" : ""}{" "}
                 completed.
               </span>
@@ -122,7 +122,7 @@ export default function PaymentBanner({ conversation, role }) {
             <button
               type="button"
               onClick={() => setMoreOpen(true)}
-              className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white/60 px-2.5 py-1 text-xs font-semibold text-emerald-900 hover:bg-white"
+              className="inline-flex items-center gap-1 rounded-full border border-success-line bg-surface/60 px-2.5 py-1 text-xs font-semibold text-success hover:bg-surface"
             >
               <PackagePlus size={13} />
               Request more
@@ -154,23 +154,23 @@ export default function PaymentBanner({ conversation, role }) {
             submissions. Held in escrow until you approve each video.
           </p>
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-amber-900/80">Videos:</span>
+            <span className="text-xs text-warn/80">Videos:</span>
             <Stepper
               value={videoCount}
               min={1}
               max={50}
               onChange={setVideoCount}
             />
-            <span className="text-xs text-amber-900/70">
+            <span className="text-xs text-warn/70">
               ${perVideo.toFixed(2)} × {videoCount} = ${total.toFixed(2)}
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-amber-900/70">
+          <p className="mt-1 text-[11px] text-warn/70">
             + ${processingFee.toFixed(2)} payment processing fee · You'll be
             charged <strong>${grandTotal.toFixed(2)}</strong> at checkout.
           </p>
           {err ? (
-            <p className="mt-1 text-xs text-rose-700">
+            <p className="mt-1 text-xs text-danger">
               {err}
               {errCode === "brand_connect_required" ? (
                 <>
@@ -190,7 +190,7 @@ export default function PaymentBanner({ conversation, role }) {
           type="button"
           onClick={handleInitialDeposit}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-60"
         >
           {busy ? <Loader2 size={13} className="animate-spin" /> : null}
           Deposit ${grandTotal.toFixed(2)}
@@ -211,8 +211,8 @@ export default function PaymentBanner({ conversation, role }) {
 
 function Wrap({ tone, children }) {
   const tones = {
-    amber: "bg-amber-50 border-amber-200 text-amber-900",
-    emerald: "bg-emerald-50 border-emerald-200 text-emerald-900",
+    amber: "bg-warn-soft border-warn-line text-warn",
+    emerald: "bg-success-soft border-success-line text-success",
   };
   return (
     <div
@@ -227,11 +227,11 @@ function Stepper({ value, min, max, onChange }) {
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
   return (
-    <div className="inline-flex items-center rounded-full border border-amber-300 bg-white">
+    <div className="inline-flex items-center rounded-full border border-warn-line bg-surface">
       <button
         type="button"
         onClick={dec}
-        className="h-7 w-7 inline-flex items-center justify-center text-amber-900 hover:bg-amber-50 rounded-l-full disabled:opacity-40"
+        className="h-7 w-7 inline-flex items-center justify-center text-warn hover:bg-warn-soft rounded-l-full disabled:opacity-40"
         disabled={value <= min}
         aria-label="Decrease"
       >
@@ -243,7 +243,7 @@ function Stepper({ value, min, max, onChange }) {
       <button
         type="button"
         onClick={inc}
-        className="h-7 w-7 inline-flex items-center justify-center text-amber-900 hover:bg-amber-50 rounded-r-full disabled:opacity-40"
+        className="h-7 w-7 inline-flex items-center justify-center text-warn hover:bg-warn-soft rounded-r-full disabled:opacity-40"
         disabled={value >= max}
         aria-label="Increase"
       >
@@ -287,28 +287,28 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h3 className="text-base font-semibold text-brand-ink">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/40 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-surface shadow-xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+          <h3 className="text-base font-semibold text-ink">
             Request additional videos
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-surface-hover text-muted"
             aria-label="Close"
           >
             <X size={16} />
           </button>
         </div>
         <div className="px-5 py-4 space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted">
             Add more videos to this gig. We'll charge for the new videos and
             top up the same escrow.
           </p>
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
-            <span className="text-sm text-slate-700">Additional videos</span>
+          <div className="flex items-center justify-between rounded-xl bg-surface-sunken px-3 py-2.5">
+            <span className="text-sm text-ink-soft">Additional videos</span>
             <Stepper
               value={count}
               min={1}
@@ -316,10 +316,10 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
               onChange={setCount}
             />
           </div>
-          <div className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+          <div className="rounded-xl border border-line px-3 py-2.5 text-sm">
             <Row label="Per video" value={`$${perVideo.toFixed(2)}`} />
             <Row label="Quantity" value={`× ${count}`} />
-            <div className="my-2 border-t border-slate-200" />
+            <div className="my-2 border-t border-line" />
             <Row
               label="Additional deposit"
               value={`$${total.toFixed(2)}`}
@@ -328,29 +328,29 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
               label="Payment processing fee"
               value={`$${processingFee.toFixed(2)}`}
             />
-            <div className="my-2 border-t border-slate-200" />
+            <div className="my-2 border-t border-line" />
             <Row
               label="Charged today"
               value={`$${grandTotal.toFixed(2)}`}
               strong
             />
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-muted">
               New project total: {currentTotal + count} video
               {currentTotal + count > 1 ? "s" : ""}.
             </p>
           </div>
           {err ? (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
+            <p className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger">
               {err}
             </p>
           ) : null}
         </div>
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-200">
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-line">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+            className="rounded-full px-3 py-1.5 text-sm text-muted hover:bg-surface-hover disabled:opacity-60"
           >
             Cancel
           </button>
@@ -358,7 +358,7 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
             type="button"
             onClick={handleConfirm}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-60"
           >
             {busy ? <Loader2 size={13} className="animate-spin" /> : null}
             Deposit ${grandTotal.toFixed(2)}
@@ -372,10 +372,10 @@ function RequestMoreVideosDialog({ conversation, perVideo, onClose }) {
 function Row({ label, value, strong }) {
   return (
     <div className="flex items-center justify-between py-0.5">
-      <span className={strong ? "text-slate-900 font-semibold" : "text-slate-600"}>
+      <span className={strong ? "text-ink font-semibold" : "text-muted"}>
         {label}
       </span>
-      <span className={strong ? "text-slate-900 font-semibold" : "text-slate-700"}>
+      <span className={strong ? "text-ink font-semibold" : "text-ink-soft"}>
         {value}
       </span>
     </div>

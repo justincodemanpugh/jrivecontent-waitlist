@@ -55,26 +55,26 @@ export default function ProfileCompletenessCard({ profile, videoCount = 0 }) {
   const allDone = completed === total;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+    <div className="rounded-2xl border border-line bg-surface p-6">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-brand-ink">
+          <h3 className="text-sm font-semibold text-ink">
             Profile completeness
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             {allDone
               ? "Nice — your profile is ready for brands."
               : "Complete your profile to get noticed by more brands."}
           </p>
         </div>
-        <span className="text-sm font-semibold text-brand-skyDeep">
+        <span className="text-sm font-semibold text-accent">
           {percent}%
         </span>
       </div>
 
-      <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+      <div className="w-full bg-surface-hover rounded-full h-2 overflow-hidden">
         <div
-          className="h-2 rounded-full bg-brand-skyDeep transition-all duration-300"
+          className="h-2 rounded-full bg-accent transition-all duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -83,21 +83,21 @@ export default function ProfileCompletenessCard({ profile, videoCount = 0 }) {
         {items.map((it) => (
           <li
             key={it.key}
-            className="flex items-center gap-2 text-sm text-slate-700"
+            className="flex items-center gap-2 text-sm text-ink-soft"
           >
             {it.done ? (
               <CheckCircle2
                 size={16}
-                className="text-emerald-500 shrink-0"
+                className="text-success shrink-0"
               />
             ) : (
-              <Circle size={16} className="text-slate-300 shrink-0" />
+              <Circle size={16} className="text-faint shrink-0" />
             )}
-            <span className={it.done ? "text-slate-500 line-through" : ""}>
+            <span className={it.done ? "text-muted line-through" : ""}>
               {it.label}
             </span>
             {!it.done && it.emphasize && (
-              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide text-warn">
                 Recommended
               </span>
             )}
@@ -108,7 +108,7 @@ export default function ProfileCompletenessCard({ profile, videoCount = 0 }) {
       {!allDone && (
         <Link
           href="/dashboard/creator/profile/edit"
-          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-skyDeep hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
         >
           Finish setup <ArrowRight size={12} />
         </Link>

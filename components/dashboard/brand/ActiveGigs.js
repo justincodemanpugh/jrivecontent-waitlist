@@ -6,10 +6,10 @@ export default function ActiveGigs({ gigs }) {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-brand-ink">My active gigs</h2>
+        <h2 className="text-sm font-semibold text-ink">My active gigs</h2>
         <Link
           href="/dashboard/brand/gigs"
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand-skyDeep hover:gap-1.5 transition-all"
+          className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:gap-1.5 transition-all"
         >
           View all
           <ArrowRight size={14} />

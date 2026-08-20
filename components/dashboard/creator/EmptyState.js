@@ -25,21 +25,21 @@ export default function CreatorEmptyState({ creatorName }) {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-brand-mist to-white p-8 md:p-12 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full bg-white border border-brand-sky/40 px-4 py-1.5 text-xs font-medium text-brand-skyDeep">
-          <span className="h-2 w-2 rounded-full bg-brand-skyDeep animate-pulse" />
+      <div className="rounded-3xl border border-line bg-gradient-to-br from-accent-tint to-surface p-8 md:p-12 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full bg-surface border border-accent-soft/40 px-4 py-1.5 text-xs font-medium text-accent">
+          <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
           Welcome to JriveContent
         </span>
-        <h2 className="mt-5 text-3xl md:text-4xl font-semibold tracking-tight text-brand-ink">
+        <h2 className="mt-5 text-3xl md:text-4xl font-semibold tracking-tight text-ink">
           Ready to create amazing content{creatorName ? `, ${creatorName}` : ""}?
         </h2>
-        <p className="mt-3 max-w-lg mx-auto text-slate-600">
+        <p className="mt-3 max-w-lg mx-auto text-muted">
           Find gigs that match your style, apply in minutes, and get paid to create content.
         </p>
 
         {/* Tutorial video */}
         <div 
-          className={`mt-8 mx-auto max-w-2xl aspect-video rounded-2xl bg-brand-ink/90 relative overflow-hidden group ${isPlaying ? "" : "cursor-pointer"}`}
+          className={`mt-8 mx-auto max-w-2xl aspect-video rounded-2xl bg-ink/90 relative overflow-hidden group ${isPlaying ? "" : "cursor-pointer"}`}
           onClick={isPlaying ? undefined : () => setIsPlaying(true)}
         >
           {isPlaying ? (
@@ -51,13 +51,13 @@ export default function CreatorEmptyState({ creatorName }) {
             />
           ) : (
             <>
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-skyDeep/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-transparent" />
               <button
                 type="button"
                 aria-label="Play creator tutorial video"
-                className="relative h-16 w-16 rounded-full bg-white text-brand-ink flex items-center justify-center shadow-xl group-hover:scale-105 transition"
+                className="relative h-16 w-16 rounded-full bg-surface text-ink flex items-center justify-center shadow-xl group-hover:scale-105 transition"
               >
-                <Play size={24} className="ml-1 fill-brand-ink" />
+                <Play size={24} className="ml-1 fill-ink" />
               </button>
               <span className="absolute bottom-4 left-4 text-xs text-white/80">
                 How to succeed as a creator · Click to play
@@ -69,7 +69,7 @@ export default function CreatorEmptyState({ creatorName }) {
         <div className="mt-8">
           <Link
             href="/dashboard/creator/explore"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-ink text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-brand-sky/20"
+            className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-7 py-3.5 font-medium hover:bg-ink/90 transition shadow-lg shadow-accent-soft/20"
           >
             <Search size={18} />
             Explore gigs
@@ -83,15 +83,15 @@ export default function CreatorEmptyState({ creatorName }) {
           return (
             <div
               key={i}
-              className="rounded-2xl border border-slate-200 bg-white p-5"
+              className="rounded-2xl border border-line bg-surface p-5"
             >
-              <div className="h-10 w-10 rounded-xl bg-brand-sky/20 text-brand-skyDeep flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-accent-soft/20 text-accent flex items-center justify-center">
                 <Icon size={18} />
               </div>
-              <h3 className="mt-4 font-semibold text-brand-ink">
+              <h3 className="mt-4 font-semibold text-ink">
                 Step {i + 1}: {tip.title}
               </h3>
-              <p className="mt-1 text-sm text-slate-600 leading-relaxed">
+              <p className="mt-1 text-sm text-muted leading-relaxed">
                 {tip.body}
               </p>
             </div>

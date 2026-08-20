@@ -50,7 +50,7 @@ export default function BrandPricingPage() {
         {/* Back link */}
         <Link
           href="/dashboard/brand"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-ink transition mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink transition mb-6"
         >
           <ArrowLeft size={16} />
           Back to dashboard
@@ -58,52 +58,52 @@ export default function BrandPricingPage() {
 
         {/* Contextual banner when redirected from a gated route */}
         {reasonMessage && (
-          <div className="mb-5 flex items-start gap-3 rounded-xl border border-brand-sky/40 bg-brand-mist px-4 py-3 text-sm text-brand-ink">
-            <Info size={18} className="mt-0.5 shrink-0 text-brand-skyDeep" />
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-accent-soft/40 bg-accent-tint px-4 py-3 text-sm text-ink">
+            <Info size={18} className="mt-0.5 shrink-0 text-accent" />
             <p>{reasonMessage}</p>
           </div>
         )}
 
         {/* Pricing card */}
-        <div className="relative rounded-3xl border border-brand-sky/40 bg-white shadow-xl shadow-brand-sky/10 p-7 sm:p-9">
+        <div className="relative rounded-3xl border border-accent-soft/40 bg-surface shadow-xl shadow-accent-soft/10 p-7 sm:p-9">
           {/* Trial pill */}
-          <span className="inline-flex items-center rounded-full border border-brand-skyDeep/40 bg-brand-mist px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-skyDeep">
+          <span className="inline-flex items-center rounded-full border border-accent/40 bg-accent-tint px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent">
             3-Day Free Trial
           </span>
 
           {/* Plan name + tagline */}
-          <h2 className="mt-5 text-3xl font-bold tracking-tight text-brand-ink">
+          <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink">
             Pro
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted">
             For brands serious about growth.
           </p>
 
           {/* Price */}
           <div className="mt-6 flex items-baseline gap-2">
-            <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-brand-ink">
+            <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-ink">
               $0
             </span>
-            <span className="text-lg text-slate-500">for 3 days</span>
+            <span className="text-lg text-muted">for 3 days</span>
           </div>
-          <p className="mt-1 text-xs text-slate-400">Then $25/month · Cancel anytime</p>
+          <p className="mt-1 text-xs text-faint">Then $25/month · Cancel anytime</p>
 
           {/* CTA */}
           <button
             type="button"
             onClick={handleUpgrade}
             disabled={busy}
-            className="mt-6 w-full rounded-xl bg-brand-skyDeep text-white py-3.5 text-base font-semibold shadow-md shadow-brand-sky/30 hover:bg-brand-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="mt-6 w-full rounded-xl bg-accent text-on-accent py-3.5 text-base font-semibold shadow-md shadow-accent-soft/30 hover:bg-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {busy ? "Redirecting to checkout…" : "Start Free Trial"}
           </button>
 
           {error && (
-            <p className="mt-3 text-center text-sm text-red-600">{error}</p>
+            <p className="mt-3 text-center text-sm text-danger">{error}</p>
           )}
 
           {/* Divider */}
-          <div className="my-7 border-t border-slate-200" />
+          <div className="my-7 border-t border-line" />
 
           {/* Feature rows */}
           <ul className="space-y-4">
@@ -111,31 +111,31 @@ export default function BrandPricingPage() {
               <li
                 key={f.label}
                 className={`flex items-center justify-between gap-4 ${
-                  i !== FEATURES.length - 1 ? "pb-4 border-b border-slate-100" : ""
+                  i !== FEATURES.length - 1 ? "pb-4 border-b border-line" : ""
                 }`}
               >
-                <span className="flex items-center gap-2.5 text-sm text-brand-ink">
+                <span className="flex items-center gap-2.5 text-sm text-ink">
                   <Check
                     size={16}
                     strokeWidth={3}
-                    className="text-brand-skyDeep shrink-0"
+                    className="text-accent shrink-0"
                   />
                   {f.label}
                 </span>
-                <span className="text-sm font-medium text-brand-skyDeep text-right">
+                <span className="text-sm font-medium text-accent text-right">
                   {f.value}
                 </span>
               </li>
             ))}
           </ul>
 
-          <p className="mt-7 text-center text-xs text-slate-400">
+          <p className="mt-7 text-center text-xs text-faint">
             Secure payment via Stripe · Cancel anytime
           </p>
         </div>
 
         {/* Current plan note */}
-        <p className="mt-5 text-center text-sm text-slate-500">
+        <p className="mt-5 text-center text-sm text-muted">
           Browse creators for free · Start trial to post gigs
         </p>
       </main>

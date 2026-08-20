@@ -76,8 +76,8 @@ export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
 
   return (
     <div>
-      <p className="text-sm font-medium text-brand-ink mb-2">Cover photo</p>
-      <div className="relative aspect-[9/16] max-w-xs rounded-2xl overflow-hidden border border-slate-200 bg-gradient-to-br from-brand-mist to-slate-100">
+      <p className="text-sm font-medium text-ink mb-2">Cover photo</p>
+      <div className="relative aspect-[9/16] max-w-xs rounded-2xl overflow-hidden border border-line bg-gradient-to-br from-accent-tint to-surface-hover">
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -86,10 +86,10 @@ export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full w-full flex flex-col items-center justify-center text-slate-500 px-3 text-center">
+          <div className="h-full w-full flex flex-col items-center justify-center text-muted px-3 text-center">
             <ImagePlus size={28} />
             <p className="mt-1 text-xs font-medium">Add a cover photo</p>
-            <p className="mt-0.5 text-[10px] text-slate-400">
+            <p className="mt-0.5 text-[10px] text-faint">
               Stand out to brands
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-3 py-1.5 text-xs font-semibold text-slate-700 shadow hover:bg-white disabled:opacity-50"
+          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-surface/95 backdrop-blur px-3 py-1.5 text-xs font-semibold text-ink-soft shadow hover:bg-surface disabled:opacity-50"
         >
           {busy ? (
             <Loader2 size={12} className="animate-spin" />
@@ -118,7 +118,7 @@ export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
         />
       </div>
       <div className="mt-2 flex items-center justify-between gap-3">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted">
           PNG, JPG, or WebP. Max 8 MB. Portrait 9:16 (a normal phone photo works).
         </p>
         {url ? (
@@ -126,13 +126,13 @@ export default function CoverPhotoUploader({ userId, initialUrl, onChange }) {
             type="button"
             onClick={handleRemove}
             disabled={busy}
-            className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-xs text-danger hover:text-danger disabled:opacity-50"
           >
             <Trash2 size={12} /> Remove
           </button>
         ) : null}
       </div>
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

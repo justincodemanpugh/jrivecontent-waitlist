@@ -172,10 +172,12 @@ export default function GuidedTour({ isOpen, onClose }) {
 
   const tooltipPosition = getTooltipPosition(step.position, targetRect);
 
+  // Portalled to document.body, so it sits outside the dashboard shell and
+  // has to opt into the theme's text colour itself.
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[9999]"
+      className="fixed inset-0 z-[9999] text-ink"
       style={{ pointerEvents: "auto" }}
     >
       {/* Backdrop with spotlight cutout */}
@@ -226,7 +228,7 @@ export default function GuidedTour({ isOpen, onClose }) {
 
       {/* Tooltip */}
       <div
-        className={`absolute bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 max-w-sm transition-all duration-300 ${
+        className={`absolute bg-surface rounded-2xl shadow-2xl border border-line p-5 max-w-sm transition-all duration-300 ${
           step.position === "center"
             ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             : ""
@@ -243,7 +245,7 @@ export default function GuidedTour({ isOpen, onClose }) {
         {/* Close button */}
         <button
           onClick={handleSkip}
-          className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+          className="absolute top-3 right-3 p-1.5 rounded-lg text-faint hover:text-muted hover:bg-surface-hover transition"
         >
           <X size={16} />
         </button>
@@ -255,20 +257,20 @@ export default function GuidedTour({ isOpen, onClose }) {
               key={idx}
               className={`h-1.5 rounded-full transition-all ${
                 idx === currentStep
-                  ? "w-4 bg-brand-skyDeep"
+                  ? "w-4 bg-accent"
                   : idx < currentStep
-                  ? "w-1.5 bg-brand-sky"
-                  : "w-1.5 bg-slate-200"
+                  ? "w-1.5 bg-accent-soft"
+                  : "w-1.5 bg-surface-hover"
               }`}
             />
           ))}
         </div>
 
         {/* Content */}
-        <h3 className="text-lg font-semibold text-brand-ink pr-6">
+        <h3 className="text-lg font-semibold text-ink pr-6">
           {step.title}
         </h3>
-        <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+        <p className="mt-2 text-sm text-muted leading-relaxed">
           {step.content}
         </p>
 
@@ -276,7 +278,7 @@ export default function GuidedTour({ isOpen, onClose }) {
         <div className="mt-5 flex items-center justify-between gap-3">
           <button
             onClick={handleSkip}
-            className="text-sm text-slate-500 hover:text-slate-700 transition"
+            className="text-sm text-muted hover:text-ink-soft transition"
           >
             Skip tour
           </button>
@@ -285,7 +287,7 @@ export default function GuidedTour({ isOpen, onClose }) {
             {!isFirstStep && (
               <button
                 onClick={handlePrev}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-ink transition"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-muted hover:text-ink transition"
               >
                 <ArrowLeft size={14} />
                 Back
@@ -295,7 +297,7 @@ export default function GuidedTour({ isOpen, onClose }) {
             {step.cta ? (
               <button
                 onClick={handleCtaClick}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-ink text-white text-sm font-semibold hover:bg-slate-800 transition"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-on-accent text-sm font-semibold hover:bg-ink/90 transition"
               >
                 <Sparkles size={14} />
                 {step.cta.label}
@@ -303,7 +305,7 @@ export default function GuidedTour({ isOpen, onClose }) {
             ) : (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-1 px-4 py-2 rounded-full bg-brand-ink text-white text-sm font-semibold hover:bg-slate-800 transition"
+                className="flex items-center gap-1 px-4 py-2 rounded-full bg-ink text-on-accent text-sm font-semibold hover:bg-ink/90 transition"
               >
                 {isLastStep ? "Finish" : "Next"}
                 {!isLastStep && <ArrowRight size={14} />}

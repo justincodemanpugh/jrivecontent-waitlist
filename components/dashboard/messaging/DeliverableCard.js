@@ -12,15 +12,15 @@ import {
 const STATUS_META = {
   submitted: {
     label: "Submitted",
-    classes: "bg-sky-50 text-sky-700 border-sky-200",
+    classes: "bg-info-soft text-info border-info-line",
   },
   approved: {
     label: "Approved",
-    classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    classes: "bg-success-soft text-success border-success-line",
   },
   revision_requested: {
     label: "Revision requested",
-    classes: "bg-amber-50 text-amber-700 border-amber-200",
+    classes: "bg-warn-soft text-warn border-warn-line",
   },
 };
 
@@ -90,14 +90,14 @@ export default function DeliverableCard({ deliverableId, role }) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 inline-flex items-center gap-2 text-sm text-slate-500">
+      <div className="rounded-2xl border border-line bg-surface p-4 inline-flex items-center gap-2 text-sm text-muted">
         <Loader2 size={16} className="animate-spin" /> Loading submission…
       </div>
     );
   }
   if (err || !deliverable) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 inline-flex items-center gap-2">
+      <div className="rounded-2xl border border-danger-line bg-danger-soft p-3 text-sm text-danger inline-flex items-center gap-2">
         <AlertCircle size={14} /> {err || "Couldn't load."}
       </div>
     );
@@ -174,9 +174,9 @@ export default function DeliverableCard({ deliverableId, role }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3 w-full max-w-[260px]">
+    <div className="rounded-2xl border border-line bg-surface p-3 w-full max-w-[260px]">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+        <p className="text-xs font-semibold text-muted uppercase tracking-wide">
           {deliverable.videos.length} video
           {deliverable.videos.length === 1 ? "" : "s"} submitted
         </p>
@@ -223,14 +223,14 @@ export default function DeliverableCard({ deliverableId, role }) {
       </div>
 
       {deliverable.status === "revision_requested" && deliverable.feedback ? (
-        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <div className="mt-3 rounded-xl border border-warn-line bg-warn-soft px-3 py-2 text-xs text-warn">
           <span className="font-semibold">Revision notes: </span>
           {deliverable.feedback}
         </div>
       ) : null}
 
       {actionErr ? (
-        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 flex items-start gap-2">
+        <div className="mt-3 rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-xs text-danger flex items-start gap-2">
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <div className="flex-1">
             <p>{actionErr}</p>
@@ -239,7 +239,7 @@ export default function DeliverableCard({ deliverableId, role }) {
                 type="button"
                 onClick={handleRetryPayout}
                 disabled={busy}
-                className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-rose-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-danger-solid px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-danger-solid/90 disabled:opacity-60"
               >
                 {busy ? <Loader2 size={11} className="animate-spin" /> : null}
                 Retry payout
@@ -255,7 +255,7 @@ export default function DeliverableCard({ deliverableId, role }) {
             type="button"
             onClick={handleApprove}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-success-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-success-solid/90 disabled:opacity-60"
           >
             <Check size={13} />
             Approve
@@ -264,7 +264,7 @@ export default function DeliverableCard({ deliverableId, role }) {
             type="button"
             onClick={() => setRevisionOpen((v) => !v)}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand-ink hover:bg-slate-50 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-sunken disabled:opacity-60"
           >
             <RotateCcw size={13} />
             Request revision
@@ -279,13 +279,13 @@ export default function DeliverableCard({ deliverableId, role }) {
             onChange={(e) => setRevisionFeedback(e.target.value)}
             rows={3}
             placeholder="What needs to change?"
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
+            className="w-full rounded-xl border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setRevisionOpen(false)}
-              className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-muted hover:bg-surface-hover"
             >
               Cancel
             </button>
@@ -293,7 +293,7 @@ export default function DeliverableCard({ deliverableId, role }) {
               type="button"
               onClick={handleRevise}
               disabled={busy || !revisionFeedback.trim()}
-              className="rounded-full bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60"
+              className="rounded-full bg-warn-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-warn-solid/90 disabled:opacity-60"
             >
               Send notes
             </button>

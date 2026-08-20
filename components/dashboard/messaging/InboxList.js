@@ -43,7 +43,7 @@ export default function InboxList({ role, basePath, emptyCopy }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-slate-400">
+      <div className="flex items-center justify-center py-16 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
@@ -51,7 +51,7 @@ export default function InboxList({ role, basePath, emptyCopy }) {
 
   if (err) {
     return (
-      <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+      <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
         {err}
       </p>
     );
@@ -59,12 +59,12 @@ export default function InboxList({ role, basePath, emptyCopy }) {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep mb-3">
+      <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tint text-accent mb-3">
           <MessageSquare size={20} />
         </span>
-        <h2 className="text-lg font-semibold text-brand-ink">No messages yet</h2>
-        <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
+        <h2 className="text-lg font-semibold text-ink">No messages yet</h2>
+        <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
           {emptyCopy}
         </p>
       </div>

@@ -20,42 +20,42 @@ export default function ProgramStatStrip({ stats }) {
       value: formatCompact(stats.postedVideos),
       delta: formatDelta(d.postedVideos),
       icon: Film,
-      tint: "bg-sky-50 text-sky-600",
+      tint: "bg-info-soft text-info",
     },
     {
       label: "Active accounts",
       value: stats.activeAccounts ?? 0,
       delta: formatDelta(d.activeAccounts),
       icon: Users,
-      tint: "bg-emerald-50 text-emerald-600",
+      tint: "bg-success-soft text-success",
     },
     {
       label: "Views",
       value: formatCompact(stats.views),
       delta: formatDelta(d.views),
       icon: Eye,
-      tint: "bg-violet-50 text-violet-600",
+      tint: "bg-plum-soft text-plum",
     },
     {
       label: "Likes",
       value: formatCompact(stats.likes),
       delta: formatDelta(d.likes),
       icon: Heart,
-      tint: "bg-rose-50 text-rose-600",
+      tint: "bg-danger-soft text-danger",
     },
     {
       label: "Comments",
       value: formatCompact(stats.comments),
       delta: formatDelta(d.comments),
       icon: MessageCircle,
-      tint: "bg-amber-50 text-amber-600",
+      tint: "bg-warn-soft text-warn",
     },
     {
       label: "Engagement",
       value: `${stats.engagementRate ?? 0}%`,
       delta: null,
       icon: Zap,
-      tint: "bg-slate-100 text-slate-600",
+      tint: "bg-surface-hover text-muted",
     },
   ];
 
@@ -66,20 +66,20 @@ export default function ProgramStatStrip({ stats }) {
         return (
           <div
             key={it.label}
-            className="rounded-2xl border border-slate-200 bg-white p-4 transition"
+            className="rounded-2xl border border-line bg-surface p-4 transition"
           >
             <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${it.tint}`}>
               <Icon size={18} />
             </span>
             <div className="mt-3 flex items-baseline gap-1.5">
-              <p className="text-2xl font-semibold text-brand-ink tabular-nums">{it.value}</p>
+              <p className="text-2xl font-semibold text-ink tabular-nums">{it.value}</p>
               {it.delta && (
-                <span className="text-xs font-semibold text-emerald-600 tabular-nums">
+                <span className="text-xs font-semibold text-success tabular-nums">
                   {it.delta}
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">{it.label}</p>
+            <p className="text-xs text-muted mt-0.5">{it.label}</p>
           </div>
         );
       })}

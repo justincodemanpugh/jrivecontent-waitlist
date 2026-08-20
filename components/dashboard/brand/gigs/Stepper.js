@@ -18,7 +18,7 @@ export default function Stepper({ steps, currentStep, onStepClick }) {
     <div className="w-full">
       {/* Desktop / tablet */}
       <div className="hidden md:block">
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-brand-mist/60 to-white px-6 py-5">
+        <div className="rounded-2xl border border-line bg-gradient-to-b from-accent-tint/60 to-surface px-6 py-5">
           <ol className="flex items-center gap-2">
             {steps.map((step, i) => {
               const state =
@@ -40,11 +40,11 @@ export default function Stepper({ steps, currentStep, onStepClick }) {
                       className={[
                         "relative h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold transition",
                         state === "done" &&
-                          "bg-brand-skyDeep text-white group-hover:bg-brand-ink",
+                          "bg-accent text-on-accent group-hover:bg-ink",
                         state === "active" &&
-                          "bg-brand-skyDeep text-white ring-4 ring-brand-sky/30",
+                          "bg-accent text-on-accent ring-4 ring-accent-soft/30",
                         state === "upcoming" &&
-                          "bg-slate-100 text-slate-400 border border-slate-200",
+                          "bg-surface-hover text-faint border border-line",
                       ]
                         .filter(Boolean)
                         .join(" ")}
@@ -54,7 +54,7 @@ export default function Stepper({ steps, currentStep, onStepClick }) {
                     <span
                       className={[
                         "truncate text-sm font-medium transition",
-                        state === "upcoming" ? "text-slate-400" : "text-brand-ink",
+                        state === "upcoming" ? "text-faint" : "text-ink",
                       ].join(" ")}
                     >
                       {step.label}
@@ -65,7 +65,7 @@ export default function Stepper({ steps, currentStep, onStepClick }) {
                     <span
                       className={[
                         "mx-3 h-px flex-1 min-w-[16px]",
-                        state === "done" ? "bg-brand-skyDeep/60" : "bg-slate-200",
+                        state === "done" ? "bg-accent/60" : "bg-surface-hover",
                       ].join(" ")}
                     />
                   )}
@@ -78,21 +78,21 @@ export default function Stepper({ steps, currentStep, onStepClick }) {
 
       {/* Mobile */}
       <div className="md:hidden">
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+        <div className="rounded-2xl border border-line bg-surface px-4 py-3.5">
+          <div className="flex items-center justify-between text-xs font-medium text-muted">
             <span>
               Step {currentStep + 1} of {total}
             </span>
-            <span className="text-brand-skyDeep font-semibold">
+            <span className="text-accent font-semibold">
               {Math.round(((currentStep + 1) / total) * 100)}%
             </span>
           </div>
-          <p className="mt-1 text-base font-semibold text-brand-ink">
+          <p className="mt-1 text-base font-semibold text-ink">
             {steps[currentStep].label}
           </p>
-          <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+          <div className="mt-3 h-1.5 rounded-full bg-surface-hover overflow-hidden">
             <div
-              className="h-full bg-brand-skyDeep transition-all duration-300"
+              className="h-full bg-accent transition-all duration-300"
               style={{ width: `${((currentStep + 1) / total) * 100}%` }}
             />
           </div>

@@ -130,7 +130,7 @@ export default function ProfileEditForm({ initial }) {
             value={form.country}
             onChange={(e) => update("country", e.target.value)}
             disabled={stripeCountryLocked}
-            className={`${inputClass} disabled:bg-slate-100 disabled:text-slate-500`}
+            className={`${inputClass} disabled:bg-surface-hover disabled:text-muted`}
           >
             <option value="">Select your country…</option>
             {COUNTRIES.map((c) => (
@@ -139,7 +139,7 @@ export default function ProfileEditForm({ initial }) {
               </option>
             ))}
           </select>
-          <p className="mt-1 text-[11px] text-slate-500">
+          <p className="mt-1 text-[11px] text-muted">
             {stripeCountryLocked
               ? "The country of a Stripe connected account can only be set when it's first created."
               : "Pick the country where you'll receive payouts. Stripe locks this once you connect, so choose carefully."}
@@ -151,27 +151,27 @@ export default function ProfileEditForm({ initial }) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 rounded-full bg-brand-skyDeep px-5 py-2 text-sm font-semibold text-white hover:bg-brand-skyDeep/90 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-on-accent hover:bg-accent/90 disabled:opacity-60"
         >
           {pending ? <Loader2 size={14} className="animate-spin" /> : null}
           Save changes
         </button>
         {saved ? (
-          <span className="text-sm text-emerald-600">Saved.</span>
+          <span className="text-sm text-success">Saved.</span>
         ) : null}
-        {error ? <span className="text-sm text-red-600">{error}</span> : null}
+        {error ? <span className="text-sm text-danger">{error}</span> : null}
       </div>
     </form>
   );
 }
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-brand-ink placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-sky/40 focus:border-brand-sky";
+  "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent-soft/40 focus:border-accent-soft";
 
 function Section({ title, children }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
-      <h3 className="text-sm font-semibold text-brand-ink">{title}</h3>
+    <div className="rounded-2xl border border-line bg-surface p-6 space-y-4">
+      <h3 className="text-sm font-semibold text-ink">{title}</h3>
       {children}
     </div>
   );
@@ -181,16 +181,16 @@ function Field({ label, hint, icon, prefix, required, children }) {
   return (
     <label className="block">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1.5">
-          {icon ? <span className="text-slate-400">{icon}</span> : null}
+        <span className="text-xs font-medium text-muted inline-flex items-center gap-1.5">
+          {icon ? <span className="text-faint">{icon}</span> : null}
           {label}
-          {required ? <span className="text-red-500">*</span> : null}
+          {required ? <span className="text-danger">*</span> : null}
         </span>
-        {hint ? <span className="text-[11px] text-slate-400">{hint}</span> : null}
+        {hint ? <span className="text-[11px] text-faint">{hint}</span> : null}
       </div>
       {prefix ? (
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-faint">
             {prefix}
           </span>
           <div className="[&>input]:pl-7">{children}</div>

@@ -26,11 +26,11 @@ export default function Sidebar() {
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
-    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white z-40">
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200">
+    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-line bg-surface z-40">
+      <div className="h-16 flex items-center gap-2 px-6 border-b border-line">
         <Logo size={32} />
         <span className="font-semibold tracking-tight">
-          Jrive<span className="text-brand-skyDeep">Content</span>
+          Jrive<span className="text-accent">Content</span>
         </span>
       </div>
 
@@ -44,17 +44,17 @@ export default function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                 active
-                  ? "bg-brand-mist text-brand-ink"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+                  ? "bg-accent-tint text-ink"
+                  : "text-muted hover:bg-surface-sunken hover:text-ink"
               }`}
             >
               <Icon
                 size={18}
-                className={active ? "text-brand-skyDeep" : "text-slate-400"}
+                className={active ? "text-accent" : "text-faint"}
               />
               <span className="flex-1">{item.label}</span>
               {item.badge ? (
-                <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-skyDeep text-white text-[11px] font-semibold">
+                <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-on-accent text-[11px] font-semibold">
                   {item.badge}
                 </span>
               ) : null}
@@ -63,16 +63,16 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 pb-5 border-t border-slate-200 pt-3">
+      <div className="px-3 pb-5 border-t border-line pt-3">
         <Link
           href="/dashboard/creator/settings"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
             pathname.startsWith("/dashboard/creator/settings")
-              ? "bg-brand-mist text-brand-ink"
-              : "text-slate-600 hover:bg-slate-50 hover:text-brand-ink"
+              ? "bg-accent-tint text-ink"
+              : "text-muted hover:bg-surface-sunken hover:text-ink"
           }`}
         >
-          <Settings size={18} className="text-slate-400" />
+          <Settings size={18} className="text-faint" />
           Settings
         </Link>
       </div>

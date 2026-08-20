@@ -21,11 +21,11 @@ export default function ProgramsShell({
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
                 {heading && (
-                  <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-brand-ink">
+                  <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-ink">
                     {heading}
                   </h1>
                 )}
-                {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
+                {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
               </div>
               {action}
             </div>

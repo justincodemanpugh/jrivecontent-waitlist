@@ -88,20 +88,20 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-scrim/40 backdrop-blur-sm"
         onClick={() => !busy && onClose?.()}
       />
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl border border-slate-200">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-surface shadow-xl border border-line">
         <div className="flex items-start justify-between gap-4 px-5 pt-5">
           <div>
-            <h2 className="text-base font-semibold text-brand-ink">
+            <h2 className="text-base font-semibold text-ink">
               Submit videos
             </h2>
             <div className="mt-1 space-y-1">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted">
                 Up to {MAX_VIDEOS_PER_SUBMISSION} videos per submission. mp4, mov, m4v, or webm.
               </p>
-              <div className="text-xs text-slate-400 space-y-0.5">
+              <div className="text-xs text-faint space-y-0.5">
                 <p>• Recommended: 1080p resolution, 15-60 seconds</p>
                 <p>• Max file size: 500MB per video</p>
                 <p>• Ensure good lighting and clear audio</p>
@@ -112,7 +112,7 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition disabled:opacity-40"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-hover transition disabled:opacity-40"
             aria-label="Close"
           >
             <X size={16} />
@@ -133,15 +133,15 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={busy || files.length >= MAX_VIDEOS_PER_SUBMISSION}
-              className="w-full rounded-2xl border-2 border-dashed border-slate-200 hover:border-brand-sky bg-slate-50 px-4 py-6 text-sm text-slate-600 transition flex flex-col items-center gap-2 disabled:opacity-60"
+              className="w-full rounded-2xl border-2 border-dashed border-line hover:border-accent-soft bg-surface-sunken px-4 py-6 text-sm text-muted transition flex flex-col items-center gap-2 disabled:opacity-60"
             >
-              <Upload size={20} className="text-brand-skyDeep" />
-              <span className="font-medium text-brand-ink">
+              <Upload size={20} className="text-accent" />
+              <span className="font-medium text-ink">
                 {files.length >= MAX_VIDEOS_PER_SUBMISSION
                   ? "Max videos selected"
                   : "Add video"}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted">
                 {files.length}/{MAX_VIDEOS_PER_SUBMISSION} videos selected
               </span>
             </button>
@@ -152,14 +152,14 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
               {files.map((f, idx) => (
                 <li
                   key={`${f.name}-${idx}`}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2 text-sm"
                 >
-                  <Film size={16} className="text-brand-skyDeep shrink-0" />
+                  <Film size={16} className="text-accent shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-brand-ink">
+                    <p className="truncate font-medium text-ink">
                       {f.name}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted">
                       {(f.size / 1024 / 1024).toFixed(1)} MB
                     </p>
                   </div>
@@ -167,7 +167,7 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
                     <button
                       type="button"
                       onClick={() => remove(idx)}
-                      className="text-slate-400 hover:text-rose-600"
+                      className="text-faint hover:text-danger"
                       aria-label="Remove video"
                     >
                       <Trash2 size={14} />
@@ -184,29 +184,29 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
             disabled={busy}
             rows={3}
             placeholder="Optional note for the brand…"
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30 disabled:opacity-60"
+            className="w-full rounded-xl border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30 disabled:opacity-60"
           />
 
           {err ? (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
               {err}
             </p>
           ) : null}
 
           {progress ? (
-            <p className="text-xs text-slate-500 inline-flex items-center gap-1.5">
+            <p className="text-xs text-muted inline-flex items-center gap-1.5">
               <Loader2 size={12} className="animate-spin" />
               Uploading {progress.uploaded} / {progress.total}…
             </p>
           ) : null}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-line bg-surface-sunken/60 px-5 py-3">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+            className="rounded-full px-4 py-2 text-sm font-medium text-muted hover:bg-surface-hover disabled:opacity-40"
           >
             Cancel
           </button>
@@ -214,7 +214,7 @@ export default function SubmitVideosDialog({ open, conversation, onClose, onSubm
             type="button"
             onClick={submit}
             disabled={busy || files.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-50"
           >
             {busy ? (
               <Loader2 size={14} className="animate-spin" />

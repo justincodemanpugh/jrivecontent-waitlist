@@ -49,28 +49,28 @@ export default function RecommendedGigs({ limit = 3 }) {
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold text-brand-ink">
+        <h2 className="text-base font-semibold text-ink">
           Recommended for you
         </h2>
         <Link
           href="/dashboard/creator/explore"
-          className="text-sm text-brand-skyDeep hover:underline inline-flex items-center gap-1"
+          className="text-sm text-accent hover:underline inline-flex items-center gap-1"
         >
           See all <ArrowRight size={14} />
         </Link>
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 flex items-center justify-center text-slate-400">
+        <div className="rounded-2xl border border-line bg-surface p-10 flex items-center justify-center text-faint">
           <Loader2 size={18} className="animate-spin" />
         </div>
       ) : err ? (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
           {err}
         </p>
       ) : visible.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
+          <p className="text-sm text-muted">
             No open gigs yet. Check back soon!
           </p>
         </div>

@@ -58,14 +58,14 @@ export default function OverviewView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-faint">
         <Loader2 size={20} className="animate-spin" />
       </div>
     );
   }
 
   if (err) {
-    return <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{err}</p>;
+    return <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{err}</p>;
   }
 
   return (
@@ -80,21 +80,21 @@ export default function OverviewView() {
           {topVideos.length === 0 ? (
             <EmptyPanel text="No videos tracked yet." />
           ) : (
-            <ul className="divide-y divide-slate-50">
+            <ul className="divide-y divide-line">
               {topVideos.map((v, i) => (
                 <li key={v.id} className="flex items-center gap-3 py-3">
-                  <span className="text-xs font-semibold text-slate-400 w-4 text-center">
+                  <span className="text-xs font-semibold text-faint w-4 text-center">
                     {i + 1}
                   </span>
                   <Avatar name={v.creatorName} url={v.creatorAvatarUrl} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-brand-ink truncate">
+                    <p className="text-sm font-medium text-ink truncate">
                       {v.creatorName}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{v.programTitle}</p>
+                    <p className="text-xs text-faint truncate">{v.programTitle}</p>
                   </div>
-                  <span className="flex items-center gap-1 text-sm font-medium text-brand-ink tabular-nums">
-                    <Eye size={13} className="text-slate-400" />
+                  <span className="flex items-center gap-1 text-sm font-medium text-ink tabular-nums">
+                    <Eye size={13} className="text-faint" />
                     {formatCompact(v.views)}
                   </span>
                   {v.videoUrl && (
@@ -102,7 +102,7 @@ export default function OverviewView() {
                       href={v.videoUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-slate-300 hover:text-brand-skyDeep transition"
+                      className="text-faint hover:text-accent transition"
                     >
                       <ExternalLink size={14} />
                     </a>
@@ -118,25 +118,25 @@ export default function OverviewView() {
           {topAccounts.length === 0 ? (
             <EmptyPanel text="No accounts tracked yet." />
           ) : (
-            <ul className="divide-y divide-slate-50">
+            <ul className="divide-y divide-line">
               {topAccounts.map((a, i) => (
                 <li key={a.memberId} className="flex items-center gap-3 py-3">
-                  <span className="text-xs font-semibold text-slate-400 w-4 text-center">
+                  <span className="text-xs font-semibold text-faint w-4 text-center">
                     {i + 1}
                   </span>
                   <Avatar name={a.name} url={a.avatarUrl} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-brand-ink truncate">{a.name}</p>
-                    <p className="text-xs text-slate-400 truncate">
+                    <p className="text-sm font-medium text-ink truncate">{a.name}</p>
+                    <p className="text-xs text-faint truncate">
                       {a.tiktokHandle ? `@${a.tiktokHandle}` : a.programTitle}
                     </p>
                   </div>
-                  <span className="flex items-center gap-1 text-sm text-slate-500 tabular-nums">
-                    <Film size={12} className="text-slate-400" />
+                  <span className="flex items-center gap-1 text-sm text-muted tabular-nums">
+                    <Film size={12} className="text-faint" />
                     {a.videoCount}
                   </span>
-                  <span className="flex items-center gap-1 text-sm font-medium text-brand-ink tabular-nums">
-                    <Eye size={13} className="text-slate-400" />
+                  <span className="flex items-center gap-1 text-sm font-medium text-ink tabular-nums">
+                    <Eye size={13} className="text-faint" />
                     {formatCompact(a.views)}
                   </span>
                 </li>
@@ -151,10 +151,10 @@ export default function OverviewView() {
 
 function Panel({ title, icon: Icon, children }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <Icon size={15} className="text-brand-skyDeep" />
-        <h2 className="text-sm font-semibold text-brand-ink">{title}</h2>
+    <section className="rounded-2xl border border-line bg-surface">
+      <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+        <Icon size={15} className="text-accent" />
+        <h2 className="text-sm font-semibold text-ink">{title}</h2>
       </div>
       <div className="px-5 py-1">{children}</div>
     </section>
@@ -162,7 +162,7 @@ function Panel({ title, icon: Icon, children }) {
 }
 
 function EmptyPanel({ text }) {
-  return <p className="py-8 text-center text-sm text-slate-400">{text}</p>;
+  return <p className="py-8 text-center text-sm text-faint">{text}</p>;
 }
 
 function Avatar({ name, url }) {
@@ -173,7 +173,7 @@ function Avatar({ name, url }) {
     );
   }
   return (
-    <span className="h-8 w-8 rounded-full bg-brand-mist text-brand-skyDeep flex items-center justify-center text-[10px] font-semibold flex-shrink-0">
+    <span className="h-8 w-8 rounded-full bg-accent-tint text-accent flex items-center justify-center text-[10px] font-semibold flex-shrink-0">
       {name?.slice(0, 2).toUpperCase() || "?"}
     </span>
   );

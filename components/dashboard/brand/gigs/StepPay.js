@@ -18,11 +18,11 @@ export default function StepPay({ form, update }) {
     >
       {/* Amount input */}
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1.5">
+        <label className="block text-sm font-medium text-ink mb-1.5">
           Pay per video
         </label>
         <div className="relative max-w-xs">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-ink font-semibold">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink font-semibold">
             $
           </span>
           <input
@@ -33,11 +33,11 @@ export default function StepPay({ form, update }) {
             onChange={(e) =>
               update({ payPerVideo: e.target.value === "" ? "" : Number(e.target.value) })
             }
-            className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 py-3 text-lg font-semibold text-brand-ink focus:border-brand-skyDeep focus:ring-2 focus:ring-brand-sky/30 outline-none transition"
+            className="w-full rounded-xl border border-line bg-surface pl-9 pr-4 py-3 text-lg font-semibold text-ink focus:border-accent focus:ring-2 focus:ring-accent-soft/30 outline-none transition"
           />
         </div>
         {belowMin && (
-          <p className="mt-2 text-xs text-amber-600">
+          <p className="mt-2 text-xs text-warn">
             Minimum is ${MIN_PAY}. Higher pay gets faster, better applicants.
           </p>
         )}
@@ -45,7 +45,7 @@ export default function StepPay({ form, update }) {
 
       {/* Presets */}
       <div>
-        <p className="text-xs font-medium text-slate-500 mb-2">Quick picks</p>
+        <p className="text-xs font-medium text-muted mb-2">Quick picks</p>
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((p) => {
             const active = Number(value) === p;
@@ -57,8 +57,8 @@ export default function StepPay({ form, update }) {
                 className={[
                   "rounded-full px-4 py-2 text-sm font-medium border transition",
                   active
-                    ? "bg-brand-ink text-white border-brand-ink"
-                    : "bg-white text-brand-ink border-slate-200 hover:border-brand-sky",
+                    ? "bg-ink text-on-accent border-ink"
+                    : "bg-surface text-ink border-line hover:border-accent-soft",
                 ].join(" ")}
               >
                 ${p}
@@ -75,26 +75,26 @@ export default function StepPay({ form, update }) {
 
       {/* Insight cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-        <div className="rounded-xl border border-slate-200 bg-brand-mist/50 p-4">
-          <div className="flex items-center gap-2 text-brand-skyDeep">
+        <div className="rounded-xl border border-line bg-accent-tint/50 p-4">
+          <div className="flex items-center gap-2 text-accent">
             <Sparkles size={16} />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Recommended
             </span>
           </div>
-          <p className="mt-1.5 text-sm text-brand-ink">
+          <p className="mt-1.5 text-sm text-ink">
             <span className="font-semibold">${RECOMMENDED_PAY}/video</span> hits the
             sweet spot — most gigs fill in under 48 hours.
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex items-center gap-2 text-slate-500">
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <div className="flex items-center gap-2 text-muted">
             <TrendingUp size={16} />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Pro tip
             </span>
           </div>
-          <p className="mt-1.5 text-sm text-slate-600">
+          <p className="mt-1.5 text-sm text-muted">
             Paying $50+ attracts creators with bigger followings and faster
             turnaround.
           </p>

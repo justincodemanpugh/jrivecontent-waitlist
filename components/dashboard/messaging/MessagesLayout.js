@@ -25,20 +25,20 @@ export default function MessagesLayout({
     pathname && pathname !== basePath && pathname.startsWith(`${basePath}/`);
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-white">
+    <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-surface">
       {/* Inbox column */}
       <aside
         className={[
-          "w-full md:w-80 lg:w-96 md:shrink-0 border-r border-slate-200 flex flex-col",
+          "w-full md:w-80 lg:w-96 md:shrink-0 border-r border-line flex flex-col",
           hasSelection ? "hidden md:flex" : "flex",
         ].join(" ")}
       >
-        <div className="px-4 py-4 border-b border-slate-200">
-          <h1 className="text-xl font-semibold tracking-tight text-brand-ink">
+        <div className="px-4 py-4 border-b border-line">
+          <h1 className="text-xl font-semibold tracking-tight text-ink">
             Messages
           </h1>
           {intro ? (
-            <p className="mt-1 text-xs text-slate-500">{intro}</p>
+            <p className="mt-1 text-xs text-muted">{intro}</p>
           ) : null}
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-3">

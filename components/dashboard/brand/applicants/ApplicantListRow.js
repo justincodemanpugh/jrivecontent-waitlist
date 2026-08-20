@@ -23,9 +23,9 @@ import {
 } from "@/lib/dashboard/applicationsApi";
 
 const STATUS_META = {
-  pending: { label: "Pending", classes: "bg-slate-100 text-slate-600 border-slate-200" },
-  accepted: { label: "Accepted", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  declined: { label: "Declined", classes: "bg-rose-50 text-rose-700 border-rose-200" },
+  pending: { label: "Pending", classes: "bg-surface-hover text-muted border-line" },
+  accepted: { label: "Accepted", classes: "bg-success-soft text-success border-success-line" },
+  declined: { label: "Declined", classes: "bg-danger-soft text-danger border-danger-line" },
 };
 
 function deriveInitials(name) {
@@ -109,7 +109,7 @@ export default function ApplicantListRow({ application, onChanged }) {
   };
 
   return (
-    <li className="rounded-2xl border border-slate-200 bg-white p-4">
+    <li className="rounded-2xl border border-line bg-surface p-4">
       <div className="flex items-start gap-3">
         {creator.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -119,7 +119,7 @@ export default function ApplicantListRow({ application, onChanged }) {
             className="h-12 w-12 rounded-full object-cover"
           />
         ) : (
-          <span className="h-12 w-12 rounded-full bg-brand-sky text-white text-sm font-semibold inline-flex items-center justify-center shrink-0">
+          <span className="h-12 w-12 rounded-full bg-accent-soft text-on-accent text-sm font-semibold inline-flex items-center justify-center shrink-0">
             {deriveInitials(creator.display_name || creator.handle)}
           </span>
         )}
@@ -127,11 +127,11 @@ export default function ApplicantListRow({ application, onChanged }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="min-w-0">
-              <p className="font-semibold text-brand-ink truncate">
+              <p className="font-semibold text-ink truncate">
                 {creator.display_name || creator.handle || "Creator"}
               </p>
               {creator.handle ? (
-                <p className="text-xs text-slate-500 truncate">
+                <p className="text-xs text-muted truncate">
                   @{creator.handle}
                   {creator.location ? (
                     <>
@@ -153,9 +153,9 @@ export default function ApplicantListRow({ application, onChanged }) {
           {gig.id ? (
             <Link
               href={`/dashboard/brand/gigs/${gig.id}`}
-              className="mt-2 inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-brand-skyDeep"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent"
             >
-              <Briefcase size={12} className="text-slate-400" />
+              <Briefcase size={12} className="text-faint" />
               <span className="font-medium">Applied to:</span>
               <span className="truncate">{gig.title || "Untitled gig"}</span>
             </Link>
@@ -166,7 +166,7 @@ export default function ApplicantListRow({ application, onChanged }) {
               {creator.niches.slice(0, 5).map((n) => (
                 <span
                   key={n}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-mist text-brand-skyDeep text-[11px] font-medium"
+                  className="inline-flex items-center px-2 py-0.5 rounded-full bg-accent-tint text-accent text-[11px] font-medium"
                 >
                   {n}
                 </span>
@@ -175,29 +175,29 @@ export default function ApplicantListRow({ application, onChanged }) {
           ) : null}
 
           {creator.bio ? (
-            <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+            <p className="mt-2 text-sm text-muted line-clamp-2">
               {creator.bio}
             </p>
           ) : null}
 
           {application.pitch ? (
-            <div className="mt-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">
+            <div className="mt-3 rounded-xl bg-surface-sunken border border-line px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wide text-faint font-semibold mb-1">
                 Pitch
               </p>
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">
+              <p className="text-sm text-ink-soft whitespace-pre-wrap">
                 {application.pitch}
               </p>
             </div>
           ) : null}
 
-          <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+          <div className="mt-2 flex items-center gap-3 text-xs text-muted">
             {creator.instagram_handle ? (
               <a
                 href={`https://instagram.com/${creator.instagram_handle.replace(/^@/, "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 hover:text-brand-ink"
+                className="inline-flex items-center gap-1 hover:text-ink"
               >
                 <Instagram size={13} />
                 {creator.instagram_handle}
@@ -208,7 +208,7 @@ export default function ApplicantListRow({ application, onChanged }) {
                 href={`https://tiktok.com/@${creator.tiktok_handle.replace(/^@/, "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 hover:text-brand-ink"
+                className="inline-flex items-center gap-1 hover:text-ink"
               >
                 <Music2 size={13} />
                 {creator.tiktok_handle}
@@ -219,7 +219,7 @@ export default function ApplicantListRow({ application, onChanged }) {
                 href={`https://youtube.com/${creator.youtube_handle.startsWith("@") ? creator.youtube_handle : `@${creator.youtube_handle}`}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 hover:text-brand-ink"
+                className="inline-flex items-center gap-1 hover:text-ink"
               >
                 <Youtube size={13} />
                 {creator.youtube_handle}
@@ -228,7 +228,7 @@ export default function ApplicantListRow({ application, onChanged }) {
           </div>
 
           {err ? (
-            <p className="mt-2 text-xs text-rose-700 bg-rose-50 rounded px-2 py-1">
+            <p className="mt-2 text-xs text-danger bg-danger-soft rounded px-2 py-1">
               {err}
             </p>
           ) : null}
@@ -240,7 +240,7 @@ export default function ApplicantListRow({ application, onChanged }) {
                   type="button"
                   onClick={handleAccept}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-success-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-success-solid/90 disabled:opacity-60"
                 >
                   {busy ? (
                     <Loader2 size={13} className="animate-spin" />
@@ -253,7 +253,7 @@ export default function ApplicantListRow({ application, onChanged }) {
                   type="button"
                   onClick={handleDecline}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand-ink hover:bg-slate-50 disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-sunken disabled:opacity-60"
                 >
                   <X size={13} />
                   Decline
@@ -264,7 +264,7 @@ export default function ApplicantListRow({ application, onChanged }) {
             {application.status === "accepted" && conversationId ? (
               <Link
                 href={`/dashboard/brand/messages/${conversationId}`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-on-accent hover:opacity-90"
               >
                 <MessageSquare size={13} />
                 Open conversation
@@ -276,7 +276,7 @@ export default function ApplicantListRow({ application, onChanged }) {
                 type="button"
                 onClick={handleUndo}
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand-ink hover:bg-slate-50 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-sunken disabled:opacity-60"
               >
                 {busy ? (
                   <Loader2 size={13} className="animate-spin" />

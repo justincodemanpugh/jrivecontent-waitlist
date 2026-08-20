@@ -23,16 +23,16 @@ export default function MyCreatorCard({
   const isPending = creator.connectionStatus === "pending";
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden border border-slate-200 bg-white transition flex flex-col hover:border-brand-sky/60 hover:shadow-md">
+    <div className="group relative rounded-2xl overflow-hidden border border-line bg-surface transition flex flex-col hover:border-accent-soft/60 hover:shadow-md">
       {/* Status badge */}
       <div className="absolute top-2 left-2 z-10">
         {isPending ? (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warn-soft text-warn text-[10px] font-medium">
             <Clock size={10} />
             Pending
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-medium">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-soft text-success text-[10px] font-medium">
             <CheckCircle2 size={10} />
             Connected
           </span>
@@ -40,7 +40,7 @@ export default function MyCreatorCard({
       </div>
 
       {/* Cover */}
-      <div className="relative aspect-[9/12] w-full bg-gradient-to-br from-brand-mist to-slate-100">
+      <div className="relative aspect-[9/12] w-full bg-gradient-to-br from-accent-tint to-surface-hover">
         {creator.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -56,7 +56,7 @@ export default function MyCreatorCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center text-4xl font-bold text-slate-300">
+          <div className="h-full w-full flex items-center justify-center text-4xl font-bold text-faint">
             {initials}
           </div>
         )}
@@ -64,17 +64,17 @@ export default function MyCreatorCard({
         {/* Social pills */}
         <div className="absolute bottom-2 left-2 flex items-center gap-1">
           {creator.instagram ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Instagram size={12} />
             </span>
           ) : null}
           {creator.tiktok ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Music2 size={12} />
             </span>
           ) : null}
           {creator.youtube ? (
-            <span className="h-6 w-6 rounded-full bg-white/95 flex items-center justify-center text-slate-700 shadow-sm">
+            <span className="h-6 w-6 rounded-full bg-surface/95 flex items-center justify-center text-ink-soft shadow-sm">
               <Youtube size={12} />
             </span>
           ) : null}
@@ -84,13 +84,13 @@ export default function MyCreatorCard({
       {/* Body */}
       <div className="p-3 flex-1 flex flex-col gap-2">
         <div>
-          <p className="font-semibold text-sm text-brand-ink truncate">
+          <p className="font-semibold text-sm text-ink truncate">
             {creator.name}
           </p>
-          <p className="text-[11px] text-slate-500 truncate inline-flex items-center gap-1">
+          <p className="text-[11px] text-muted truncate inline-flex items-center gap-1">
             {creator.location ? (
               <>
-                <MapPin size={11} className="text-slate-400" />
+                <MapPin size={11} className="text-faint" />
                 {creator.location}
               </>
             ) : creator.handle ? (
@@ -106,7 +106,7 @@ export default function MyCreatorCard({
           {creator.niches.slice(0, 2).map((n) => (
             <span
               key={n}
-              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-brand-mist text-brand-skyDeep"
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-accent-tint text-accent"
             >
               {n}
             </span>
@@ -115,7 +115,7 @@ export default function MyCreatorCard({
 
         {/* Notes preview */}
         {creator.notes && (
-          <p className="text-[11px] text-slate-500 truncate italic">
+          <p className="text-[11px] text-muted truncate italic">
             "{creator.notes}"
           </p>
         )}
@@ -123,7 +123,7 @@ export default function MyCreatorCard({
         {/* Actions */}
         <div className="mt-auto flex items-center gap-2">
           {isPending && (
-            <span className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-slate-100 text-slate-500 px-3 py-2 text-xs font-semibold">
+            <span className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-surface-hover text-muted px-3 py-2 text-xs font-semibold">
               <Clock size={12} />
               Awaiting Response
             </span>
@@ -134,7 +134,7 @@ export default function MyCreatorCard({
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-faint hover:bg-surface-hover hover:text-muted transition"
             >
               <MoreHorizontal size={16} />
             </button>
@@ -145,13 +145,13 @@ export default function MyCreatorCard({
                   className="fixed inset-0 z-10"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 bottom-full mb-1 w-40 rounded-xl border border-slate-200 bg-white shadow-lg py-1 z-20">
+                <div className="absolute right-0 bottom-full mb-1 w-40 rounded-xl border border-line bg-surface shadow-lg py-1 z-20">
                   <button
                     onClick={() => {
                       setMenuOpen(false);
                       onEditNotes();
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-ink-soft hover:bg-surface-sunken"
                   >
                     <StickyNote size={14} />
                     Edit Notes
@@ -161,7 +161,7 @@ export default function MyCreatorCard({
                       setMenuOpen(false);
                       onRemove();
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger-soft"
                   >
                     <Trash2 size={14} />
                     Remove

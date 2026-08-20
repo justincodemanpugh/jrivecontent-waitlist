@@ -62,14 +62,14 @@ export default function StatStrip({ openApplicationsCount }) {
         return (
           <div
             key={s.label}
-            className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3"
+            className="rounded-2xl border border-line bg-surface p-4 flex items-center gap-3"
           >
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-mist text-brand-skyDeep">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
               <Icon size={18} />
             </span>
             <div>
-              <p className="text-xs text-slate-500">{s.label}</p>
-              <p className="text-lg font-semibold text-brand-ink">{s.value}</p>
+              <p className="text-xs text-muted">{s.label}</p>
+              <p className="text-lg font-semibold text-ink">{s.value}</p>
             </div>
           </div>
         );

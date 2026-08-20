@@ -46,30 +46,30 @@ export default function ExploreGigsPage() {
         <div className="relative">
           <Search
             size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-faint"
           />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search gigs by name or brand"
-            className="w-full rounded-full border border-slate-200 bg-white pl-10 pr-4 py-3 text-sm text-brand-ink placeholder-slate-400 focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30"
+            className="w-full rounded-full border border-line bg-surface pl-10 pr-4 py-3 text-sm text-ink placeholder-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30"
           />
         </div>
 
         {err ? (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
             {err}
           </p>
         ) : null}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-slate-400">
+          <div className="flex items-center justify-center py-20 text-faint">
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
-            <p className="text-sm text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+            <p className="text-sm text-muted">
               {gigs.length === 0
                 ? "No open gigs yet. Check back soon!"
                 : "No gigs match your search."}

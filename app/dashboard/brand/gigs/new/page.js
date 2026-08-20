@@ -94,7 +94,7 @@ export default function NewGigPage() {
   if (checkingPro) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-slate-400" />
+        <Loader2 size={24} className="animate-spin text-faint" />
       </div>
     );
   }
@@ -102,17 +102,17 @@ export default function NewGigPage() {
   return (
     <div className="min-h-screen">
       {/* Minimal top bar for the flow */}
-      <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-30 h-16 bg-surface/80 backdrop-blur-md border-b border-line">
         <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
           <Link
             href="/dashboard/brand"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-brand-ink transition"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink transition"
           >
             <ArrowLeft size={16} />
             <span className="hidden sm:inline">Back to dashboard</span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <h1 className="text-base md:text-lg font-semibold text-brand-ink">
+          <h1 className="text-base md:text-lg font-semibold text-ink">
             Post a new gig
           </h1>
           <span className="w-[88px] md:w-[180px]" aria-hidden />

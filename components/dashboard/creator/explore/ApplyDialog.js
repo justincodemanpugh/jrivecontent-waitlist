@@ -58,19 +58,19 @@ export default function ApplyDialog({ open, gig, onClose, onApplied }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-scrim/40 backdrop-blur-sm"
         onClick={() => !busy && onClose?.()}
       />
       <form
         onSubmit={submit}
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl border border-slate-200"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-surface shadow-xl border border-line"
       >
         <div className="flex items-start justify-between gap-4 px-5 pt-5">
           <div>
-            <h2 className="text-base font-semibold text-brand-ink">
+            <h2 className="text-base font-semibold text-ink">
               Apply to {gig.title}
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-muted">
               {gig.brandName} · ${gig.payPerVideo}/video
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function ApplyDialog({ open, gig, onClose, onApplied }) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-hover transition"
             aria-label="Close"
           >
             <X size={16} />
@@ -86,7 +86,7 @@ export default function ApplyDialog({ open, gig, onClose, onApplied }) {
         </div>
 
         <div className="px-5 pb-5 pt-3 space-y-3">
-          <label className="block text-sm font-medium text-brand-ink">
+          <label className="block text-sm font-medium text-ink">
             Why are you a fit?
           </label>
           <textarea
@@ -95,36 +95,36 @@ export default function ApplyDialog({ open, gig, onClose, onApplied }) {
             rows={6}
             disabled={busy}
             placeholder="Briefly tell the brand why you're a great match — relevant niches, recent work, ideas for the gig…"
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30 disabled:opacity-60"
+            className="w-full rounded-xl border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft/30 disabled:opacity-60"
           />
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted">
               Optional but strongly recommended.
             </p>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-faint">
               {pitch.length}/{PITCH_LIMIT}
             </span>
           </div>
           {err ? (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
               {err}
             </p>
           ) : null}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-line bg-surface-sunken/60 px-5 py-3">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+            className="rounded-full px-4 py-2 text-sm font-medium text-muted hover:bg-surface-hover disabled:opacity-40"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent hover:bg-ink/90 disabled:opacity-50"
           >
             {busy ? (
               <Loader2 size={14} className="animate-spin" />
