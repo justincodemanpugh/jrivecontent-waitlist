@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, Eye, Heart, Film, ExternalLink, TrendingUp } from "lucide-react";
 import ProgramStatStrip from "@/components/dashboard/brand/programs/ProgramStatStrip";
 import ProgramMetricsChart from "@/components/dashboard/brand/programs/ProgramMetricsChart";
+import VideoThumb, { videoLabel } from "@/components/dashboard/brand/programs/VideoThumb";
 import {
   fetchProgramStats,
   fetchProgramVideos,
@@ -86,12 +87,22 @@ export default function OverviewView() {
                   <span className="text-xs font-semibold text-faint w-4 text-center">
                     {i + 1}
                   </span>
-                  <Avatar name={v.creatorName} url={v.creatorAvatarUrl} />
+                  <VideoThumb
+                    coverImageUrl={v.coverImageUrl}
+                    creatorAvatarUrl={v.creatorAvatarUrl}
+                    creatorName={v.creatorName}
+                    className="h-9 w-9 rounded-lg"
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">
-                      {v.creatorName}
+                    <p
+                      className="text-sm font-medium text-ink truncate"
+                      title={v.caption || undefined}
+                    >
+                      {videoLabel(v)}
                     </p>
-                    <p className="text-xs text-faint truncate">{v.programTitle}</p>
+                    <p className="text-xs text-faint truncate">
+                      {v.creatorName} · {v.programTitle}
+                    </p>
                   </div>
                   <span className="flex items-center gap-1 text-sm font-medium text-ink tabular-nums">
                     <Eye size={13} className="text-faint" />

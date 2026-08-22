@@ -60,6 +60,16 @@ function buildEmail(notification, recipientName) {
         cta: "Open conversation",
         link,
       };
+    case "program_payout_due":
+      return {
+        subject: notification.title || "Creator payouts are ready to fund",
+        heading: "Payouts are due",
+        intro:
+          notification.body ||
+          "A program billing period just closed and payouts are waiting for you to fund.",
+        cta: "Review payouts",
+        link,
+      };
     case "gig_new":
       return {
         subject: `New gig: ${notification.title || "A brand is looking for creators"}`,

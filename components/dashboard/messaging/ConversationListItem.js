@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MoreVertical, Trash2, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Trash2, Loader2 } from "lucide-react";
 import { hideConversationForBrand } from "@/lib/dashboard/conversationsApi";
 
 function formatTimestamp(iso) {
@@ -25,9 +25,7 @@ export default function ConversationListItem({
   active,
   canHide = false,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [hiding, setHiding] = useState(false);
-  const menuRef = useRef(null);
 
   const time = useMemo(
     () => formatTimestamp(conversation.lastMessageAt),
@@ -42,24 +40,22 @@ export default function ConversationListItem({
       .join("")
       .toUpperCase() || "?";
 
-  useEffect(() => {
-    if (!menuOpen) return undefined;
-    const onDocClick = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [menuOpen]);
-
-  const handleHide = async () => {
-    setMenuOpen(false);
+  const handleHide = async (e) => {
+    // The button sits on top of the row's Link — don't navigate.
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      !confirm(
+        `Remove your conversation with ${conversation.counterpart.name} from your inbox? They'll still see it on their side.`,
+      )
+    ) {
+      return;
+    }
     setHiding(true);
     try {
       await hideConversationForBrand(conversation.id);
-    } catch (e) {
-      alert(e.message || "Couldn't remove this conversation.");
+    } catch (err) {
+      alert(err.message || "Couldn't remove this conversation.");
       setHiding(false);
     }
   };
@@ -102,33 +98,20 @@ export default function ConversationListItem({
       </Link>
 
       {canHide && (
-        <div ref={menuRef} className="absolute right-2 top-1/2 -translate-y-1/2">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            disabled={hiding}
-            aria-label={`Conversation options for ${conversation.counterpart.name}`}
-            className="h-8 w-8 rounded-full inline-flex items-center justify-center text-faint hover:bg-surface-hover hover:text-ink transition"
-          >
-            {hiding ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              <MoreVertical size={15} />
-            )}
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-9 z-20 w-48 rounded-xl border border-line bg-surface shadow-lg py-1">
-              <button
-                type="button"
-                onClick={handleHide}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-surface-hover transition text-left"
-              >
-                <Trash2 size={14} />
-                Remove from inbox
-              </button>
-            </div>
+        <button
+          type="button"
+          onClick={handleHide}
+          disabled={hiding}
+          title="Remove from inbox"
+          aria-label={`Remove conversation with ${conversation.counterpart.name} from your inbox`}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full inline-flex items-center justify-center text-faint hover:bg-danger-soft hover:text-danger transition disabled:opacity-50"
+        >
+          {hiding ? (
+            <Loader2 size={15} className="animate-spin" />
+          ) : (
+            <Trash2 size={15} />
           )}
-        </div>
+        </button>
       )}
     </div>
   );

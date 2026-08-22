@@ -1,10 +1,9 @@
-// POST /api/brand-reminders
+// GET|POST /api/brand-reminders
 // Cron-triggered endpoint that sends reminder emails to brands who
 // completed onboarding but haven't posted a gig yet.
 //
-// Trigger via Vercel Cron or external scheduler with:
-//   POST /api/brand-reminders
-//   Header: x-cron-secret: <CRON_SECRET>
+// Vercel Cron invokes with GET and an `Authorization: Bearer <CRON_SECRET>`
+// header; POST with `x-cron-secret` is supported for manual runs.
 //
 // Supports multiple reminder tiers:
 //   - no_gig_3_days:  3 days after onboarding
@@ -85,7 +84,7 @@ function renderText({ heading, intro, cta, link }) {
   return `${heading}\n\n${intro}\n\n${cta}: ${link}\n`;
 }
 
-export async function POST(request) {
+async function handler(request) {
   // 1. Auth: only cron jobs with the shared secret can trigger this.
   // Accepts either x-cron-secret header (manual trigger) or Vercel's
   // CRON_SECRET via Authorization header (Vercel Cron Jobs).
@@ -238,6 +237,5 @@ export async function POST(request) {
   });
 }
 
-export async function GET() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
+export const GET = handler;
+export const POST = handler;

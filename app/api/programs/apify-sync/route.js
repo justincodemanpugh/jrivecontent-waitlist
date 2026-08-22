@@ -1,4 +1,4 @@
-// POST /api/programs/apify-sync
+// GET|POST /api/programs/apify-sync
 //
 // OAuth-free counterpart to /api/programs/tiktok-sync. That route uses
 // TikTok's official Display API, which needs every creator to authorize the
@@ -6,9 +6,8 @@
 // scrapes the same public numbers via Apify so brands see real metrics in the
 // meantime.
 //
-// Trigger via Vercel Cron or an external scheduler with:
-//   POST /api/programs/apify-sync
-//   Header: x-cron-secret: <CRON_SECRET>
+// Vercel Cron invokes with GET and an `Authorization: Bearer <CRON_SECRET>`
+// header; POST with `x-cron-secret` is supported for manual runs.
 //
 // It syncs two independent sets of accounts:
 //   1. Program members whose creator saved a TikTok handle
@@ -28,7 +27,7 @@ export const dynamic = "force-dynamic";
 // room rather than letting a partial sync get killed mid-flight.
 export const maxDuration = 300;
 
-export async function POST(request) {
+async function handler(request) {
   const secret = process.env.CRON_SECRET;
   const providedHeader = request.headers.get("x-cron-secret");
   const authHeader = request.headers.get("authorization");
@@ -133,6 +132,5 @@ async function syncAccounts(admin, results) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
+export const GET = handler;
+export const POST = handler;

@@ -1,10 +1,9 @@
-// POST /api/programs/tiktok-sync
+// GET|POST /api/programs/tiktok-sync
 // Cron-triggered endpoint that refreshes TikTok video discovery + view/like/
 // comment/share counts for every active program member.
 //
-// Trigger via Vercel Cron or external scheduler with:
-//   POST /api/programs/tiktok-sync
-//   Header: x-cron-secret: <CRON_SECRET>
+// Vercel Cron invokes with GET and an `Authorization: Bearer <CRON_SECRET>`
+// header; POST with `x-cron-secret` is supported for manual runs.
 //
 // For each active program_member with a connected TikTok account:
 //   1. Refresh the access token if it's near expiry.
@@ -21,7 +20,7 @@ export const dynamic = "force-dynamic";
 
 const TOKEN_REFRESH_MARGIN_MS = 10 * 60 * 1000; // refresh if expiring within 10 min
 
-export async function POST(request) {
+async function handler(request) {
   const secret = process.env.CRON_SECRET;
   const providedHeader = request.headers.get("x-cron-secret");
   const authHeader = request.headers.get("authorization");
@@ -72,7 +71,9 @@ export async function POST(request) {
           .eq("id", account.id);
       }
 
-      // 1. Discover new videos.
+      // 1. Discover new videos, and refresh metadata on ones we already know.
+      // Cover URLs are signed and expire, so known rows get rewritten rather
+      // than skipped — otherwise a thumbnail is written once and then rots.
       const { videos } = await fetchVideoList(accessToken);
       for (const video of videos) {
         const { data: existing } = await admin
@@ -81,12 +82,29 @@ export async function POST(request) {
           .eq("program_member_id", member.id)
           .eq("tiktok_video_id", video.id)
           .maybeSingle();
-        if (existing) continue;
+
+        // Caption can be edited and the cover URL expires, so both are
+        // rewritten every pass. video_url is deliberately excluded — it never
+        // changes, and a response missing share_url would blank a good one.
+        const metadata = {
+          description: video.video_description || video.title || null,
+          cover_image_url: video.cover_image_url || null,
+          duration_seconds: video.duration ? Math.round(Number(video.duration)) : null,
+        };
+
+        if (existing) {
+          await admin
+            .from("program_videos")
+            .update(metadata)
+            .eq("id", existing.id);
+          continue;
+        }
 
         await admin.from("program_videos").insert({
           program_member_id: member.id,
           tiktok_video_id: video.id,
           video_url: video.share_url || null,
+          ...metadata,
           posted_at: video.create_time
             ? new Date(Number(video.create_time) * 1000).toISOString()
             : null,
@@ -145,6 +163,5 @@ export async function POST(request) {
   return NextResponse.json({ ok: true, ...results });
 }
 
-export async function GET() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
+export const GET = handler;
+export const POST = handler;

@@ -23,6 +23,7 @@ import {
   releaseProgramPayout,
 } from "@/lib/dashboard/brand/programsApi";
 import { fetchMyCreators } from "@/lib/dashboard/brand/creatorsApi";
+import { currentPeriod } from "@/lib/programs/periods";
 
 function formatMoney(cents) {
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
@@ -30,24 +31,6 @@ function formatMoney(cents) {
 
 function formatCompact(n) {
   return new Intl.NumberFormat("en-US", { notation: "compact" }).format(n || 0);
-}
-
-// Current billing period boundaries based on the program's period type.
-function currentPeriod(periodType) {
-  const now = new Date();
-  if (periodType === "week") {
-    const day = now.getDay(); // 0 = Sunday
-    const diffToMonday = (day + 6) % 7;
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    start.setDate(now.getDate() - diffToMonday);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 7);
-    return { start, end };
-  }
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return { start, end };
 }
 
 export default function ProgramDetailView({ programId }) {
@@ -95,7 +78,7 @@ export default function ProgramDetailView({ programId }) {
 
   if (!program) return null;
 
-  const { start, end } = currentPeriod(program.periodType);
+  const { start, end } = currentPeriod(program);
   const activeMembers = program.members.filter((m) => m.status !== "removed");
 
   return (
@@ -208,12 +191,14 @@ function MemberCard({ member, program, period, onChanged }) {
   const billableCount = Math.min(videosThisPeriod.length, program.videosPerPeriod);
   const owedCents = billableCount * program.payPerVideoCents;
 
-  const currentPayout = member.payouts?.find(
-    (p) =>
-      p.payoutType !== "test" &&
-      new Date(p.periodStart).getTime() === period.start.getTime() &&
-      new Date(p.periodEnd).getTime() === period.end.getTime(),
-  );
+  // Matched by overlap rather than exact timestamps: rows created before
+  // period math moved to UTC carry the brand's local-midnight boundaries, and
+  // an exact match would miss them and offer to fund the period twice.
+  const currentPayout = member.payouts?.find((p) => {
+    if (p.payoutType === "test" || !p.periodStart) return false;
+    const start = new Date(p.periodStart).getTime();
+    return start >= period.start.getTime() && start < period.end.getTime();
+  });
 
   const testPayout = member.payouts?.find((p) => p.payoutType === "test");
   const testPayoutOffered = (program.testPayoutAmountCents || 0) > 0;
