@@ -1,11 +1,13 @@
 // GET /api/stripe/earnings
-// Creator-only. Returns the creator's released earnings totals (this month
-// and lifetime) in dollars, computed from our `payments` table. We use our
-// DB rather than Stripe's balance API so the number is consistent with
-// what we've actually released, and so it includes amounts already paid
-// out to the creator's bank.
+// Creator-only. Returns the creator's program payout totals in dollars:
+// money already released (this month + lifetime) and money funded by the
+// brand but not yet transferred. Computed from our `program_payouts` table
+// rather than Stripe's balance API so the numbers match what we've recorded
+// and include amounts already paid out to the creator's bank.
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+
+const EMPTY = { earningsThisMonth: 0, earningsTotal: 0, pendingToReceive: 0 };
 
 export async function GET() {
   try {
@@ -22,38 +24,35 @@ export async function GET() {
     startOfMonth.setUTCHours(0, 0, 0, 0);
 
     const { data, error } = await supabase
-      .from("payments")
-      .select("creator_payout_cents, released_at, status, videos_paid_out, total_videos_requested")
+      .from("program_payouts")
+      .select("creator_payout_cents, released_at, status")
       .eq("creator_id", user.id)
-      .in("status", ["released", "escrowed"])
-      .not("released_at", "is", null);
+      .in("status", ["released", "escrowed", "released_pending"]);
 
     if (error) {
       console.error("[stripe/earnings] query error:", error);
-      return NextResponse.json(
-        { earningsThisMonth: 0, earningsTotal: 0 },
-        { status: 200 },
-      );
+      return NextResponse.json(EMPTY, { status: 200 });
     }
 
     let monthCents = 0;
     let totalCents = 0;
+    let pendingCents = 0;
     for (const row of data || []) {
-      // Pro-rate per-video payouts when not all videos in a payment have
-      // been released yet (matches the multi-video release logic).
-      const total = row.total_videos_requested || 1;
-      const paid = row.videos_paid_out || total;
-      const fraction = total > 0 ? paid / total : 1;
-      const earned = Math.round((row.creator_payout_cents || 0) * fraction);
-      totalCents += earned;
-      if (row.released_at && new Date(row.released_at) >= startOfMonth) {
-        monthCents += earned;
+      const cents = row.creator_payout_cents || 0;
+      if (row.status === "released") {
+        totalCents += cents;
+        if (row.released_at && new Date(row.released_at) >= startOfMonth) {
+          monthCents += cents;
+        }
+      } else {
+        pendingCents += cents;
       }
     }
 
     return NextResponse.json({
       earningsThisMonth: monthCents / 100,
       earningsTotal: totalCents / 100,
+      pendingToReceive: pendingCents / 100,
     });
   } catch (e) {
     console.error("[stripe/earnings]", e);

@@ -123,6 +123,11 @@ export default function ProgramPayoutsView() {
                         )}
                       </span>
                       {p.creatorName}
+                      {p.payoutType === "test" && (
+                        <span className="rounded-full bg-accent-tint px-2 py-0.5 text-[10px] font-semibold text-accent">
+                          Test
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-5 py-3">
@@ -134,9 +139,13 @@ export default function ProgramPayoutsView() {
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-muted">
-                    {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
+                    {p.payoutType === "test"
+                      ? "One-time test video"
+                      : `${formatDate(p.periodStart)} – ${formatDate(p.periodEnd)}`}
                   </td>
-                  <td className="px-5 py-3 text-muted">{p.videoCount}</td>
+                  <td className="px-5 py-3 text-muted">
+                    {p.payoutType === "test" ? "—" : p.videoCount}
+                  </td>
                   <td className="px-5 py-3 font-medium text-ink">
                     {formatMoney(p.creatorPayoutCents)}
                   </td>

@@ -79,6 +79,7 @@ export default function InboxList({ role, basePath, emptyCopy }) {
             conversation={c}
             basePath={basePath}
             active={pathname === `${basePath}/${c.id}`}
+            canHide={role === "brand"}
           />
         </li>
       ))}

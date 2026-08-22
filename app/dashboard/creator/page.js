@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Upload, Clock, CheckCircle2, Eye, ImagePlus } from "lucide-react";
 import TopBar from "@/components/dashboard/creator/TopBar";
+import StatStrip from "@/components/dashboard/creator/home/StatStrip";
 import { useCreator } from "@/components/dashboard/creator/CreatorProvider";
 import { fetchMyAssignments } from "@/lib/dashboard/creator/assignmentsApi";
 
@@ -91,6 +92,8 @@ export default function CreatorHomePage() {
               : "Here's what needs your attention today."}
           </p>
         </div>
+
+        <StatStrip />
 
         {/* Profile completeness banner (show if not 100%) */}
         {!profileComplete && (

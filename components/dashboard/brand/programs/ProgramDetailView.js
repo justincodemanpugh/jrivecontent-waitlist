@@ -210,9 +210,13 @@ function MemberCard({ member, program, period, onChanged }) {
 
   const currentPayout = member.payouts?.find(
     (p) =>
+      p.payoutType !== "test" &&
       new Date(p.periodStart).getTime() === period.start.getTime() &&
       new Date(p.periodEnd).getTime() === period.end.getTime(),
   );
+
+  const testPayout = member.payouts?.find((p) => p.payoutType === "test");
+  const testPayoutOffered = (program.testPayoutAmountCents || 0) > 0;
 
   const handleFund = async () => {
     setError("");
@@ -230,11 +234,26 @@ function MemberCard({ member, program, period, onChanged }) {
     }
   };
 
-  const handleRelease = async () => {
+  const handleFundTest = async () => {
     setError("");
     setFunding(true);
     try {
-      await releaseProgramPayout(currentPayout.id);
+      const url = await fundProgramPayout({
+        programMemberId: member.id,
+        isTest: true,
+      });
+      window.location.href = url;
+    } catch (e) {
+      setError(e.message || "Could not start test payout.");
+      setFunding(false);
+    }
+  };
+
+  const handleRelease = async (payoutId) => {
+    setError("");
+    setFunding(true);
+    try {
+      await releaseProgramPayout(payoutId);
       onChanged?.();
     } catch (e) {
       setError(e.message || "Could not release payout.");
@@ -286,6 +305,48 @@ function MemberCard({ member, program, period, onChanged }) {
         <Metric icon={MessageCircle} label="Comments" value={formatCompact(member.totals.comments)} />
       </div>
 
+      {/* One-time test video payout — no posted video required */}
+      {member.status === "active" && testPayoutOffered && (
+        <div className="mt-4 rounded-xl bg-accent-tint border border-accent/30 p-4 flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-sm text-muted">
+              Test video ·{" "}
+              <span className="font-medium text-ink">
+                {formatMoney(program.testPayoutAmountCents)}
+              </span>{" "}
+              one-time
+            </p>
+          </div>
+          {!testPayout && (
+            <button
+              onClick={handleFundTest}
+              disabled={funding}
+              className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition disabled:opacity-60"
+            >
+              {funding && <Loader2 size={14} className="animate-spin" />}
+              Fund test payout
+            </button>
+          )}
+          {testPayout?.status === "escrowed" && (
+            <button
+              onClick={() => handleRelease(testPayout.id)}
+              disabled={funding}
+              className="inline-flex items-center gap-2 rounded-full bg-success-solid text-white px-4 py-2 text-sm font-medium hover:bg-success-solid/90 transition disabled:opacity-60"
+            >
+              {funding ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              Release test payout
+            </button>
+          )}
+          {(testPayout?.status === "released" ||
+            testPayout?.status === "released_pending") && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
+              <CheckCircle2 size={14} />
+              Test payout complete
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Payout for current period */}
       {member.status === "active" && (
         <div className="mt-4 rounded-xl bg-surface-sunken border border-line p-4 flex items-center justify-between gap-3 flex-wrap">
@@ -308,7 +369,7 @@ function MemberCard({ member, program, period, onChanged }) {
           )}
           {currentPayout?.status === "escrowed" && (
             <button
-              onClick={handleRelease}
+              onClick={() => handleRelease(currentPayout.id)}
               disabled={funding}
               className="inline-flex items-center gap-2 rounded-full bg-success-solid text-white px-4 py-2 text-sm font-medium hover:bg-success-solid/90 transition disabled:opacity-60"
             >

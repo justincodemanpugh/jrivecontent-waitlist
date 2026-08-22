@@ -19,6 +19,8 @@ export default function CreateProgramModal({ onClose }) {
   const [periodType, setPeriodType] = useState("month");
   const [videosPerPeriod, setVideosPerPeriod] = useState("");
   const [payPerVideo, setPayPerVideo] = useState("");
+  const [testPayoutEnabled, setTestPayoutEnabled] = useState(false);
+  const [testPayout, setTestPayout] = useState("");
 
   const [roster, setRoster] = useState([]);
   const [rosterLoading, setRosterLoading] = useState(true);
@@ -68,6 +70,10 @@ export default function CreateProgramModal({ onClose }) {
         periodType,
         payPerVideoCents: Math.round(Number(payPerVideo) * 100),
         payoutSchedule,
+        testPayoutAmountCents:
+          testPayoutEnabled && Number(testPayout) > 0
+            ? Math.round(Number(testPayout) * 100)
+            : 0,
         memberCreatorIds: selectedCreatorIds,
       });
       handleClose();
@@ -262,6 +268,43 @@ export default function CreateProgramModal({ onClose }) {
                     />
                   </div>
                 </Field>
+
+                <div className="rounded-xl border border-line p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={testPayoutEnabled}
+                      onChange={(e) => setTestPayoutEnabled(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-line accent-accent"
+                    />
+                    <span>
+                      <span className="block text-sm font-medium text-ink">
+                        Pay for a test video
+                      </span>
+                      <span className="block text-xs text-faint mt-0.5">
+                        Offer each new creator a one-time flat payment so you can
+                        see their work before the regular cycle starts. Released
+                        without waiting for a posted video.
+                      </span>
+                    </span>
+                  </label>
+                  {testPayoutEnabled && (
+                    <div className="relative mt-3">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-faint text-sm">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={testPayout}
+                        onChange={(e) => setTestPayout(e.target.value)}
+                        placeholder="25.00"
+                        className={`${inputCls} pl-7`}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -348,6 +391,14 @@ export default function CreateProgramModal({ onClose }) {
                 <SummaryRow
                   label="Pay per video"
                   value={payPerVideo ? `$${Number(payPerVideo).toFixed(2)}` : "$0.00"}
+                />
+                <SummaryRow
+                  label="Test video payout"
+                  value={
+                    testPayoutEnabled && Number(testPayout) > 0
+                      ? `$${Number(testPayout).toFixed(2)} per new creator`
+                      : "Off"
+                  }
                 />
                 <SummaryRow
                   label="Creators invited"

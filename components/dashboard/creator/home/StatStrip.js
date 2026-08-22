@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Wallet, Inbox } from "lucide-react";
+import { Sparkles, Wallet, Clock, TrendingUp } from "lucide-react";
 import { useCreator } from "@/components/dashboard/creator/CreatorProvider";
 import { computeProfileStrength } from "@/lib/dashboard/creator/profileStrength";
 
@@ -12,11 +12,10 @@ function formatMoney(amount) {
     : `$${amount.toFixed(2)}`;
 }
 
-// Stats shown above the home page lists. `openApplicationsCount` is computed
-// by the parent so we don't double-fetch applications.
-export default function StatStrip({ openApplicationsCount }) {
+// Money + profile stats shown above the home page lists.
+export default function StatStrip() {
   const creator = useCreator();
-  const [earningsThisMonth, setEarningsThisMonth] = useState(null);
+  const [earnings, setEarnings] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +24,7 @@ export default function StatStrip({ openApplicationsCount }) {
         const res = await fetch("/api/stripe/earnings");
         if (!res.ok) return;
         const json = await res.json();
-        if (!cancelled) {
-          setEarningsThisMonth(Number(json.earningsThisMonth) || 0);
-        }
+        if (!cancelled) setEarnings(json);
       } catch {
         // Leave as null; UI will show $0.
       }
@@ -39,14 +36,20 @@ export default function StatStrip({ openApplicationsCount }) {
 
   const stats = [
     {
-      label: "Open applications",
-      value: openApplicationsCount ?? 0,
-      icon: Inbox,
+      label: "To receive",
+      value: formatMoney(Number(earnings?.pendingToReceive) || 0),
+      icon: Clock,
+      hint: "Funded by the brand, waiting to be released",
     },
     {
-      label: "Earnings this month",
-      value: formatMoney(earningsThisMonth ?? 0),
+      label: "Earned this month",
+      value: formatMoney(Number(earnings?.earningsThisMonth) || 0),
       icon: Wallet,
+    },
+    {
+      label: "Earned all time",
+      value: formatMoney(Number(earnings?.earningsTotal) || 0),
+      icon: TrendingUp,
     },
     {
       label: "Profile strength",
@@ -56,20 +59,21 @@ export default function StatStrip({ openApplicationsCount }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((s) => {
         const Icon = s.icon;
         return (
           <div
             key={s.label}
+            title={s.hint}
             className="rounded-2xl border border-line bg-surface p-4 flex items-center gap-3"
           >
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-tint text-accent shrink-0">
               <Icon size={18} />
             </span>
-            <div>
-              <p className="text-xs text-muted">{s.label}</p>
-              <p className="text-lg font-semibold text-ink">{s.value}</p>
+            <div className="min-w-0">
+              <p className="text-xs text-muted truncate">{s.label}</p>
+              <p className="text-lg font-semibold text-ink tabular-nums">{s.value}</p>
             </div>
           </div>
         );

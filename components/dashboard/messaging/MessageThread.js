@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Paperclip } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import {
   fetchMessages,
   sendMessage,
@@ -14,13 +14,10 @@ import {
 } from "@/lib/dashboard/conversationsApi";
 import MessageBubble from "./MessageBubble";
 import MessageComposer from "./MessageComposer";
-import DeliverableCard from "./DeliverableCard";
-import SubmitVideosDialog from "./SubmitVideosDialog";
-import PaymentBanner from "./PaymentBanner";
 
 /**
  * Full-thread view used by both brand and creator messages pages.
- * - role: "brand" | "creator" — controls deliverable actions and back link.
+ * - role: "brand" | "creator" — controls the back link.
  * - currentUserId: used to color "mine" vs "theirs".
  * - basePath: where the back button links to (the inbox list).
  */
@@ -29,7 +26,6 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [submitOpen, setSubmitOpen] = useState(false);
   const scrollRef = useRef(null);
 
   // DEBUG: verify the currentUserId prop reaches the client. If this is empty
@@ -102,14 +98,11 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
     return unsubscribe;
   }, [conversationId]);
 
-  // Realtime conversation updates (payment_deposited, video counts, etc.).
-  // Without this, the PaymentBanner would stay on "Deposit $X" even after
-  // the brand finished Stripe checkout because we'd never re-fetch.
+  // Realtime conversation updates — the realtime payload only carries the
+  // conversations row, so re-fetch to pick up nested joins.
   useEffect(() => {
     if (!conversationId) return undefined;
     const unsubscribe = subscribeToConversation(conversationId, async () => {
-      // Re-fetch the full row so we pick up nested gig/payment/counterpart
-      // joins (the realtime payload only contains the conversations row).
       try {
         const fresh = await fetchConversation(conversationId, role);
         if (fresh) setConversation(fresh);
@@ -118,46 +111,6 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
       }
     });
     return unsubscribe;
-  }, [conversationId, role]);
-
-  // Post-Stripe-checkout refresh. The webhook flips payment_deposited on the
-  // server, but the brand lands here via a top-level redirect so the realtime
-  // channel hasn't necessarily delivered the UPDATE yet. Force a re-fetch and
-  // strip the query param so a manual reload doesn't keep re-triggering.
-  useEffect(() => {
-    if (!conversationId) return;
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("deposit") !== "success") return;
-
-    params.delete("deposit");
-    const qs = params.toString();
-    const next =
-      window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
-    window.history.replaceState({}, "", next);
-
-    let cancelled = false;
-    (async () => {
-      // Webhook fires async — retry briefly so the UI catches up even if the
-      // user beats Stripe's webhook back to the page.
-      for (let i = 0; i < 5; i += 1) {
-        try {
-          const fresh = await fetchConversation(conversationId, role);
-          if (cancelled) return;
-          if (fresh?.payment_deposited) {
-            setConversation(fresh);
-            return;
-          }
-          if (fresh) setConversation(fresh);
-        } catch {
-          /* retry */
-        }
-        await new Promise((r) => setTimeout(r, 1000));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
   }, [conversationId, role]);
 
   // Auto-scroll on new messages.
@@ -235,7 +188,6 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
   return (
     <div className="flex flex-col h-full w-full">
       {/* Header */}
-      <PaymentBanner conversation={conversation} role={role} />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-line bg-surface">
         <Link
           href={basePath}
@@ -300,58 +252,14 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
               isMine={isMine}
               avatarUrl={counterpartAvatar}
               initials={counterpartInitials}
-            >
-              {m.kind === "deliverable" && m.deliverable_id ? (
-                <DeliverableCard
-                  deliverableId={m.deliverable_id}
-                  role={role}
-                />
-              ) : null}
-            </MessageBubble>
+            />
             );
           })
         )}
       </div>
 
       {/* Composer */}
-      <MessageComposer
-        onSend={handleSend}
-        leftSlot={
-          role === "creator" ? (
-            <button
-              type="button"
-              onClick={() => setSubmitOpen(true)}
-              disabled={!conversation?.payment_deposited}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:text-ink hover:bg-surface-hover transition disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
-              aria-label={
-                conversation?.payment_deposited
-                  ? "Submit videos"
-                  : "Add videos - waiting for brand to deposit payment"
-              }
-              title={
-                conversation?.payment_deposited
-                  ? "Submit videos"
-                  : "Brand must deposit payment into escrow before you can submit videos. Funds are held until your videos are approved."
-              }
-            >
-              <Paperclip size={18} />
-            </button>
-          ) : null
-        }
-      />
-
-      {role === "creator" ? (
-        <SubmitVideosDialog
-          open={submitOpen}
-          conversation={{
-            id: conversation.id,
-            gig_id: conversation.gig_id,
-            brand_id: conversation.brand_id,
-            creator_id: conversation.creator_id,
-          }}
-          onClose={() => setSubmitOpen(false)}
-        />
-      ) : null}
+      <MessageComposer onSend={handleSend} />
     </div>
   );
 }

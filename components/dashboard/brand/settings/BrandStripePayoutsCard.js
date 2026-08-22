@@ -136,7 +136,7 @@ export default function BrandStripePayoutsCard({ initial }) {
           <li className="flex items-start gap-2">
             <ShieldCheck size={16} className="mt-0.5 text-accent" />
             On approval, the creator's share is transferred instantly. We
-            keep our 15% as a platform fee.
+            keep our 5% as a platform fee.
           </li>
         </ul>
       )}

@@ -1,10 +1,13 @@
 // POST /api/programs/payouts/checkout
-// Body: { programMemberId, periodStart, periodEnd }  <- ISO date strings
+// Body: { programMemberId, periodStart, periodEnd } | { programMemberId, isTest: true }
 //
 // Brand-only. Computes (or reuses) the payout for one creator's program
 // membership over a billing period — video_count * pay_per_video_cents,
 // capped at the program's video target — and returns a Stripe Checkout
-// Session URL that funds escrow. Mirrors /api/briefs/escrow/checkout.
+// Session URL that funds escrow.
+//
+// With `isTest`, funds the program's flat one-time test payout instead: no
+// period, no posted videos required, one per member.
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,10 +20,17 @@ import {
 
 export async function POST(request) {
   try {
-    const { programMemberId, periodStart, periodEnd } = await request.json();
-    if (!programMemberId || !periodStart || !periodEnd) {
+    const { programMemberId, periodStart, periodEnd, isTest } =
+      await request.json();
+    if (!programMemberId) {
       return NextResponse.json(
-        { error: "programMemberId, periodStart, and periodEnd are required" },
+        { error: "programMemberId is required" },
+        { status: 400 },
+      );
+    }
+    if (!isTest && (!periodStart || !periodEnd)) {
+      return NextResponse.json(
+        { error: "periodStart and periodEnd are required" },
         { status: 400 },
       );
     }
@@ -39,7 +49,7 @@ export async function POST(request) {
       .from("program_members")
       .select(
         `id, creator_id,
-         program:programs ( id, brand_id, title, pay_per_video_cents, videos_per_period )`,
+         program:programs ( id, brand_id, title, pay_per_video_cents, videos_per_period, test_payout_amount_cents )`,
       )
       .eq("id", programMemberId)
       .maybeSingle();
@@ -56,20 +66,49 @@ export async function POST(request) {
       );
     }
 
-    const { count: videoCount } = await admin
-      .from("program_videos")
-      .select("id", { count: "exact", head: true })
-      .eq("program_member_id", programMemberId)
-      .gte("posted_at", periodStart)
-      .lt("posted_at", periodEnd);
+    let billableVideos = 0;
+    let amountCents = 0;
+    let retryTestPayoutId = null;
 
-    const billableVideos = Math.min(videoCount || 0, program.videos_per_period);
-    const amountCents = billableVideos * program.pay_per_video_cents;
-    if (amountCents <= 0) {
-      return NextResponse.json(
-        { error: "No billable videos posted in this period yet." },
-        { status: 400 },
-      );
+    if (isTest) {
+      amountCents = program.test_payout_amount_cents || 0;
+      if (amountCents <= 0) {
+        return NextResponse.json(
+          { error: "This program doesn't offer a test payout." },
+          { status: 400 },
+        );
+      }
+
+      const { data: existingTest } = await admin
+        .from("program_payouts")
+        .select("id, status")
+        .eq("program_member_id", programMemberId)
+        .eq("payout_type", "test")
+        .maybeSingle();
+      if (existingTest && existingTest.status !== "failed") {
+        return NextResponse.json(
+          { error: "This creator's test payout has already been funded." },
+          { status: 400 },
+        );
+      }
+      // A previous checkout that expired or failed can be retried in place.
+      retryTestPayoutId = existingTest?.id || null;
+    } else {
+      const { count: videoCount } = await admin
+        .from("program_videos")
+        .select("id", { count: "exact", head: true })
+        .eq("program_member_id", programMemberId)
+        .gte("posted_at", periodStart)
+        .lt("posted_at", periodEnd);
+
+      billableVideos = Math.min(videoCount || 0, program.videos_per_period);
+      amountCents = billableVideos * program.pay_per_video_cents;
+      if (amountCents <= 0) {
+        return NextResponse.json(
+          { error: "No billable videos posted in this period yet." },
+          { status: 400 },
+        );
+      }
     }
 
     const { data: brandProfile } = await admin
@@ -92,27 +131,40 @@ export async function POST(request) {
     const breakdown = feeBreakdown(amountCents);
     const processingFeeCents = processingFeeFor(amountCents);
 
-    const { data: payout, error: payoutErr } = await admin
-      .from("program_payouts")
-      .upsert(
-        {
-          program_member_id: programMemberId,
-          program_id: program.id,
-          brand_id: program.brand_id,
-          creator_id: member.creator_id,
-          period_start: periodStart,
-          period_end: periodEnd,
-          video_count: billableVideos,
-          amount_cents: breakdown.amountCents,
-          platform_fee_cents: breakdown.platformFeeCents,
-          creator_payout_cents: breakdown.creatorPayoutCents,
-          brand_stripe_account_id: brandStripeAccountId,
-          status: "pending",
-        },
-        { onConflict: "program_member_id,period_start,period_end" },
-      )
-      .select()
-      .single();
+    const payoutRow = {
+      program_member_id: programMemberId,
+      program_id: program.id,
+      brand_id: program.brand_id,
+      creator_id: member.creator_id,
+      payout_type: isTest ? "test" : "period",
+      period_start: isTest ? null : periodStart,
+      period_end: isTest ? null : periodEnd,
+      video_count: billableVideos,
+      amount_cents: breakdown.amountCents,
+      platform_fee_cents: breakdown.platformFeeCents,
+      creator_payout_cents: breakdown.creatorPayoutCents,
+      brand_stripe_account_id: brandStripeAccountId,
+      status: "pending",
+    };
+
+    // Test payouts have null periods, so the (member, period) upsert target
+    // doesn't apply — reuse a previously failed row, or insert a fresh one.
+    const { data: payout, error: payoutErr } = isTest
+      ? retryTestPayoutId
+        ? await admin
+            .from("program_payouts")
+            .update(payoutRow)
+            .eq("id", retryTestPayoutId)
+            .select()
+            .single()
+        : await admin.from("program_payouts").insert(payoutRow).select().single()
+      : await admin
+          .from("program_payouts")
+          .upsert(payoutRow, {
+            onConflict: "program_member_id,period_start,period_end",
+          })
+          .select()
+          .single();
     if (payoutErr) throw payoutErr;
 
     const base = siteUrl();
@@ -123,6 +175,7 @@ export async function POST(request) {
       program_id: program.id,
       brand_id: program.brand_id,
       creator_id: member.creator_id,
+      payout_type: isTest ? "test" : "period",
       subtotal_cents: String(breakdown.amountCents),
       platform_fee_cents: String(breakdown.platformFeeCents),
       creator_payout_cents: String(breakdown.creatorPayoutCents),
@@ -137,7 +190,9 @@ export async function POST(request) {
           currency: "usd",
           unit_amount: amountCents,
           product_data: {
-            name: `${program.title || "Program"} — ${billableVideos} video${billableVideos !== 1 ? "s" : ""}`,
+            name: isTest
+              ? `${program.title || "Program"} — test video payout`
+              : `${program.title || "Program"} — ${billableVideos} video${billableVideos !== 1 ? "s" : ""}`,
             description: "Funds held in escrow until released to the creator.",
           },
         },

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 
-export default function MessageComposer({ onSend, disabled, leftSlot }) {
+export default function MessageComposer({ onSend, disabled }) {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -24,7 +24,6 @@ export default function MessageComposer({ onSend, disabled, leftSlot }) {
       onSubmit={submit}
       className="border-t border-line bg-surface px-3 py-3 flex items-center gap-2"
     >
-      {leftSlot}
       <input
         type="text"
         value={body}
