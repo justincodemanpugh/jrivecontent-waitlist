@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Loader2, Eye, Heart, Film, ExternalLink, TrendingUp } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Loader2, Eye, Film, ExternalLink, TrendingUp, RefreshCw } from "lucide-react";
 import ProgramStatStrip from "@/components/dashboard/brand/programs/ProgramStatStrip";
 import ProgramMetricsChart from "@/components/dashboard/brand/programs/ProgramMetricsChart";
 import VideoThumb, { videoLabel } from "@/components/dashboard/brand/programs/VideoThumb";
 import {
-  fetchProgramStats,
-  fetchProgramVideos,
-  fetchProgramAccounts,
+  fetchOverviewData,
+  fetchMetricsHistory,
+  buildMetricsFromSnapshots,
   buildProgramMetrics,
 } from "@/lib/dashboard/brand/programsApi";
+import { refreshTrackedMetrics } from "@/lib/dashboard/brand/trackedAccountsApi";
 
 function formatCompact(n) {
   return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
@@ -22,30 +22,39 @@ function formatCompact(n) {
 export default function OverviewView() {
   const [stats, setStats] = useState({});
   const [series, setSeries] = useState([]);
+  const [approximate, setApproximate] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [topVideos, setTopVideos] = useState([]);
   const [topAccounts, setTopAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [err, setErr] = useState("");
+
+  const load = useCallback(async () => {
+    const [overview, snapshots] = await Promise.all([
+      fetchOverviewData(),
+      fetchMetricsHistory().catch(() => []),
+    ]);
+    const { videos, accounts } = overview;
+
+    // Prefer real recorded history; fall back to the post-date approximation
+    // until there are at least two days of snapshots to plot.
+    const metrics =
+      buildMetricsFromSnapshots(snapshots) || buildProgramMetrics(videos);
+
+    setStats({ ...overview.stats, deltas: metrics.deltas });
+    setSeries(metrics.series);
+    setApproximate(metrics.approximate);
+    setLastSyncedAt(overview.lastSyncedAt);
+    setTopVideos([...videos].sort((a, b) => b.views - a.views).slice(0, 5));
+    setTopAccounts([...accounts].sort((a, b) => b.views - a.views).slice(0, 5));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [statsRes, videos, accounts] = await Promise.all([
-          fetchProgramStats(),
-          fetchProgramVideos().catch(() => []),
-          fetchProgramAccounts().catch(() => []),
-        ]);
-        if (cancelled) return;
-        const { series: metricSeries, deltas } = buildProgramMetrics(videos);
-        setStats({ ...statsRes, deltas });
-        setSeries(metricSeries);
-        setTopVideos(
-          [...videos].sort((a, b) => b.views - a.views).slice(0, 5),
-        );
-        setTopAccounts(
-          [...accounts].sort((a, b) => b.views - a.views).slice(0, 5),
-        );
+        await load();
       } catch (e) {
         if (!cancelled) setErr(e.message || "Couldn't load analytics.");
       } finally {
@@ -55,7 +64,20 @@ export default function OverviewView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [load]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setErr("");
+    try {
+      await refreshTrackedMetrics();
+      await load();
+    } catch (e) {
+      setErr(e.message || "Couldn't refresh metrics.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -65,15 +87,31 @@ export default function OverviewView() {
     );
   }
 
-  if (err) {
-    return <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{err}</p>;
-  }
-
   return (
     <div className="space-y-6">
+      {err && (
+        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{err}</p>
+      )}
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft hover:bg-surface-sunken transition disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+          {refreshing ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
+
       <ProgramStatStrip stats={stats} />
 
-      <ProgramMetricsChart series={series} />
+      <ProgramMetricsChart
+        series={series}
+        approximate={approximate}
+        lastSyncedAt={lastSyncedAt}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Videos */}
@@ -101,7 +139,7 @@ export default function OverviewView() {
                       {videoLabel(v)}
                     </p>
                     <p className="text-xs text-faint truncate">
-                      {v.creatorName} · {v.programTitle}
+                      {v.creatorName} · {v.sourceLabel}
                     </p>
                   </div>
                   <span className="flex items-center gap-1 text-sm font-medium text-ink tabular-nums">
@@ -131,7 +169,7 @@ export default function OverviewView() {
           ) : (
             <ul className="divide-y divide-line">
               {topAccounts.map((a, i) => (
-                <li key={a.memberId} className="flex items-center gap-3 py-3">
+                <li key={a.id} className="flex items-center gap-3 py-3">
                   <span className="text-xs font-semibold text-faint w-4 text-center">
                     {i + 1}
                   </span>
@@ -139,7 +177,11 @@ export default function OverviewView() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ink truncate">{a.name}</p>
                     <p className="text-xs text-faint truncate">
-                      {a.tiktokHandle ? `@${a.tiktokHandle}` : a.programTitle}
+                      {a.source === "tracked"
+                        ? a.sourceLabel
+                        : a.tiktokHandle
+                        ? `@${a.tiktokHandle}`
+                        : a.programTitle}
                     </p>
                   </div>
                   <span className="flex items-center gap-1 text-sm text-muted tabular-nums">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BarChart3 } from "lucide-react";
 
 function formatCompact(n) {
@@ -12,12 +13,27 @@ function formatDay(iso) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function formatSyncedAt(iso) {
+  if (!iso) return null;
+  const diffMin = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const hours = Math.floor(diffMin / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 // Lightweight dual-series area chart (Views + Posted Videos), drawn as inline
 // SVG — no charting dependency. Colours come from the theme tokens via
 // fill-*/stroke-* utilities so the chart follows light and dark mode.
 // Views use the left axis, posted videos the right axis (each scaled to its own
 // max), mirroring ViralApp's Metrics panel.
-export default function ProgramMetricsChart({ series = [] }) {
+export default function ProgramMetricsChart({
+  series = [],
+  approximate = false,
+  lastSyncedAt = null,
+}) {
+  const [hoverIdx, setHoverIdx] = useState(null);
   const W = 820;
   const H = 280;
   const mL = 52;
@@ -47,10 +63,20 @@ export default function ProgramMetricsChart({ series = [] }) {
 
   return (
     <section className="rounded-2xl border border-line bg-surface">
-      <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-line flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <BarChart3 size={15} className="text-accent" />
           <h2 className="text-sm font-semibold text-ink">Metrics</h2>
+          {n > 1 && (
+            <span className="text-xs text-faint">
+              {formatDay(series[0].date)} – {formatDay(series[n - 1].date)}
+            </span>
+          )}
+          {lastSyncedAt && (
+            <span className="text-xs text-faint">
+              · synced {formatSyncedAt(lastSyncedAt)}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1.5 text-muted">
@@ -59,10 +85,17 @@ export default function ProgramMetricsChart({ series = [] }) {
           </span>
           <span className="flex items-center gap-1.5 text-muted">
             <span className="h-2.5 w-2.5 rounded-sm bg-accent" />
-            Posted Videos
+            Videos tracked
           </span>
         </div>
       </div>
+
+      {approximate && hasData && (
+        <p className="px-5 pt-3 text-xs text-faint">
+          Estimated from post dates — not enough sync history yet to chart real
+          view growth. This corrects itself as tracking data accumulates.
+        </p>
+      )}
 
       <div className="relative px-3 py-4">
         {!hasData && (
@@ -109,6 +142,48 @@ export default function ProgramMetricsChart({ series = [] }) {
             strokeLinejoin="round"
           />
 
+          {/* Hover crosshair + markers */}
+          {hoverIdx !== null && series[hoverIdx] && (
+            <g pointerEvents="none">
+              <line
+                x1={x(hoverIdx)}
+                y1={mT}
+                x2={x(hoverIdx)}
+                y2={mT + innerH}
+                className="stroke-faint"
+                strokeWidth="1"
+                strokeDasharray="3 3"
+              />
+              <circle
+                cx={x(hoverIdx)}
+                cy={yViews(series[hoverIdx].views)}
+                r="3.5"
+                className="fill-plum-solid"
+              />
+              <circle
+                cx={x(hoverIdx)}
+                cy={yVideos(series[hoverIdx].postedVideos)}
+                r="3.5"
+                className="fill-accent"
+              />
+            </g>
+          )}
+
+          {/* Invisible hit targets — one column per day. */}
+          {n > 1 &&
+            series.map((s, i) => (
+              <rect
+                key={s.date}
+                x={x(i) - innerW / (n - 1) / 2}
+                y={mT}
+                width={innerW / (n - 1)}
+                height={innerH}
+                fill="transparent"
+                onMouseEnter={() => setHoverIdx(i)}
+                onMouseLeave={() => setHoverIdx(null)}
+              />
+            ))}
+
           {/* x-axis date labels */}
           {xLabelIdx.map((i) => (
             <text
@@ -123,6 +198,25 @@ export default function ProgramMetricsChart({ series = [] }) {
             </text>
           ))}
         </svg>
+
+        {hoverIdx !== null && series[hoverIdx] && (
+          <div
+            className="pointer-events-none absolute top-6 z-20 -translate-x-1/2 rounded-lg border border-line bg-surface px-3 py-2 shadow-lg"
+            style={{ left: `${(x(hoverIdx) / W) * 100}%` }}
+          >
+            <p className="text-[11px] font-medium text-ink whitespace-nowrap">
+              {formatDay(series[hoverIdx].date)}
+            </p>
+            <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted whitespace-nowrap">
+              <span className="h-2 w-2 rounded-sm bg-plum-solid" />
+              {formatCompact(series[hoverIdx].views)} views
+            </p>
+            <p className="flex items-center gap-1.5 text-[11px] text-muted whitespace-nowrap">
+              <span className="h-2 w-2 rounded-sm bg-accent" />
+              {series[hoverIdx].postedVideos} videos tracked
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
