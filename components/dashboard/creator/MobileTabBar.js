@@ -5,10 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Compass,
   MessageSquare,
-  ClipboardList,
-  Inbox,
   User,
   Settings,
   Menu,
@@ -18,14 +15,11 @@ import {
 
 const TABS = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
-  { label: "Explore", href: "/dashboard/creator/explore", icon: Compass },
+  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
 ];
 
 const MORE_ITEMS = [
-  { label: "Assignments", href: "/dashboard/creator/assignments", icon: ClipboardList },
-  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
-  { label: "Applications", href: "/dashboard/creator/applications", icon: Inbox },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },
   { label: "Settings", href: "/dashboard/creator/settings", icon: Settings },
 ];

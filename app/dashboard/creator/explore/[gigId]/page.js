@@ -1,11 +1,5 @@
-import TopBar from "@/components/dashboard/creator/TopBar";
-import GigDetailView from "@/components/dashboard/creator/explore/GigDetailView";
+import { redirect } from "next/navigation";
 
-export default function CreatorGigDetailPage({ params }) {
-  return (
-    <>
-      <TopBar title="Gig" />
-      <GigDetailView gigId={params.gigId} />
-    </>
-  );
+export default function CreatorExploreGigPage() {
+  redirect("/dashboard/creator/programs");
 }

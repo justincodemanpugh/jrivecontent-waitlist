@@ -272,18 +272,20 @@ create policy "Applications: brand update status"
 
 
 -- =====================================================================
--- Conversations (created when brand accepts an applicant) + messages.
+-- Conversations + messages. A conversation hangs off either a gig (brand
+-- accepted an applicant) or a program (brand invited a creator) — see
+-- migration 0040. program_id is added there, since programs are defined in
+-- a later migration than this file.
 -- =====================================================================
 
 create table if not exists public.conversations (
   id uuid primary key default gen_random_uuid(),
-  gig_id uuid not null references public.gigs(id) on delete cascade,
+  gig_id uuid references public.gigs(id) on delete cascade,
   application_id uuid references public.gig_applications(id) on delete set null,
   brand_id uuid not null references auth.users(id) on delete cascade,
   creator_id uuid not null references auth.users(id) on delete cascade,
   last_message_at timestamptz not null default now(),
-  created_at timestamptz not null default now(),
-  unique (gig_id, creator_id)
+  created_at timestamptz not null default now()
 );
 
 create index if not exists conversations_brand_idx on public.conversations(brand_id, last_message_at desc);

@@ -92,7 +92,7 @@ export default function ConversationListItem({
             <span className="text-[11px] text-faint shrink-0">{time}</span>
           </div>
           <p className="text-xs text-muted truncate">
-            {conversation.gigTitle}
+            {conversation.subjectTitle}
           </p>
         </div>
       </Link>

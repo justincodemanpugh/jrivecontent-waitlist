@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  ClipboardList,
   MessageSquare,
   User,
   Settings,
@@ -14,7 +13,6 @@ import Logo from "@/components/Logo";
 
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
-  { label: "Assignments", href: "/dashboard/creator/assignments", icon: ClipboardList },
   { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },

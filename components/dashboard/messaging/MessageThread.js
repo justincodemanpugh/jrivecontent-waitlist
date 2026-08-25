@@ -213,8 +213,10 @@ export default function MessageThread({ conversationId, role, currentUserId, bas
             {counterpartName}
           </p>
           <p className="text-xs text-muted truncate">
-            {conversation.gig?.title}
-            {conversation.gig?.pay_per_video
+            {conversation.program?.title || conversation.gig?.title}
+            {conversation.program?.pay_per_video_cents
+              ? ` · $${(Number(conversation.program.pay_per_video_cents) / 100).toFixed(2)}/video`
+              : conversation.gig?.pay_per_video
               ? ` · $${Number(conversation.gig.pay_per_video)}/video`
               : ""}
           </p>
