@@ -13,7 +13,7 @@ import {
 import ComingSoonModal from "./ComingSoonModal";
 
 const TABS = [
-  { label: "Programs", href: "/dashboard/brand/programs", icon: TrendingUp },
+  { label: "Campaigns", href: "/dashboard/brand/programs", icon: TrendingUp },
   { label: "Creators", href: "/dashboard/brand/my-creators", icon: Users },
   { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare },
   { label: "Browse", href: "/dashboard/brand/creators", icon: Search, comingSoon: true },

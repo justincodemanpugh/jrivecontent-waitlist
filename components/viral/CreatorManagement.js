@@ -13,7 +13,7 @@ const TABS = [
   },
   {
     title: "Define Your Payout Rules",
-    body: "Set the base fee your creators earn per video or per month. Our payments engine keeps every program on one clear, consistent structure.",
+    body: "Set the base fee your creators earn per video or per month. Our payments engine keeps every campaign on one clear, consistent structure.",
     mock: PayoutRulesMock,
   },
   {
@@ -117,7 +117,7 @@ function PayoutRulesMock() {
       <div className="flex items-center justify-between">
         <div>
           <p className="font-display text-base font-bold text-brand-ink">Flexible Payout Engine</p>
-          <p className="text-xs text-slate-400">My UGC Program</p>
+          <p className="text-xs text-slate-400">My UGC Campaign</p>
         </div>
         <span className="rounded-full bg-brand-sky/20 px-2.5 py-1 text-[11px] font-semibold text-brand-skyDeep">
           Define Rules

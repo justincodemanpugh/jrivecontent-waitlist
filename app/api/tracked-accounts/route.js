@@ -12,6 +12,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parseTikTokUsername } from "@/lib/apify/tiktokScraper";
 import { syncTrackedAccount } from "@/lib/apify/sync";
+import {
+  brandHasActiveSubscription,
+  TRIAL_REQUIRED_MESSAGE,
+} from "@/lib/billing/subscription";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +41,13 @@ export async function POST(request) {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+    }
+
+    // Tracking costs real money (Apify credits), so it's gated behind the
+    // trial. This check must live here rather than in RLS: the insert below
+    // uses the service-role admin client, which bypasses row-level security.
+    if (!(await brandHasActiveSubscription(supabase, user.id))) {
+      return NextResponse.json({ error: TRIAL_REQUIRED_MESSAGE }, { status: 402 });
     }
 
     // Normalize + dedupe before touching the DB so "@x", "x" and the full

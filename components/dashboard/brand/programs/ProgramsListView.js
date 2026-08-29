@@ -13,6 +13,7 @@ import {
   Pause,
   Play,
   ExternalLink,
+  Lock,
 } from "lucide-react";
 import {
   fetchMyPrograms,
@@ -20,7 +21,10 @@ import {
   pauseProgram,
   reactivateProgram,
 } from "@/lib/dashboard/brand/programsApi";
+import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import CreateProgramModal from "@/components/dashboard/brand/programs/CreateProgramModal";
+
+const UPGRADE_HREF = "/dashboard/brand/pricing?from=create-campaign";
 
 function centsToDollars(cents) {
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
@@ -32,6 +36,10 @@ export default function ProgramsListView() {
   const [err, setErr] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  // Campaign creation requires an active trial/subscription (enforced by RLS).
+  // Assume allowed until billing says otherwise, so the button doesn't flash
+  // locked for paying brands on every load.
+  const [canCreate, setCanCreate] = useState(true);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -40,7 +48,7 @@ export default function ProgramsListView() {
       const rows = await fetchMyPrograms();
       setPrograms(rows);
     } catch (e) {
-      setErr(e.message || "Couldn't load programs.");
+      setErr(e.message || "Couldn't load campaigns.");
     } finally {
       setLoading(false);
     }
@@ -52,6 +60,21 @@ export default function ProgramsListView() {
     window.addEventListener("programs:changed", refresh);
     return () => window.removeEventListener("programs:changed", refresh);
   }, [reload]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchBilling()
+      .then((b) => {
+        if (!cancelled) setCanCreate(b.plan === "pro");
+      })
+      .catch(() => {
+        // Billing lookup failed — leave the button enabled and let the
+        // server-side gate reject it with a proper message.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const livePrograms = programs.filter((p) => p.status !== "archived");
   const archivedPrograms = programs.filter((p) => p.status === "archived");
@@ -83,13 +106,23 @@ export default function ProgramsListView() {
           </button>
         </div>
 
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition"
-        >
-          <Plus size={14} />
-          Create Program
-        </button>
+        {canCreate ? (
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition"
+          >
+            <Plus size={14} />
+            Create Campaign
+          </button>
+        ) : (
+          <Link
+            href={UPGRADE_HREF}
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition"
+          >
+            <Lock size={14} />
+            Start Free Trial
+          </Link>
+        )}
       </div>
 
       {loading ? (
@@ -104,22 +137,31 @@ export default function ProgramsListView() {
             <TrendingUp size={20} />
           </span>
           <h2 className="text-lg font-semibold text-ink">
-            {showArchived ? "No archived programs" : "No programs yet"}
+            {showArchived ? "No archived campaigns" : "No campaigns yet"}
           </h2>
           <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
             {showArchived
-              ? "Archived programs will appear here."
-              : "Set up a recurring TikTok program — video quota, per-video pay, and a payout schedule — and track every creator's performance automatically."}
+              ? "Archived campaigns will appear here."
+              : "Set up a recurring TikTok campaign — video quota, per-video pay, and a payout schedule — and track every creator's performance automatically."}
           </p>
-          {!showArchived && (
-            <button
-              onClick={() => setCreateOpen(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
-            >
-              <Plus size={16} />
-              Create Your First Program
-            </button>
-          )}
+          {!showArchived &&
+            (canCreate ? (
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
+              >
+                <Plus size={16} />
+                Create Your First Campaign
+              </button>
+            ) : (
+              <Link
+                href={UPGRADE_HREF}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
+              >
+                <Lock size={16} />
+                Start Free Trial to Create a Campaign
+              </Link>
+            ))}
         </div>
       ) : (
         <div className="space-y-3">
@@ -244,7 +286,7 @@ function ProgramCard({ program }) {
         href={`/dashboard/brand/programs/${program.id}`}
         className="mt-3 inline-block text-xs font-medium text-accent hover:underline"
       >
-        View program →
+        View campaign →
       </Link>
     </div>
   );

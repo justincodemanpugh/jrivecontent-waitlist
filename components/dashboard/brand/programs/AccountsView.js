@@ -129,7 +129,7 @@ export default function AccountsView() {
         <h2 className="text-lg font-semibold text-ink">No tracked accounts yet</h2>
         <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
           Use <span className="font-medium text-ink">Track Account</span> to add any
-          public TikTok account, or add creators to a program and their accounts show up here
+          public TikTok account, or add creators to a campaign and their accounts show up here
           automatically.
         </p>
       </div>
@@ -143,7 +143,7 @@ export default function AccountsView() {
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
               <th className="px-5 py-3 font-medium">Account</th>
-              <th className="px-5 py-3 font-medium">Program</th>
+              <th className="px-5 py-3 font-medium">Campaign</th>
               <th className="px-5 py-3 font-medium">Status</th>
               <th className="px-5 py-3 font-medium text-right">Videos</th>
               <th className="px-5 py-3 font-medium text-right">Views</th>

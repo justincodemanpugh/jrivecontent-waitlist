@@ -6,7 +6,7 @@ import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
 import ThemeToggle from "@/components/dashboard/ThemeToggle";
 
-export default function TopBar({ title = "Programs", checklistHidden, checklistProgress, onShowChecklist }) {
+export default function TopBar({ title = "Campaigns", checklistHidden, checklistProgress, onShowChecklist }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const brand = useBrand();
 

@@ -6,7 +6,7 @@ import TopBar from "@/components/dashboard/brand/TopBar";
 // content. Optionally renders a page heading + subtitle + an action slot
 // (e.g. a Create button). Secondary navigation lives in the main Sidebar.
 export default function ProgramsShell({
-  title = "Programs",
+  title = "Campaigns",
   heading,
   subtitle,
   action,

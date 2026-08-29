@@ -66,7 +66,7 @@ function buildEmail(notification, recipientName) {
         heading: "Payouts are due",
         intro:
           notification.body ||
-          "A program billing period just closed and payouts are waiting for you to fund.",
+          "A campaign billing period just closed and payouts are waiting for you to fund.",
         cta: "Review payouts",
         link,
       };

@@ -13,7 +13,7 @@ import Logo from "@/components/Logo";
 
 const NAV = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
-  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
+  { label: "Campaigns", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
   { label: "Profile", href: "/dashboard/creator/profile", icon: User },
 ];

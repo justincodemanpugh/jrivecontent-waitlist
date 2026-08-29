@@ -7,7 +7,7 @@ import VideosView from "@/components/dashboard/brand/programs/VideosView";
 export default function ProgramsVideosPage() {
   return (
     <ProgramsShell
-      title="Programs"
+      title="Campaigns"
       heading="Videos"
       subtitle="View and analyze performance metrics across your tracked videos."
     >

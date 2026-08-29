@@ -55,7 +55,7 @@ export async function POST(request) {
       .maybeSingle();
     if (memErr) throw memErr;
     if (!member) {
-      return NextResponse.json({ error: "Program member not found." }, { status: 404 });
+      return NextResponse.json({ error: "Campaign member not found." }, { status: 404 });
     }
 
     const program = member.program;
@@ -74,7 +74,7 @@ export async function POST(request) {
       amountCents = program.test_payout_amount_cents || 0;
       if (amountCents <= 0) {
         return NextResponse.json(
-          { error: "This program doesn't offer a test payout." },
+          { error: "This campaign doesn't offer a test payout." },
           { status: 400 },
         );
       }
@@ -191,8 +191,8 @@ export async function POST(request) {
           unit_amount: amountCents,
           product_data: {
             name: isTest
-              ? `${program.title || "Program"} — test video payout`
-              : `${program.title || "Program"} — ${billableVideos} video${billableVideos !== 1 ? "s" : ""}`,
+              ? `${program.title || "Campaign"} — test video payout`
+              : `${program.title || "Campaign"} — ${billableVideos} video${billableVideos !== 1 ? "s" : ""}`,
             description: "Funds held in escrow until released to the creator.",
           },
         },

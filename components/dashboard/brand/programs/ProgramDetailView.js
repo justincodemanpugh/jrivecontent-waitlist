@@ -46,7 +46,7 @@ export default function ProgramDetailView({ programId }) {
       const data = await fetchProgramById(programId);
       setProgram(data);
     } catch (e) {
-      setErr(e.message || "Couldn't load this program.");
+      setErr(e.message || "Couldn't load this campaign.");
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ function BackLink() {
       className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink transition"
     >
       <ArrowLeft size={15} />
-      Back to programs
+      Back to campaigns
     </Link>
   );
 }
@@ -248,7 +248,7 @@ function MemberCard({ member, program, period, onChanged }) {
   };
 
   const handleRemove = async () => {
-    if (!confirm(`Remove ${member.name} from this program?`)) return;
+    if (!confirm(`Remove ${member.name} from this campaign?`)) return;
     try {
       await removeProgramMember(member.id);
       onChanged?.();
@@ -275,7 +275,7 @@ function MemberCard({ member, program, period, onChanged }) {
           <button
             onClick={handleRemove}
             className="h-8 w-8 rounded-full flex items-center justify-center text-faint hover:bg-surface-hover hover:text-danger transition"
-            title="Remove from program"
+            title="Remove from campaign"
           >
             <UserX size={15} />
           </button>
@@ -439,7 +439,7 @@ function AddCreatorModal({ programId, existingCreatorIds, onClose }) {
       <div className="absolute inset-0 bg-scrim/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md rounded-2xl bg-surface shadow-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-line">
-          <p className="font-semibold text-ink">Add creator to program</p>
+          <p className="font-semibold text-ink">Add creator to campaign</p>
           <button
             onClick={onClose}
             className="h-8 w-8 rounded-full flex items-center justify-center text-faint hover:bg-surface-hover hover:text-muted transition"

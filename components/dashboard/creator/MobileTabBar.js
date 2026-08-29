@@ -15,7 +15,7 @@ import {
 
 const TABS = [
   { label: "Home", href: "/dashboard/creator", icon: LayoutDashboard, exact: true },
-  { label: "Programs", href: "/dashboard/creator/programs", icon: TrendingUp },
+  { label: "Campaigns", href: "/dashboard/creator/programs", icon: TrendingUp },
   { label: "Messages", href: "/dashboard/creator/messages", icon: MessageSquare },
 ];
 

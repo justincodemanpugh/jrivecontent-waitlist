@@ -36,7 +36,7 @@ const NAV_GROUPS = [
       { label: "My Creators", href: "/dashboard/brand/my-creators", icon: Users, tourId: "nav-my-creators" },
       { label: "Browse Creators", href: "/dashboard/brand/creators", icon: Search, tourId: "nav-creators", comingSoon: true },
       { label: "Messages", href: "/dashboard/brand/messages", icon: MessageSquare, tourId: "nav-messages" },
-      { label: "Programs", href: "/dashboard/brand/programs/manage", icon: TrendingUp },
+      { label: "Campaigns", href: "/dashboard/brand/programs/manage", icon: TrendingUp },
       { label: "Payouts", href: "/dashboard/brand/programs/payouts", icon: Wallet },
     ],
   },

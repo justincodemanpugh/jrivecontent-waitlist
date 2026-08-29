@@ -14,7 +14,7 @@ import ViralFooter from "@/components/viral/ViralFooter";
 export const metadata = {
   title: "JriveContent — Track every video. Pay for real results.",
   description:
-    "Track, manage, and pay UGC creators on TikTok. See every video, pay for what performs, and scale your creator program. Pay $0 today.",
+    "Track, manage, and pay UGC creators on TikTok. See every video, pay for what performs, and scale your creator campaigns. Pay $0 today.",
 };
 
 export default function Home() {

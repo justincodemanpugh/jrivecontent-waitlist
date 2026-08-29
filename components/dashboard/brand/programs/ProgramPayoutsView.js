@@ -102,7 +102,7 @@ export default function ProgramPayoutsView() {
             <thead>
               <tr className="border-b border-line text-left text-xs text-muted">
                 <th className="px-5 py-3 font-medium">Creator</th>
-                <th className="px-5 py-3 font-medium">Program</th>
+                <th className="px-5 py-3 font-medium">Campaign</th>
                 <th className="px-5 py-3 font-medium">Billing period</th>
                 <th className="px-5 py-3 font-medium">Videos</th>
                 <th className="px-5 py-3 font-medium">Amount</th>

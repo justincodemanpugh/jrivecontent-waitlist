@@ -159,7 +159,7 @@ export default function CreatorHomePage() {
           <section>
             <h2 className="text-sm font-semibold text-ink mb-3 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-              Program invitations
+              Campaign invitations
               <span className="text-xs font-medium text-faint">({invited.length})</span>
             </h2>
             <div className="space-y-2">
@@ -175,7 +175,7 @@ export default function CreatorHomePage() {
           <>
             <section>
               <h2 className="text-sm font-semibold text-ink mb-3">
-                Your programs
+                Your campaigns
                 <span className="ml-2 text-xs font-medium text-faint">
                   ({active.length})
                 </span>
@@ -213,7 +213,7 @@ export default function CreatorHomePage() {
                 href="/dashboard/creator/programs"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline underline-offset-2"
               >
-                View all programs
+                View all campaigns
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -228,7 +228,7 @@ export default function CreatorHomePage() {
             </div>
             <p className="text-base font-semibold text-ink">You&apos;re all set</p>
             <p className="text-sm text-muted mt-1 max-w-xs mx-auto">
-              Your TikTok is connected. Brands will invite you to programs here — keep
+              Your TikTok is connected. Brands will invite you to campaigns here — keep
               posting and your videos will be tracked automatically.
             </p>
           </div>

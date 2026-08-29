@@ -78,7 +78,7 @@ export default function CreateProgramModal({ onClose }) {
       });
       handleClose();
     } catch (e) {
-      setErr(e.message || "Failed to create program.");
+      setErr(e.message || "Failed to create campaign.");
     } finally {
       setSaving(false);
     }
@@ -106,9 +106,9 @@ export default function CreateProgramModal({ onClose }) {
                 <Target size={20} />
               </span>
               <div>
-                <h2 className="text-lg font-semibold text-ink">Create Program</h2>
+                <h2 className="text-lg font-semibold text-ink">Create Campaign</h2>
                 <p className="text-sm text-muted mt-0.5">
-                  Setup a recurring TikTok creator program.
+                  Setup a recurring TikTok creator campaign.
                 </p>
               </div>
             </div>
@@ -159,11 +159,11 @@ export default function CreateProgramModal({ onClose }) {
         <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {step === 0 && (
             <>
-              <Field label="Program name">
+              <Field label="Campaign name">
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Premium Creator Program"
+                  placeholder="e.g. Premium Creator Campaign"
                   className={inputCls}
                   autoFocus
                 />
@@ -173,7 +173,7 @@ export default function CreateProgramModal({ onClose }) {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  placeholder="Add notes about this program..."
+                  placeholder="Add notes about this campaign..."
                   className={`${inputCls} resize-none`}
                 />
               </Field>
@@ -222,7 +222,7 @@ export default function CreateProgramModal({ onClose }) {
             <div>
               <SectionHeading
                 title="Base Compensation"
-                hint="Set the video target and flat pay-per-video rate for this program."
+                hint="Set the video target and flat pay-per-video rate for this campaign."
               />
               <div className="space-y-4">
                 <Field label="Video target" hint="Number of videos creators should post every period.">
@@ -313,7 +313,7 @@ export default function CreateProgramModal({ onClose }) {
             <div>
               <SectionHeading
                 title="Add Creators"
-                hint="Invite creators from your roster now, or add them later from the program page."
+                hint="Invite creators from your roster now, or add them later from the campaign page."
               />
               {rosterLoading ? (
                 <div className="py-8 flex justify-center text-faint">
@@ -321,7 +321,7 @@ export default function CreateProgramModal({ onClose }) {
                 </div>
               ) : roster.length === 0 ? (
                 <p className="text-sm text-muted py-4">
-                  No connected creators yet. You can invite creators to this program later.
+                  No connected creators yet. You can invite creators to this campaign later.
                 </p>
               ) : (
                 <div className="space-y-1.5 max-h-64 overflow-y-auto">
@@ -366,7 +366,7 @@ export default function CreateProgramModal({ onClose }) {
 
           {step === 4 && (
             <div>
-              <SectionHeading title="Program Review" hint="Check your program details before creating it." />
+              <SectionHeading title="Campaign Review" hint="Check your campaign details before creating it." />
 
               {!hasValidBase && (
                 <div className="mb-4 flex items-start gap-3 rounded-xl border border-warn-line bg-warn-soft px-4 py-3">
@@ -382,7 +382,7 @@ export default function CreateProgramModal({ onClose }) {
 
               <p className="text-xs font-medium text-faint uppercase tracking-wide mb-2">Summary</p>
               <div className="rounded-xl border border-line divide-y divide-line mb-4">
-                <SummaryRow label="Program name" value={title} />
+                <SummaryRow label="Campaign name" value={title} />
                 <SummaryRow label="Payout cycle" value={payoutSchedule} capitalize />
                 <SummaryRow
                   label="Video target"
@@ -447,7 +447,7 @@ export default function CreateProgramModal({ onClose }) {
               className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-5 py-2 text-sm font-medium hover:bg-ink/90 transition disabled:opacity-40"
             >
               {saving && <Loader2 size={14} className="animate-spin" />}
-              Create Program
+              Create Campaign
             </button>
           )}
         </div>

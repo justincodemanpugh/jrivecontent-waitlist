@@ -49,7 +49,7 @@ export default function ViralPricing() {
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
           <h2 className="mx-auto max-w-3xl text-center font-display text-4xl font-bold leading-tight tracking-tight text-brand-ink sm:text-5xl md:text-6xl">
-            Plans that grow with your creator program
+            Plans that grow with your creator campaigns
           </h2>
         </FadeIn>
 

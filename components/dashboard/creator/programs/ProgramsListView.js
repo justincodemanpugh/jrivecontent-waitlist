@@ -55,7 +55,7 @@ export default function ProgramsListView() {
       setHandle(savedHandle);
       setMemberships(rows);
     } catch (e) {
-      setErr(e.message || "Couldn't load your programs.");
+      setErr(e.message || "Couldn't load your campaigns.");
     } finally {
       setLoading(false);
     }
@@ -142,7 +142,7 @@ export default function ProgramsListView() {
             <h2 className="text-lg font-semibold text-ink">Connect TikTok</h2>
             <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
               Connect your TikTok account so brands can automatically track your
-              posted videos — views, likes, and comments — for programs you join.
+              posted videos — views, likes, and comments — for campaigns you join.
             </p>
             <a
               href="/api/auth/tiktok/connect"
@@ -161,7 +161,7 @@ export default function ProgramsListView() {
       {invited.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-ink">
-            Program invitations ({invited.length})
+            Campaign invitations ({invited.length})
           </h2>
           <div className="space-y-3">
             {invited.map((m) => (
@@ -174,11 +174,11 @@ export default function ProgramsListView() {
       {/* Active programs */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-ink">
-          Your programs ({active.length})
+          Your campaigns ({active.length})
         </h2>
         {active.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">
-            No active programs yet. Brands will invite you here.
+            No active campaigns yet. Brands will invite you here.
           </div>
         ) : (
           <div className="space-y-3">

@@ -10,7 +10,7 @@ export default function ProgramDetailPage() {
   const programId = params?.id;
 
   return (
-    <ProgramsShell title="Program">
+    <ProgramsShell title="Campaign">
       <Suspense fallback={<div className="animate-pulse h-96 bg-surface-hover rounded-2xl" />}>
         <ProgramDetailView programId={programId} />
       </Suspense>

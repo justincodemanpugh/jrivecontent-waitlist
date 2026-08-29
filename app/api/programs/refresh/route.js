@@ -14,6 +14,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncProgramMemberVideos, syncTrackedAccount } from "@/lib/apify/sync";
+import {
+  brandHasActiveSubscription,
+  TRIAL_REQUIRED_MESSAGE,
+} from "@/lib/billing/subscription";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +34,13 @@ export async function POST() {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+    }
+
+    // Spends Apify credits, so it's gated like adding a tracked account.
+    // Enforced here rather than in RLS because the sync below runs on the
+    // service-role admin client.
+    if (!(await brandHasActiveSubscription(supabase, user.id))) {
+      return NextResponse.json({ error: TRIAL_REQUIRED_MESSAGE }, { status: 402 });
     }
 
     if (!process.env.APIFY_API_TOKEN) {

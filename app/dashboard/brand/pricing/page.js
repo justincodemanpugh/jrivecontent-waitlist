@@ -8,16 +8,18 @@ import TopBar from "@/components/dashboard/brand/TopBar";
 import { startBrandSubscription } from "@/lib/dashboard/brand/billingApi";
 
 const FEATURES = [
-  { label: "Gig postings", value: "Unlimited" },
-  { label: "Creator browsing", value: "All creators" },
+  { label: "Campaigns", value: "Unlimited" },
+  { label: "Tracked accounts", value: "Unlimited" },
+  { label: "Video analytics", value: "Daily sync" },
   { label: "Creator invites", value: "Unlimited" },
-  { label: "Applications", value: "Unlimited" },
   { label: "Messaging", value: "Full access" },
   { label: "Support", value: "Priority" },
   { label: "Billing", value: "Cancel anytime" },
 ];
 
 const REDIRECT_REASONS = {
+  "create-campaign": "Start your free 3-day trial to create campaigns and track creators.",
+  "track-accounts": "Start your free 3-day trial to track creator accounts.",
   "post-gig": "Start your free 3-day trial to post gigs and connect with creators.",
   "browse-creators": "Browsing creators is free! Start a trial to post gigs.",
   "invite-creator": "Start your free 3-day trial to invite creators directly.",

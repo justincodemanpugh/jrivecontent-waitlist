@@ -59,7 +59,7 @@ export default function VideosView() {
         </span>
         <h2 className="text-lg font-semibold text-ink">No videos tracked yet</h2>
         <p className="mt-1 text-sm text-muted max-w-sm mx-auto">
-          Once your program creators connect TikTok and post, their videos and
+          Once your campaign creators connect TikTok and post, their videos and
           performance metrics appear here automatically.
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function VideosView() {
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
               <th className="px-5 py-3 font-medium">Video</th>
-              <th className="px-5 py-3 font-medium">Program</th>
+              <th className="px-5 py-3 font-medium">Campaign</th>
               <th className="px-5 py-3 font-medium">Posted</th>
               <th className="px-5 py-3 font-medium text-right">Views</th>
               <th className="px-5 py-3 font-medium text-right">Likes</th>

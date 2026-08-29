@@ -7,7 +7,7 @@ import OverviewView from "@/components/dashboard/brand/programs/OverviewView";
 export default function ProgramsOverviewPage() {
   return (
     <ProgramsShell
-      title="Programs"
+      title="Campaigns"
       heading="Overview"
       subtitle="Track every creator's TikTok performance in one place."
     >
