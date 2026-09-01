@@ -10,7 +10,7 @@ import {
   AlertCircle,
   Trash2,
 } from "lucide-react";
-import { fetchProgramAccounts } from "@/lib/dashboard/brand/programsApi";
+import { fetchProgramAccounts, removeProgramMember } from "@/lib/dashboard/brand/programsApi";
 import {
   fetchTrackedAccounts,
   removeTrackedAccount,
@@ -31,7 +31,7 @@ export default function AccountsView() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [removingId, setRemovingId] = useState(null);
+  const [removingKey, setRemovingKey] = useState(null);
 
   const load = useCallback(async () => {
     setErr("");
@@ -45,6 +45,7 @@ export default function AccountsView() {
       const programRows = (programRes.status === "fulfilled" ? programRes.value : []).map(
         (a) => ({
           key: `member:${a.memberId}`,
+          memberId: a.memberId,
           source: "program",
           name: a.name,
           handle: a.tiktokHandle,
@@ -95,16 +96,31 @@ export default function AccountsView() {
     return () => window.removeEventListener("tracked-accounts:changed", refresh);
   }, [load]);
 
+  // Two different removals behind one button. A campaign member is removed
+  // SOFTLY (status -> 'removed') and never hard-deleted: program_payouts
+  // cascades from program_members, so deleting the row would take escrowed and
+  // released payout records — money Stripe already moved — with it.
   const handleRemove = async (row) => {
-    if (!confirm(`Stop tracking @${row.handle}?`)) return;
-    setRemovingId(row.id);
+    const isProgram = row.source === "program";
+    const message = isProgram
+      ? `Remove ${row.name} from ${row.programTitle || "this campaign"}? ` +
+        `They'll stop being tracked and won't be paid for future videos. ` +
+        `Payouts already created are unaffected.`
+      : `Stop tracking @${row.handle}?`;
+    if (!confirm(message)) return;
+
+    setRemovingKey(row.key);
     try {
-      await removeTrackedAccount(row.id);
+      if (isProgram) {
+        await removeProgramMember(row.memberId);
+      } else {
+        await removeTrackedAccount(row.id);
+      }
       await load();
     } catch (e) {
       alert(e.message || "Couldn't remove account.");
     } finally {
-      setRemovingId(null);
+      setRemovingKey(null);
     }
   };
 
@@ -165,7 +181,7 @@ export default function AccountsView() {
                           ? "Tracked directly"
                           : row.handle
                             ? `@${row.handle}`
-                            : "No TikTok handle"}
+                            : "TikTok not connected"}
                       </p>
                     </div>
                   </div>
@@ -198,20 +214,22 @@ export default function AccountsView() {
                   {formatCompact(row.comments)}
                 </td>
                 <td className="px-5 py-3 text-right">
-                  {row.source === "tracked" && (
-                    <button
-                      onClick={() => handleRemove(row)}
-                      disabled={removingId === row.id}
-                      title="Stop tracking"
-                      className="text-faint hover:text-danger transition disabled:opacity-40"
-                    >
-                      {removingId === row.id ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Trash2 size={14} />
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleRemove(row)}
+                    disabled={removingKey === row.key}
+                    title={
+                      row.source === "program"
+                        ? "Remove from campaign"
+                        : "Stop tracking"
+                    }
+                    className="text-faint hover:text-danger transition disabled:opacity-40"
+                  >
+                    {removingKey === row.key ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                  </button>
                 </td>
               </tr>
             ))}
