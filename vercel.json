@@ -15,6 +15,14 @@
     {
       "path": "/api/programs/payout-cycle",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/discovery/seed",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/discovery/refresh",
+      "schedule": "0 4 1 * *"
     }
   ]
 }
