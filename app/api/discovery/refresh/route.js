@@ -17,9 +17,24 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-// 200 profiles/run at $1.00/1000 is ~$0.20 per invocation.
-const MAX_PROFILES_PER_RUN = 200;
+// Runs daily and refreshes roughly 1/CYCLE_DAYS of the directory each time, so
+// the whole thing cycles once a month at ANY size while each run stays well
+// inside maxDuration. A fixed cap cannot do both: 200/month never finishes a
+// 3000-row directory, and a single 3000-profile run would time out.
+//
+// At $1.00/1000 profiles this is ~$0.50/month for today's ~480 creators and
+// ~$3/month at 3000.
+const CYCLE_DAYS = 30;
+const MIN_PROFILES_PER_RUN = 25;
+const MAX_PROFILES_PER_RUN = 400; // ceiling so one run can't run long
 const BATCH_SIZE = 25;
+
+function sliceSize(total) {
+  return Math.min(
+    MAX_PROFILES_PER_RUN,
+    Math.max(MIN_PROFILES_PER_RUN, Math.ceil(total / CYCLE_DAYS)),
+  );
+}
 
 async function handler(request) {
   const secret = process.env.CRON_SECRET;
@@ -38,6 +53,15 @@ async function handler(request) {
 
   const admin = createAdminClient();
 
+  // Size this run against the directory so a full cycle takes CYCLE_DAYS
+  // regardless of how big the directory has grown.
+  const { count: directorySize } = await admin
+    .from("discovered_creators")
+    .select("id", { count: "exact", head: true })
+    .eq("platform", "tiktok")
+    .eq("hidden", false);
+  const limit = sliceSize(directorySize ?? 0);
+
   // Stalest first. Hidden rows are skipped: refreshing someone who opted out
   // means paying to scrape a profile we are contractually not showing.
   const { data: stale, error } = await admin
@@ -46,11 +70,11 @@ async function handler(request) {
     .eq("platform", "tiktok")
     .eq("hidden", false)
     .order("last_scraped_at", { ascending: true, nullsFirst: true })
-    .limit(MAX_PROFILES_PER_RUN);
+    .limit(limit);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const results = { requested: 0, updated: 0, missing: [], errors: [] };
+  const results = { directorySize: directorySize ?? 0, slice: limit, requested: 0, updated: 0, missing: [], errors: [] };
   const idByUsername = new Map(
     (stale || []).map((r) => [r.username.toLowerCase(), r.id]),
   );

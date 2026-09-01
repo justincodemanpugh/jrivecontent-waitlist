@@ -32,7 +32,7 @@ export default function OptOutPage({ searchParams }) {
 
   return (
     <ViralFonts>
-      <main className="min-h-screen bg-brand-mist/40 text-brand-ink">
+      <main className="min-h-screen bg-brand-mist/40 text-brand-ink [color-scheme:light]">
         <ViralNavbar />
 
         <section className="mx-auto max-w-xl px-4 py-16">
@@ -72,7 +72,7 @@ export default function OptOutPage({ searchParams }) {
                 name="username"
                 required
                 placeholder="@yourname"
-                className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-brand-ink outline-none placeholder:text-slate-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               />
               <span className="mt-1 block text-xs text-slate-500">
                 A full profile URL works too.
@@ -87,7 +87,7 @@ export default function OptOutPage({ searchParams }) {
               <textarea
                 name="reason"
                 rows={3}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-brand-ink outline-none placeholder:text-slate-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               />
             </label>
 

@@ -1,10 +1,10 @@
 -- =====================================================================
 -- Public creator discovery directory (/creators).
 --
--- Everything else in this schema is private to a brand or a creator. This
--- migration is the deliberate exception: `discovered_creators` and their
--- sample videos are readable by ANON, because they back the public,
--- unauthenticated /creators page that exists to bring brands in.
+-- NOTE: as originally written these tables were anon-readable, backing a
+-- public /creators page. Migration 0043 replaced those policies with a
+-- subscribed-brand gate and the public page was removed. The policies
+-- created below are superseded — read 0043 for the live rules.
 --
 -- These rows describe TikTok accounts that have NOT signed up. They are
 -- scraped public profile data (Apify, see lib/apify/tiktokScraper.js),
@@ -79,7 +79,8 @@ for each row execute function public.set_updated_at();
 
 alter table public.discovered_creators enable row level security;
 
--- INTENTIONALLY PUBLIC. This is the only anon-readable table in the schema.
+-- Superseded by 0043 (subscribed-brand gate). Left here so the migration
+-- still replays correctly from scratch.
 drop policy if exists "Discovered creators: public read" on public.discovered_creators;
 create policy "Discovered creators: public read"
   on public.discovered_creators for select
