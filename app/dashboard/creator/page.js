@@ -40,7 +40,7 @@ export default function CreatorHomePage() {
         fetchMyTikTokHandle(),
         fetchMyProgramMemberships(),
       ]);
-      setConnected(Boolean(account || handle));
+      setConnected(Boolean(account || handle?.handle));
       setMemberships(rows);
     } catch {
       // silent — empty state shows instead

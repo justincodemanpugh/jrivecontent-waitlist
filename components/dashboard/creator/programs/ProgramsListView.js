@@ -33,12 +33,25 @@ function formatCompact(n) {
   return new Intl.NumberFormat("en-US", { notation: "compact" }).format(n || 0);
 }
 
+function relativeTime(iso) {
+  if (!iso) return "";
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(diffMs)) return "";
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.round(hrs / 24)}d ago`;
+}
+
 export default function ProgramsListView() {
   const searchParams = useSearchParams();
   const tiktokResult = searchParams?.get("tiktok");
 
   const [account, setAccount] = useState(null);
   const [handle, setHandle] = useState("");
+  const [handleStatus, setHandleStatus] = useState(null);
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -46,13 +59,14 @@ export default function ProgramsListView() {
   const reload = useCallback(async () => {
     setErr("");
     try {
-      const [acct, savedHandle, rows] = await Promise.all([
+      const [acct, handleInfo, rows] = await Promise.all([
         fetchMyTikTokAccount(),
         fetchMyTikTokHandle(),
         fetchMyProgramMemberships(),
       ]);
       setAccount(acct);
-      setHandle(savedHandle);
+      setHandle(handleInfo.handle);
+      setHandleStatus(handleInfo);
       setMemberships(rows);
     } catch (e) {
       setErr(e.message || "Couldn't load your campaigns.");
@@ -152,7 +166,12 @@ export default function ProgramsListView() {
               Connect TikTok Account
             </a>
 
-            <HandleFallback handle={handle} onSaved={setHandle} />
+            <HandleFallback
+              handle={handle}
+              status={handleStatus}
+              onSaved={setHandle}
+              onStatusChanged={reload}
+            />
           </div>
         )}
       </div>
@@ -195,18 +214,50 @@ export default function ProgramsListView() {
 // Fallback for creators who can't complete the OAuth flow: just type the
 // handle. Brands' tracking then runs off the public profile (via the
 // Apify-based sync) instead of TikTok's authorized Display API.
-function HandleFallback({ handle, onSaved }) {
+//
+// Saving persists the handle (setCreatorTikTokHandle) and then kicks
+// /api/programs/member-sync, which scrapes the public profile once so the
+// creator gets an immediate "found N videos" confirmation and any subscribed
+// brand's campaign fills in right away.
+function HandleFallback({ handle, status, onSaved, onStatusChanged }) {
   const [value, setValue] = useState(handle || "");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [err, setErr] = useState("");
+  const [result, setResult] = useState(null);
 
   const dirty = value.trim() !== (handle || "");
+  // Let a creator re-run a failed check without changing the handle (e.g. they
+  // just flipped their profile from private to public). The server bypasses the
+  // cooldown when the last attempt errored.
+  const canRetry = !dirty && !!handle && (status?.syncStatus === "error" || result?.ok === false);
+
+  // Slow part: scrape the public profile. Can take a minute or two.
+  const runCheck = async () => {
+    setChecking(true);
+    setErr("");
+    try {
+      const r = await fetch("/api/programs/member-sync", { method: "POST" });
+      const body = await r.json().catch(() => ({}));
+      if (r.status === 429) {
+        setResult({ rateLimited: true, error: body.error || "Just checked. Try again shortly." });
+      } else if (!r.ok) {
+        setErr(body.error || "Couldn't check your profile. Try again in a moment.");
+      } else {
+        setResult(body);
+      }
+    } catch {
+      setErr("Couldn't check your profile. Try again in a moment.");
+    } finally {
+      setChecking(false);
+      onStatusChanged?.();
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
     setErr("");
-    setSaved(false);
+    setResult(null);
     try {
       const res = await setCreatorTikTokHandle(value);
       if (!res.ok) {
@@ -215,7 +266,14 @@ function HandleFallback({ handle, onSaved }) {
       }
       setValue(res.handle);
       onSaved?.(res.handle);
-      setSaved(true);
+
+      if (!res.handle) {
+        setResult({ cleared: true });
+        onStatusChanged?.();
+        return;
+      }
+
+      await runCheck();
     } catch (e) {
       setErr(e.message || "Couldn't save your handle.");
     } finally {
@@ -238,36 +296,128 @@ function HandleFallback({ handle, onSaved }) {
             value={value}
             onChange={(e) => {
               setValue(e.target.value);
-              setSaved(false);
+              setResult(null);
+              setErr("");
             }}
             placeholder="yourusername"
             spellCheck={false}
-            className="w-full rounded-xl border border-line pl-7 pr-3 py-2 text-sm text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+            disabled={saving || checking}
+            className="w-full rounded-xl border border-line pl-7 pr-3 py-2 text-sm text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent disabled:opacity-60"
           />
         </div>
         <button
-          onClick={handleSave}
-          disabled={saving || !dirty}
+          onClick={canRetry ? runCheck : handleSave}
+          disabled={saving || checking || (!dirty && !canRetry)}
           className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft hover:bg-surface-sunken transition disabled:opacity-40"
         >
-          {saving && <Loader2 size={13} className="animate-spin" />}
-          Save
+          {(saving || checking) && <Loader2 size={13} className="animate-spin" />}
+          {canRetry ? "Retry" : "Save"}
         </button>
       </div>
 
-      {err && <p className="mt-2 text-xs text-danger">{err}</p>}
-      {saved && !err && (
-        <p className="mt-2 text-xs text-success flex items-center gap-1">
-          <CheckCircle2 size={12} />
-          {value ? `Tracking @${value}` : "Handle cleared."}
-        </p>
-      )}
-      {!saved && !err && handle && (
-        <p className="mt-2 text-xs text-faint">
-          Currently tracking <span className="font-medium text-muted">@{handle}</span>
-        </p>
-      )}
+      <div className="mt-2 text-xs">
+        {err ? (
+          <p className="text-danger flex items-center gap-1">
+            <XCircle size={12} />
+            {err}
+          </p>
+        ) : checking ? (
+          <p className="text-muted flex items-center gap-1">
+            <Loader2 size={12} className="animate-spin" />
+            Checking your profile…
+          </p>
+        ) : result ? (
+          <SaveOutcome result={result} handle={value} />
+        ) : (
+          <StatusLine status={status} handle={handle} />
+        )}
+      </div>
     </div>
+  );
+}
+
+// The line shown right after a save, from the /api/programs/member-sync response.
+function SaveOutcome({ result, handle }) {
+  if (result.cleared) {
+    return <span className="text-faint">Handle cleared.</span>;
+  }
+  if (result.rateLimited) {
+    return (
+      <span className="text-warn flex items-center gap-1">
+        <AlertCircle size={12} />
+        {result.error}
+      </span>
+    );
+  }
+  if (result.apifyConfigured === false) {
+    return <span className="text-faint">Saved. Tracking begins on the next scheduled sync.</span>;
+  }
+  if (result.ok === false) {
+    return (
+      <span className="text-danger flex items-center gap-1">
+        <XCircle size={12} />
+        Couldn&apos;t read @{handle} — the profile may be private or not exist.
+      </span>
+    );
+  }
+  const count = result.videoCount ?? 0;
+  if (result.membersSynced > 0) {
+    return (
+      <span className="text-success flex items-center gap-1">
+        <CheckCircle2 size={12} />
+        Connected — found {count} video{count === 1 ? "" : "s"}. Tracking{" "}
+        {result.membersSynced} campaign{result.membersSynced === 1 ? "" : "s"}.
+      </span>
+    );
+  }
+  return (
+    <span className="text-muted flex items-center gap-1">
+      <AlertCircle size={12} />
+      Saved — found {count} video{count === 1 ? "" : "s"}. Tracking starts once the brand
+      begins their trial.
+    </span>
+  );
+}
+
+// The persistent line, from the stored creator_profiles.tiktok_handle_sync_* columns.
+function StatusLine({ status, handle }) {
+  if (!handle) return null;
+  const s = status || {};
+  const count = s.videoCount ?? 0;
+  const when = s.syncedAt ? ` (${relativeTime(s.syncedAt)})` : "";
+
+  if (s.syncStatus === "ok") {
+    return (
+      <span className="text-success flex items-center gap-1">
+        <CheckCircle2 size={12} />
+        Tracking <span className="font-medium">@{handle}</span> — {count} video
+        {count === 1 ? "" : "s"}
+        {when}
+      </span>
+    );
+  }
+  if (s.syncStatus === "skipped") {
+    return (
+      <span className="text-muted flex items-center gap-1">
+        <AlertCircle size={12} />
+        <span className="font-medium">@{handle}</span> saved — {count} video
+        {count === 1 ? "" : "s"} found. Tracking starts when a brand starts their trial.
+      </span>
+    );
+  }
+  if (s.syncStatus === "error") {
+    return (
+      <span className="text-danger flex items-center gap-1">
+        <XCircle size={12} />
+        <span className="font-medium">@{handle}</span> — last check failed
+        {s.syncError ? `: ${s.syncError}` : "."}
+      </span>
+    );
+  }
+  return (
+    <span className="text-faint">
+      Currently tracking <span className="font-medium text-muted">@{handle}</span>
+    </span>
   );
 }
 

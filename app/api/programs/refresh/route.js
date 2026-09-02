@@ -13,7 +13,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { syncProgramMemberVideos, syncTrackedAccount } from "@/lib/apify/sync";
+import { syncTrackedAccount } from "@/lib/apify/sync";
+import { syncCreatorHandle } from "@/lib/apify/handleSync";
 import {
   brandHasActiveSubscription,
   TRIAL_REQUIRED_MESSAGE,
@@ -64,6 +65,7 @@ export async function POST() {
         .from("program_members")
         .select(`
           id,
+          creator_id,
           programs!inner ( brand_id ),
           creator_profiles!program_members_creator_id_fkey_profile ( tiktok_handle )
         `)
@@ -74,12 +76,18 @@ export async function POST() {
     if (membersRes.error) throw membersRes.error;
 
     const accounts = accountsRes.data || [];
-    const members = (membersRes.data || [])
-      .map((m) => ({
-        memberId: m.id,
-        handle: m.creator_profiles?.tiktok_handle || "",
-      }))
-      .filter((m) => m.handle);
+    // Group by creator so someone in two of this brand's campaigns is scraped
+    // once. Every row here is already a paid-brand membership (subscription
+    // checked above), so all of them get their program_videos written.
+    const membersByCreator = new Map();
+    for (const m of membersRes.data || []) {
+      const handle = m.creator_profiles?.tiktok_handle?.trim() || "";
+      if (!handle) continue;
+      const entry = membersByCreator.get(m.creator_id) || { creatorId: m.creator_id, handle, memberIds: [] };
+      entry.memberIds.push(m.id);
+      membersByCreator.set(m.creator_id, entry);
+    }
+    const members = [...membersByCreator.values()];
 
     if (accounts.length === 0 && members.length === 0) {
       return NextResponse.json(
@@ -119,7 +127,9 @@ export async function POST() {
 
     for (const member of members) {
       try {
-        videosUpserted += await syncProgramMemberVideos(admin, member);
+        const res = await syncCreatorHandle(admin, member);
+        videosUpserted += res.videosUpserted || 0;
+        if (!res.ok) failures.push({ target: member.handle, error: res.error });
       } catch (e) {
         failures.push({ target: member.handle, error: e.message });
       }

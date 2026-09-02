@@ -19,7 +19,9 @@
 //      tracked_account_video_snapshots.
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { syncProgramMemberVideos, syncTrackedAccount } from "@/lib/apify/sync";
+import { syncTrackedAccount } from "@/lib/apify/sync";
+import { syncCreatorHandle } from "@/lib/apify/handleSync";
+import { PAID_STATUSES } from "@/lib/billing/subscription";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,7 +63,7 @@ async function handler(request) {
 async function syncMembers(admin, results) {
   const { data: members, error: membersErr } = await admin
     .from("program_members")
-    .select("id, creator_id")
+    .select("id, creator_id, programs!inner ( brand_id )")
     .eq("status", "active");
 
   if (membersErr) {
@@ -71,9 +73,39 @@ async function syncMembers(admin, results) {
   }
   if (!members?.length) return;
 
-  // Resolve handles in one query rather than per-member. creator_profiles is
-  // keyed on user_id (see the FKs at the bottom of migration 0034).
-  const creatorIds = [...new Set(members.map((m) => m.creator_id))];
+  // Only track members whose campaign brand has a paid subscription — the paid
+  // metrics view is a brand benefit, same rule as /api/programs/refresh and the
+  // immediate save in /api/programs/member-sync.
+  const brandIds = [...new Set(members.map((m) => m.programs.brand_id))];
+  const { data: brands, error: brandsErr } = await admin
+    .from("brand_profiles")
+    .select("user_id, subscription_status")
+    .in("user_id", brandIds);
+  if (brandsErr) {
+    console.error("[apify-sync] failed to load brand subscriptions", brandsErr);
+    results.errors.push({ scope: "brand_profiles", error: brandsErr.message });
+    return;
+  }
+  const paidBrandIds = new Set(
+    (brands || [])
+      .filter((b) => PAID_STATUSES.has(b.subscription_status || "free"))
+      .map((b) => b.user_id),
+  );
+
+  // Group the payable memberships by creator so a creator in several campaigns
+  // is scraped once, not once per membership.
+  const memberIdsByCreator = new Map();
+  for (const m of members) {
+    if (!paidBrandIds.has(m.programs.brand_id)) continue;
+    const list = memberIdsByCreator.get(m.creator_id) || [];
+    list.push(m.id);
+    memberIdsByCreator.set(m.creator_id, list);
+  }
+  if (!memberIdsByCreator.size) return;
+
+  // Resolve handles in one query. creator_profiles is keyed on user_id (see the
+  // FKs at the bottom of migration 0034).
+  const creatorIds = [...memberIdsByCreator.keys()];
   const { data: profiles, error: profilesErr } = await admin
     .from("creator_profiles")
     .select("user_id, tiktok_handle")
@@ -91,19 +123,20 @@ async function syncMembers(admin, results) {
       .map((p) => [p.user_id, p.tiktok_handle.trim()]),
   );
 
-  for (const member of members) {
-    const handle = handleByCreator.get(member.creator_id);
+  for (const [creatorId, memberIds] of memberIdsByCreator) {
+    const handle = handleByCreator.get(creatorId);
     if (!handle) continue; // creator hasn't given us a handle yet
 
     try {
-      results.videosUpserted += await syncProgramMemberVideos(admin, {
-        memberId: member.id,
-        handle,
-      });
-      results.membersProcessed += 1;
+      const res = await syncCreatorHandle(admin, { creatorId, handle, memberIds });
+      results.videosUpserted += res.videosUpserted || 0;
+      results.membersProcessed += res.membersSynced || 0;
+      if (!res.ok) {
+        results.errors.push({ creator_id: creatorId, error: res.error });
+      }
     } catch (e) {
-      console.error(`[apify-sync] failed for member ${member.id}`, e);
-      results.errors.push({ program_member_id: member.id, error: e.message });
+      console.error(`[apify-sync] failed for creator ${creatorId}`, e);
+      results.errors.push({ creator_id: creatorId, error: e.message });
     }
   }
 }

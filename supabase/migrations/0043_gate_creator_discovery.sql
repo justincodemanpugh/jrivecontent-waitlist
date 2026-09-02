@@ -19,6 +19,7 @@
 -- ---------------------------------------------------------------------
 
 drop policy if exists "Discovered creators: public read" on public.discovered_creators;
+drop policy if exists "Discovered creators: subscribed brand read" on public.discovered_creators;
 
 create policy "Discovered creators: subscribed brand read"
   on public.discovered_creators for select
@@ -34,6 +35,8 @@ create policy "Discovered creators: subscribed brand read"
 -- ---------------------------------------------------------------------
 
 drop policy if exists "Discovered creator videos: public read"
+  on public.discovered_creator_videos;
+drop policy if exists "Discovered creator videos: subscribed brand read"
   on public.discovered_creator_videos;
 
 create policy "Discovered creator videos: subscribed brand read"

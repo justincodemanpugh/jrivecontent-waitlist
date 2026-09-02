@@ -85,6 +85,15 @@ create table if not exists public.creator_profiles (
   portfolio_url text,
   instagram_handle text,
   tiktok_handle text,
+  -- Sync status for the tiktok_handle fallback (no OAuth). Written only by the
+  -- service-role admin client from app/api/programs/member-sync, the daily cron,
+  -- and the brand Refresh. See migration 0045.
+  tiktok_handle_synced_at timestamptz,
+  tiktok_handle_sync_error text,
+  tiktok_handle_video_count integer,
+  tiktok_handle_sync_status text
+    check (tiktok_handle_sync_status is null
+           or tiktok_handle_sync_status in ('pending', 'ok', 'error', 'skipped')),
   youtube_handle text,
   location text,
   -- ISO 3166-1 alpha-2 country code (e.g. "US", "CA"). Used as the
