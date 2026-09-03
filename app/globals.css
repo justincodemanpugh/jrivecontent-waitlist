@@ -57,50 +57,53 @@
 .dark {
   color-scheme: dark;
 
-  /* Page sits darkest, cards lift off it, popovers/modals lift again. */
-  --c-surface: 17 24 39;
-  --c-surface-raised: 30 41 59;
-  --c-surface-sunken: 8 13 24;
-  --c-surface-hover: 30 41 59;
+  /* True black ground; cards lift off it in neutral grays, popovers lift again.
+     Deliberately hueless — any blue in these values reads as navy, not black. */
+  --c-surface: 10 10 10;
+  --c-surface-raised: 23 23 23;
+  --c-surface-sunken: 0 0 0;
+  --c-surface-hover: 26 26 26;
 
-  --c-line: 38 50 70;
-  --c-line-strong: 55 71 95;
+  --c-line: 38 38 38;
+  --c-line-strong: 64 64 64;
 
-  --c-ink: 226 232 240;
-  --c-ink-soft: 203 213 225;
-  --c-muted: 148 163 184;
-  --c-faint: 111 126 148;
+  --c-ink: 237 237 237;
+  --c-ink-soft: 212 212 212;
+  --c-muted: 163 163 163;
+  --c-faint: 115 115 115;
 
   /* Accent hue holds across themes; what flips is the text sitting on it. */
   --c-accent: 56 189 248;
   --c-accent-soft: 125 211 252;
-  --c-accent-tint: 18 38 56;
+  --c-accent-tint: 10 30 42;
   --c-on-accent: 8 14 26;
 
+  /* Status -soft grounds keep their hue but sit a step darker so the icon
+     chips don't glow against a black card. */
   --c-success: 52 211 153;
-  --c-success-soft: 6 44 36;
+  --c-success-soft: 4 34 28;
   --c-success-line: 15 74 60;
   --c-success-solid: 5 150 105;
 
   --c-warn: 251 191 36;
-  --c-warn-soft: 51 36 5;
+  --c-warn-soft: 40 28 4;
   --c-warn-line: 87 62 10;
   --c-warn-solid: 217 119 6;
 
   --c-danger: 251 113 133;
-  --c-danger-soft: 56 15 25;
+  --c-danger-soft: 44 12 20;
   --c-danger-line: 94 27 42;
   --c-danger-solid: 225 29 72;
 
   --c-info: 125 211 252;
-  --c-info-soft: 16 36 61;
+  --c-info-soft: 12 26 46;
   --c-info-line: 30 58 95;
 
   --c-plum: 196 165 250;
-  --c-plum-soft: 45 27 66;
+  --c-plum-soft: 32 20 48;
   --c-plum-solid: 139 92 246;
 
-  --c-scrim: 2 6 16;
+  --c-scrim: 0 0 0;
 }
 
 html,

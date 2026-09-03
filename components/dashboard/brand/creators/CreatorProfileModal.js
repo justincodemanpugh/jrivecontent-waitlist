@@ -256,7 +256,7 @@ export default function CreatorProfileModal({
                             className="h-full w-full object-cover transition group-hover:scale-[1.02]"
                           />
                         ) : (
-                          <div className="h-full w-full flex items-center justify-center bg-slate-800">
+                          <div className="h-full w-full flex items-center justify-center bg-surface-hover">
                             <PlatformLogo platform={video.platform} size={40} />
                           </div>
                         )
@@ -289,7 +289,7 @@ export default function CreatorProfileModal({
                   return (
                     <li
                       key={video.id}
-                      className="relative rounded-xl overflow-hidden border border-line bg-slate-900 aspect-[9/16] group"
+                      className="relative rounded-xl overflow-hidden border border-line bg-surface-hover aspect-[9/16] group"
                     >
                       {isLink ? (
                         <a

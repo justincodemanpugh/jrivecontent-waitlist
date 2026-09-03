@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, Eye, Film, ExternalLink, TrendingUp, RefreshCw } from "lucide-react";
 import ProgramStatStrip from "@/components/dashboard/brand/programs/ProgramStatStrip";
 import ProgramMetricsChart from "@/components/dashboard/brand/programs/ProgramMetricsChart";
@@ -10,6 +10,8 @@ import {
   fetchMetricsHistory,
   buildMetricsFromSnapshots,
   buildProgramMetrics,
+  windowSeries,
+  deltasFromSeries,
 } from "@/lib/dashboard/brand/programsApi";
 import { refreshTrackedMetrics } from "@/lib/dashboard/brand/trackedAccountsApi";
 
@@ -22,6 +24,7 @@ function formatCompact(n) {
 export default function OverviewView() {
   const [stats, setStats] = useState({});
   const [series, setSeries] = useState([]);
+  const [rangeDays, setRangeDays] = useState(30);
   const [approximate, setApproximate] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [topVideos, setTopVideos] = useState([]);
@@ -49,6 +52,15 @@ export default function OverviewView() {
     setTopVideos([...videos].sort((a, b) => b.views - a.views).slice(0, 5));
     setTopAccounts([...accounts].sort((a, b) => b.views - a.views).slice(0, 5));
   }, []);
+
+  // Range switching is pure client-side re-slicing of the series we already
+  // loaded — no refetch. Deltas follow the window so the "+X" badges on the
+  // stat cards always describe the chart sitting under them.
+  const windowed = useMemo(() => windowSeries(series, rangeDays), [series, rangeDays]);
+  const deltas = useMemo(
+    () => ({ ...(stats.deltas || {}), ...deltasFromSeries(windowed) }),
+    [stats.deltas, windowed],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -105,12 +117,14 @@ export default function OverviewView() {
         </button>
       </div>
 
-      <ProgramStatStrip stats={stats} />
+      <ProgramStatStrip stats={{ ...stats, deltas }} />
 
       <ProgramMetricsChart
-        series={series}
+        series={windowed}
         approximate={approximate}
         lastSyncedAt={lastSyncedAt}
+        rangeDays={rangeDays}
+        onRangeChange={setRangeDays}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -21,7 +21,7 @@ export default function PortfolioVideosGrid({ videos }) {
           return (
             <li
               key={v.id}
-              className="rounded-xl overflow-hidden border border-line bg-slate-900 aspect-[9/16]"
+              className="rounded-xl overflow-hidden border border-line bg-surface-hover aspect-[9/16]"
             >
               {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
@@ -38,7 +38,7 @@ export default function PortfolioVideosGrid({ videos }) {
         return (
           <li
             key={v.id}
-            className="relative rounded-xl overflow-hidden border border-line bg-slate-900 aspect-[9/16] group"
+            className="relative rounded-xl overflow-hidden border border-line bg-surface-hover aspect-[9/16] group"
           >
             <a
               href={v.video_url}
@@ -54,7 +54,7 @@ export default function PortfolioVideosGrid({ videos }) {
                   className="h-full w-full object-cover transition group-hover:scale-[1.02]"
                 />
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-slate-800">
+                <div className="h-full w-full flex items-center justify-center bg-surface-hover">
                   <PlatformLogo platform={v.platform} size={44} />
                 </div>
               )}

@@ -69,7 +69,7 @@ export default function WelcomeBanner({ brandName, onStartTour }) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-ink via-slate-800 to-brand-ink p-6 shadow-lg transition-all duration-300 ${
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-neutral-950 via-neutral-800 to-neutral-950 p-6 shadow-lg transition-all duration-300 ${
         dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"
       }`}
     >

@@ -32,7 +32,7 @@ export default function ExampleVideosSection({ examples }) {
           {videos.map((ex, i) => (
             <div
               key={`v-${i}`}
-              className="relative aspect-[9/16] overflow-hidden rounded-xl bg-slate-900"
+              className="relative aspect-[9/16] overflow-hidden rounded-xl bg-surface-hover"
             >
               <video
                 src={ex.value}

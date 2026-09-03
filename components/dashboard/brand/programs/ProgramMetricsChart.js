@@ -23,15 +23,48 @@ function formatSyncedAt(iso) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-// Lightweight dual-series area chart (Views + Posted Videos), drawn as inline
-// SVG — no charting dependency. Colours come from the theme tokens via
-// fill-*/stroke-* utilities so the chart follows light and dark mode.
-// Views use the left axis, posted videos the right axis (each scaled to its own
-// max), mirroring ViralApp's Metrics panel.
+// Round an axis maximum up to a readable number with a little headroom, so the
+// series never touches the top gridline and the tick labels land on round
+// values (300 / 600 / 900) instead of arbitrary fractions of the peak.
+// `integer` keeps small counts — e.g. "videos tracked" — off half-steps.
+function niceMax(value, { integer = false } = {}) {
+  const raw = Math.max(value, 0) * 1.1;
+  if (raw <= 0) return integer ? 4 : 1;
+  if (integer && raw <= 4) return 4; // 4 ticks of 1 — never "1.5 videos"
+
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const norm = raw / mag;
+  const step = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
+  const max = step * mag;
+  return integer ? Math.max(4, Math.ceil(max / 4) * 4) : max;
+}
+
+export const RANGES = [
+  { key: "7d", label: "7D", days: 7 },
+  { key: "30d", label: "30D", days: 30 },
+  { key: "90d", label: "90D", days: 90 },
+  { key: "all", label: "All", days: null },
+];
+
+// How often to print an x-axis date label, by window length. A 7-day window
+// labels every day; longer ones thin out so the labels never collide.
+function labelStride(n) {
+  if (n <= 8) return 1;
+  if (n <= 32) return 5;
+  if (n <= 95) return 14;
+  return Math.ceil(n / 4);
+}
+
+// Dual-series Metrics panel, drawn as inline SVG — no charting dependency.
+// Views are cumulative daily bars on the left axis; videos tracked is a filled
+// area on the right axis. Colours come from theme tokens via fill-*/stroke-*
+// utilities so the chart follows light and dark mode.
 export default function ProgramMetricsChart({
   series = [],
   approximate = false,
   lastSyncedAt = null,
+  rangeDays = 30,
+  onRangeChange,
 }) {
   const [hoverIdx, setHoverIdx] = useState(null);
   const W = 820;
@@ -44,22 +77,41 @@ export default function ProgramMetricsChart({
   const innerH = H - mT - mB;
 
   const n = series.length;
-  const viewsMax = Math.max(1, ...series.map((s) => s.views));
-  const videosMax = Math.max(1, ...series.map((s) => s.postedVideos));
+  const viewsMax = niceMax(Math.max(0, ...series.map((s) => s.views)));
+  const videosMax = niceMax(Math.max(0, ...series.map((s) => s.postedVideos)), {
+    integer: true,
+  });
   const hasData = series.some((s) => s.views > 0 || s.postedVideos > 0);
 
-  const x = (i) => (n <= 1 ? mL : mL + (i / (n - 1)) * innerW);
+  const colW = n > 0 ? innerW / n : innerW;
+  // Bars sit centred in their day column; the area/line uses the same centres.
+  const x = (i) => mL + colW * (i + 0.5);
   const yViews = (v) => mT + innerH - (v / viewsMax) * innerH;
   const yVideos = (v) => mT + innerH - (v / videosMax) * innerH;
 
+  const barGap = n > 60 ? 0.5 : 2;
+  const barW = Math.max(1, colW - barGap);
+
   const linePath = (accessor, yScale) =>
-    series.map((s, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${yScale(accessor(s)).toFixed(1)}`).join(" ");
+    series
+      .map((s, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${yScale(accessor(s)).toFixed(1)}`)
+      .join(" ");
 
   const areaPath = (accessor, yScale) =>
-    `${linePath(accessor, yScale)} L ${x(n - 1).toFixed(1)} ${(mT + innerH).toFixed(1)} L ${x(0).toFixed(1)} ${(mT + innerH).toFixed(1)} Z`;
+    n === 0
+      ? ""
+      : `${linePath(accessor, yScale)} L ${x(n - 1).toFixed(1)} ${(mT + innerH).toFixed(1)} L ${x(0).toFixed(1)} ${(mT + innerH).toFixed(1)} Z`;
 
   const gridLines = [0, 0.25, 0.5, 0.75, 1];
-  const xLabelIdx = n > 1 ? [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1] : [0];
+
+  const stride = labelStride(n);
+  const xLabelIdx = [];
+  for (let i = 0; i < n; i += stride) xLabelIdx.push(i);
+  if (n > 1 && xLabelIdx[xLabelIdx.length - 1] !== n - 1) {
+    // Drop a label that would crowd the final one, then always anchor the end.
+    if (n - 1 - xLabelIdx[xLabelIdx.length - 1] < stride / 2) xLabelIdx.pop();
+    xLabelIdx.push(n - 1);
+  }
 
   return (
     <section className="rounded-2xl border border-line bg-surface">
@@ -78,15 +130,39 @@ export default function ProgramMetricsChart({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 text-muted">
-            <span className="h-2.5 w-2.5 rounded-sm bg-plum-solid" />
-            Views
-          </span>
-          <span className="flex items-center gap-1.5 text-muted">
-            <span className="h-2.5 w-2.5 rounded-sm bg-accent" />
-            Videos tracked
-          </span>
+
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="flex items-center gap-1.5 text-muted">
+              <span className="h-2.5 w-2.5 rounded-sm bg-plum-solid" />
+              Views
+            </span>
+            <span className="flex items-center gap-1.5 text-muted">
+              <span className="h-2.5 w-2.5 rounded-sm bg-accent" />
+              Videos tracked
+            </span>
+          </div>
+
+          <div className="flex items-center gap-0.5 rounded-full border border-line p-0.5">
+            {RANGES.map((r) => {
+              const active = r.days === rangeDays;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => onRangeChange?.(r.days)}
+                  aria-pressed={active}
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                    active
+                      ? "bg-surface-hover text-ink"
+                      : "text-muted hover:text-ink"
+                  }`}
+                >
+                  {r.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -105,7 +181,7 @@ export default function ProgramMetricsChart({
             </p>
           </div>
         )}
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
           {/* horizontal gridlines + dual y-axis labels */}
           {gridLines.map((g) => {
             const y = mT + innerH - g * innerH;
@@ -122,17 +198,25 @@ export default function ProgramMetricsChart({
             );
           })}
 
-          {/* Views area (left axis) */}
-          <path d={areaPath((s) => s.views, yViews)} className="fill-plum-solid/10" />
-          <path
-            d={linePath((s) => s.views, yViews)}
-            fill="none"
-            className="stroke-plum-solid"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
+          {/* Views — one bar per day, left axis */}
+          {series.map((s, i) => {
+            const yTop = yViews(s.views);
+            const h = mT + innerH - yTop;
+            if (h <= 0) return null;
+            return (
+              <rect
+                key={`bar-${s.date}`}
+                x={x(i) - barW / 2}
+                y={yTop}
+                width={barW}
+                height={h}
+                rx={n <= 30 ? Math.min(2, barW / 2) : 0}
+                className={hoverIdx === i ? "fill-plum" : "fill-plum-solid"}
+              />
+            );
+          })}
 
-          {/* Posted Videos area (right axis) */}
+          {/* Videos tracked — area over the bars, right axis */}
           <path d={areaPath((s) => s.postedVideos, yVideos)} className="fill-accent/15" />
           <path
             d={linePath((s) => s.postedVideos, yVideos)}
@@ -170,19 +254,18 @@ export default function ProgramMetricsChart({
           )}
 
           {/* Invisible hit targets — one column per day. */}
-          {n > 1 &&
-            series.map((s, i) => (
-              <rect
-                key={s.date}
-                x={x(i) - innerW / (n - 1) / 2}
-                y={mT}
-                width={innerW / (n - 1)}
-                height={innerH}
-                fill="transparent"
-                onMouseEnter={() => setHoverIdx(i)}
-                onMouseLeave={() => setHoverIdx(null)}
-              />
-            ))}
+          {series.map((s, i) => (
+            <rect
+              key={`hit-${s.date}`}
+              x={mL + colW * i}
+              y={mT}
+              width={colW}
+              height={innerH}
+              fill="transparent"
+              onMouseEnter={() => setHoverIdx(i)}
+              onMouseLeave={() => setHoverIdx(null)}
+            />
+          ))}
 
           {/* x-axis date labels */}
           {xLabelIdx.map((i) => (

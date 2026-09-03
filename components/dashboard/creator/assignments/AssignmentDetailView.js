@@ -246,7 +246,7 @@ function ExampleVideoPlayer({ storagePath }) {
   }, [storagePath]);
 
   return (
-    <div className="rounded-xl overflow-hidden border border-line bg-slate-900">
+    <div className="rounded-xl overflow-hidden border border-line bg-surface-hover">
       {loadingUrl ? (
         <div className="aspect-video flex items-center justify-center text-faint">
           <Loader2 size={20} className="animate-spin" />
@@ -348,7 +348,7 @@ function UploadSection({ assignment, canUpload, hasSubmission, onChanged }) {
 
       {/* Existing submission preview */}
       {hasSubmission && (
-        <div className="rounded-xl overflow-hidden border border-line bg-slate-900">
+        <div className="rounded-xl overflow-hidden border border-line bg-surface-hover">
           {loadingUrl ? (
             <div className="aspect-video flex items-center justify-center text-faint">
               <Loader2 size={20} className="animate-spin" />
