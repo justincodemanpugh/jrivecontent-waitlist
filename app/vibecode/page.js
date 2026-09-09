@@ -25,7 +25,7 @@ import ViralFooter from "@/components/viral/ViralFooter";
 export const metadata = {
   title: "JriveContent — Marketing for the app you just built",
   description:
-    "Paste your app link and see which small TikTok creators would promote it, plus the exact videos to have them make. Built for solo devs shipping fast with no marketing budget.",
+    "Paste your app link and see the TikToks already working in your niche, plus the small creators making them. Built for solo devs shipping fast with no marketing budget.",
 };
 
 export default function VibecodePage() {

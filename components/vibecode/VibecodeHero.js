@@ -23,7 +23,7 @@ export default function VibecodeHero() {
   const [scannedUrl, setScannedUrl] = useState("");
   const resultsRef = useRef(null);
 
-  const runScan = useCallback(async (value, { scroll = true } = {}) => {
+  const runScan = useCallback(async (value, { scroll = true, niche = null } = {}) => {
     const target = String(value || "").trim();
     if (!target) {
       setError("Paste a link to your app first.");
@@ -33,13 +33,15 @@ export default function VibecodeHero() {
 
     setStatus("loading");
     setError("");
-    setData(null);
+    // A niche change is a refinement of results already on screen — clearing
+    // them would collapse the page and throw away the reader's scroll spot.
+    if (!niche) setData(null);
 
     try {
       const res = await fetch("/api/vibecode/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: target }),
+        body: JSON.stringify(niche ? { url: target, niche } : { url: target }),
       });
       const body = await res.json().catch(() => ({}));
 
@@ -114,8 +116,8 @@ export default function VibecodeHero() {
 
         <FadeIn delay={220}>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-500 sm:text-xl">
-            Paste your app link. We&apos;ll show you the TikTok creators whose
-            audience already matches it — and the exact videos to have them make.
+            Paste your app link. See the TikToks already working in your niche —
+            and the small creators making them.
           </p>
         </FadeIn>
 
@@ -175,15 +177,22 @@ export default function VibecodeHero() {
           </p>
         )}
 
-        {loading && (
+        {loading && !data && (
           <p className="mt-8 text-sm text-slate-500">
-            Reading your listing, matching creators, writing concepts — about 15 seconds.
+            Reading your listing and matching creators…
           </p>
         )}
       </div>
 
       <div ref={resultsRef} className="scroll-mt-24">
-        {status === "done" && data && <VibecodeResults data={data} appUrl={scannedUrl} />}
+        {data && (
+          <VibecodeResults
+            data={data}
+            appUrl={scannedUrl}
+            busy={loading}
+            onNicheChange={(niche) => runScan(scannedUrl, { scroll: false, niche })}
+          />
+        )}
       </div>
     </section>
   );

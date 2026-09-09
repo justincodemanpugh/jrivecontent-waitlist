@@ -1,24 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import {
-  BadgeCheck, ExternalLink, Heart, Lock, Play, Sparkles, Users,
-} from "lucide-react";
+import { BadgeCheck, ExternalLink, Heart, Lock, Play, Users } from "lucide-react";
 import { formatCount, tiktokProfileUrl } from "@/lib/discovery/directory";
+import { CREATOR_NICHES } from "@/lib/onboarding/creatorConstants";
 
-// Renders whatever /api/vibecode/scan returned. The route decides how much
-// of the plan a caller may see, so this component's job is to make the
-// locked half legible rather than to hide anything itself — everything it is
-// given, it shows.
+// Renders whatever /api/vibecode/scan returned. The route decides how much a
+// caller may see, so this component's job is to make the locked state legible
+// rather than to hide anything itself — everything it is given, it shows.
+//
+// The evidence leads. Real TikToks from the matched niche go first, because
+// "would a video like that suit my app?" is the question a developer can
+// actually answer in ten seconds, and the creators are the answer to "who
+// makes them".
 //
 // Copy rule, same as the dashboard's DiscoveredCreatorCard: these creators
 // have not signed up and have not agreed to work with anyone. Nothing here
 // may imply they are available, interested, or vetted by us.
-export default function VibecodeResults({ data, appUrl }) {
+export default function VibecodeResults({ data, appUrl, onNicheChange, busy }) {
   const locked = Boolean(data.locked);
-  const ideas = data.plan?.video_ideas || [];
-  const lockedIdeas = data.plan?.locked_idea_count || 0;
-  const creatorCount = locked ? data.creator_count : (data.creators?.length ?? 0);
+  const videos = data.videos || [];
+  const videoCount = locked ? data.video_count : videos.length;
+  const creators = data.creators || [];
+  const creatorCount = locked ? data.creator_count : creators.length;
 
   const signupHref = `/signup?role=brand&from=scan${
     appUrl ? `&app=${encodeURIComponent(appUrl)}` : ""
@@ -26,68 +30,100 @@ export default function VibecodeResults({ data, appUrl }) {
 
   return (
     <div className="mx-auto mt-12 max-w-5xl px-6 text-left">
-      <AppCard app={data.app} plan={data.plan} />
+      <AppCard
+        app={data.app}
+        niches={data.niches}
+        onNicheChange={onNicheChange}
+        busy={busy}
+      />
 
-      {/* ---- Videos to make ---- */}
-      <section className="mt-10">
-        <SectionHeading
-          title="Videos to make"
-          note={
-            lockedIdeas > 0
-              ? `${ideas.length} of ${ideas.length + lockedIdeas} shown`
-              : `${ideas.length} concepts`
-          }
-        />
-        <div className="mt-5 space-y-3">
-          {ideas.map((idea, i) => (
-            <IdeaCard key={i} idea={idea} index={i} />
-          ))}
-          {lockedIdeas > 0 && <LockedIdeas count={lockedIdeas} />}
-        </div>
-      </section>
+      {/* Say plainly when we couldn't match on topic. Presenting general
+          creators as if they were a niche match would be the one thing that
+          makes this page untrustworthy. */}
+      {data.coverage === "general" && creatorCount > 0 && (
+        <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
+          We don&apos;t have creators tagged{" "}
+          <strong>{data.niches?.[0]}</strong> yet — we&apos;ve queued those
+          searches. Below are creators who already make brand content and take
+          this kind of work, whatever the niche. Try a neighbouring niche in
+          the dropdown too.
+        </p>
+      )}
 
-      {/* ---- Creators ---- */}
-      <section className="mt-10">
-        <SectionHeading
-          title="Creators in this niche"
-          note={
-            creatorCount > 0
-              ? `${creatorCount} found${locked ? ` · ${Math.min(2, creatorCount)} shown` : ""}`
-              : null
-          }
-        />
+      {creatorCount === 0 ? (
+        <p className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
+          We&apos;re still expanding coverage here, so there isn&apos;t much to
+          show yet — we&apos;ve queued the searches and it&apos;ll fill in. Try
+          a different niche from the dropdown above in the meantime.
+        </p>
+      ) : (
+        <>
+          <section className="mt-10">
+            <SectionHeading
+              title="TikToks working in your niche"
+              note={
+                videoCount > 0
+                  ? `${videoCount}${locked ? ` · ${Math.min(TEASER_HINT, videoCount)} shown` : ""}`
+                  : null
+              }
+            />
+            <p className="mt-3 text-sm leading-relaxed text-slate-500">
+              Real posts from the creators below. This is the format to brief —
+              native and quick, not a polished ad.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {videos.map((v, i) => (
+                <VideoTile key={i} video={v} locked={locked} />
+              ))}
+            </div>
+          </section>
 
-        {data.coverage === "thin" ? (
-          <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
-            We&apos;re still expanding creator coverage for this niche, so there
-            isn&apos;t a full shortlist yet — we&apos;ve queued the searches and
-            it&apos;ll fill in. The video concepts above still apply, and you can
-            brief them to any small creator whose audience overlaps your users.
-          </p>
-        ) : (
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(data.creators || []).map((c) => (
-              <CreatorCard key={c.id} creator={c} locked={locked} />
-            ))}
-          </div>
-        )}
-      </section>
+          <section className="mt-10">
+            <SectionHeading
+              title="Creators making them"
+              note={
+                creatorCount > 0
+                  ? `${creatorCount} found${
+                      locked ? ` · ${Math.min(creators.length, creatorCount)} shown` : ""
+                    }`
+                  : null
+              }
+            />
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {creators.map((c) => (
+                <CreatorCard key={c.id} creator={c} locked={locked} />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
-      {locked && <UnlockBand creatorCount={creatorCount} lockedIdeas={lockedIdeas} href={signupHref} />}
+      {locked && creatorCount > 0 && (
+        <UnlockBand creatorCount={creatorCount} href={signupHref} />
+      )}
     </div>
   );
 }
+
+// Only used for the "n shown" hint; the route owns the real number.
+const TEASER_HINT = 6;
 
 function SectionHeading({ title, note }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-slate-200 pb-3">
       <h3 className="font-display text-2xl font-bold text-brand-ink">{title}</h3>
-      {note && <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{note}</span>}
+      {note && (
+        <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">
+          {note}
+        </span>
+      )}
     </div>
   );
 }
 
-function AppCard({ app, plan }) {
+function AppCard({ app, niches, onNicheChange, busy }) {
+  const active = niches?.[0] || "";
+
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-start">
       {app?.iconUrl ? (
@@ -102,6 +138,7 @@ function AppCard({ app, plan }) {
       ) : (
         <div className="h-16 w-16 shrink-0 rounded-2xl bg-brand-mist" />
       )}
+
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-display text-xl font-bold text-brand-ink">{app?.name}</h2>
@@ -111,71 +148,79 @@ function AppCard({ app, plan }) {
             </span>
           )}
         </div>
-        {plan?.summary && <p className="mt-2 text-sm leading-relaxed text-slate-600">{plan.summary}</p>}
-        {plan?.audience && (
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
-            <span className="font-semibold text-brand-ink">Who posts about this:</span> {plan.audience}
-          </p>
-        )}
-        {plan?.niche_tags?.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {plan.niche_tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-slate-200 px-2.5 py-0.5 text-[11px] font-medium text-slate-600"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-function IdeaCard({ idea, index }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-skyDeep to-brand-sky text-xs font-bold text-white">
-          {index + 1}
-        </span>
-        <div className="min-w-0">
-          <p className="font-display text-lg font-bold leading-snug text-brand-ink">
-            &ldquo;{idea.hook}&rdquo;
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">{idea.format}</p>
-          <p className="mt-2 flex items-start gap-1.5 text-sm leading-relaxed text-slate-500">
-            <Sparkles size={14} className="mt-0.5 shrink-0 text-brand-sky" />
-            {idea.why}
-          </p>
+        {/* The niche is a guess from a lookup table, so it is presented as
+            something to correct rather than as a verdict. */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <label htmlFor="vibecode-niche" className="text-sm text-slate-500">
+            Showing creators in
+          </label>
+          <select
+            id="vibecode-niche"
+            value={active}
+            disabled={busy}
+            onChange={(e) => onNicheChange?.(e.target.value)}
+            className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-brand-ink shadow-sm focus:border-brand-skyDeep focus:outline-none focus:ring-2 focus:ring-brand-sky/30 disabled:opacity-60"
+          >
+            {CREATOR_NICHES.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+          <span className="text-sm text-slate-400">
+            {busy ? "updating…" : "not right? change it"}
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-function LockedIdeas({ count }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
-      {/* Placeholder bars rather than blurred real text — there is nothing to
-          blur here, the route never sent the locked ideas to the browser. */}
-      <div aria-hidden className="space-y-3 opacity-40">
-        {Array.from({ length: Math.min(count, 3) }).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <div className="h-4 w-2/3 rounded-full bg-slate-300" />
-            <div className="h-3 w-full rounded-full bg-slate-200" />
-          </div>
-        ))}
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-slate-50 via-slate-50/90 to-slate-50/60">
-        <p className="flex items-center gap-2 text-sm font-semibold text-brand-ink">
-          <Lock size={15} className="text-brand-skyDeep" />
-          {count} more video {count === 1 ? "concept" : "concepts"}
-        </p>
-      </div>
+function VideoTile({ video, locked }) {
+  const tile = (
+    <div className="relative aspect-[9/13] overflow-hidden rounded-xl bg-brand-mist">
+      {video.thumbnail_url ? (
+        // TikTok CDN URLs are signed and expire, and every sync rewrites
+        // them, so next/image would cache a dead signature.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={video.thumbnail_url}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-slate-300">
+          <Play size={18} />
+        </div>
+      )}
+      {video.views > 0 && (
+        <span className="absolute bottom-1.5 left-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          {formatCount(video.views)}
+        </span>
+      )}
+      {locked && (
+        <span className="absolute right-1.5 top-1.5 rounded-full bg-black/55 p-1 text-white">
+          <Lock size={11} />
+        </span>
+      )}
     </div>
+  );
+
+  // Locked tiles are inert on purpose: you can see what is working and how
+  // well, you start a trial to find out who made it.
+  if (locked) return <div className="group">{tile}</div>;
+
+  return (
+    <a
+      href={video.video_url}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className="group block"
+    >
+      {tile}
+    </a>
   );
 }
 
@@ -189,13 +234,11 @@ function CreatorCard({ creator, locked }) {
           {videos.map((v, i) => (
             <div key={i} className="relative aspect-[9/13] overflow-hidden bg-brand-mist">
               {v.thumbnail_url ? (
-                // TikTok CDN URLs are signed and expire, and every sync
-                // rewrites them, so next/image would cache a dead signature.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={v.thumbnail_url} alt="" loading="lazy" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-slate-300">
-                  <Play size={16} />
+                  <Play size={14} />
                 </div>
               )}
               {v.views > 0 && (
@@ -212,7 +255,10 @@ function CreatorCard({ creator, locked }) {
         {locked ? (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100" />
-            <div className="min-w-0 flex-1 space-y-1.5" aria-label="Creator hidden until you start a trial">
+            <div
+              className="min-w-0 flex-1 space-y-1.5"
+              aria-label="Creator hidden until you start a trial"
+            >
               <div className="h-3 w-24 rounded-full bg-slate-200" />
               <div className="h-2.5 w-16 rounded-full bg-slate-100" />
             </div>
@@ -245,6 +291,18 @@ function CreatorCard({ creator, locked }) {
           </div>
         )}
 
+        <p className="text-[11px] font-medium text-slate-500">
+          {creator.niche_matched ? (
+            <span className="rounded-full bg-brand-mist px-2 py-0.5 text-brand-skyDeep">
+              {creator.niche_tags?.[0] || "Niche match"}
+            </span>
+          ) : (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+              Open to brand work
+            </span>
+          )}
+        </p>
+
         <dl className="mt-auto grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-brand-mist/60 px-3 py-2">
             <dt className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-slate-500">
@@ -256,6 +314,8 @@ function CreatorCard({ creator, locked }) {
             <dt className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-slate-500">
               <Heart size={11} /> Avg likes
             </dt>
+            {/* Lifetime likes / post count — a sampled average swings wildly
+                on the ~1 video per creator a keyword search returns. */}
             <dd className="font-semibold text-brand-ink">{formatCount(creator.avg_likes_per_video)}</dd>
           </div>
         </dl>
@@ -275,21 +335,17 @@ function CreatorCard({ creator, locked }) {
   );
 }
 
-function UnlockBand({ creatorCount, lockedIdeas, href }) {
-  const bits = [
-    creatorCount > 0 ? `all ${creatorCount} creators` : null,
-    lockedIdeas > 0 ? `${lockedIdeas} more video ${lockedIdeas === 1 ? "concept" : "concepts"}` : null,
-  ].filter(Boolean);
-
+function UnlockBand({ creatorCount, href }) {
   return (
     <div className="mt-10 rounded-3xl bg-brand-ink px-6 py-8 text-center sm:px-10">
       <h3 className="font-display text-2xl font-bold text-white sm:text-3xl">
-        Unlock {bits.length > 0 ? bits.join(" and ") : "the full plan"}
+        {creatorCount > 0
+          ? `See who made these — all ${creatorCount} creators`
+          : "See who made these"}
       </h3>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
-        Start the free trial to see who to contact, get the full set of concepts,
-        and run the campaign — tracking every video and paying per post from one
-        place.
+        Start the free trial to open every video, get the handles, and run the
+        campaign — tracking each post and paying per video from one place.
       </p>
       <Link
         href={href}

@@ -1,45 +1,44 @@
 // Public "scan your app" endpoint behind the hero input on /vibecode.
 //
-//   POST /api/vibecode/scan  { url }
+//   POST /api/vibecode/scan  { url, niche? }
 //
 // Deliberately unauthenticated: the whole point of the page is that a
 // developer who has never heard of us can paste a link and immediately see
-// what we'd do for their app. What they get back is gated, not the scan
-// itself — without an active subscription the response carries one video
-// idea and two anonymised creator cards, and the rest unlocks on trial.
+// what is already working in their niche. What comes back is gated, not the
+// scan — without an active subscription the video thumbnails and view counts
+// show but the links are inert and creator identities are withheld.
 //
-// Because it is public and it spends money (one Anthropic call per fresh
-// scan), three ceilings apply, in order of how much they matter:
+// Nothing here bills. The store lookup is Apple's free endpoint, the web
+// fallback is one page fetch, and the matches are one indexed Postgres query.
+// The rate limit exists because the server fetches a URL the caller supplies,
+// so it must not become a free proxy — see the SSRF guard in appScan.js,
+// which is the real defence.
 //
-//   1. The URL cache. A link scanned recently replays for free, which also
-//      makes shared result links free.
-//   2. Per-caller limits. A visitor can trigger a handful of fresh scans an
-//      hour, not thousands.
-//   3. A global daily cap. The worst case is bounded no matter what.
-//
-// A link we cannot read is rejected *before* the model call, so garbage
-// input costs nothing.
+// `niche` lets the results page override our guess. Category inference is a
+// lookup table (lib/vibecode/nicheMap.js) and it will sometimes be wrong; a
+// dropdown that re-queries is a better answer than pretending otherwise.
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { brandHasActiveSubscription } from "@/lib/billing/subscription";
+import { CREATOR_NICHES } from "@/lib/onboarding/creatorConstants";
 import { scanApp, normalizeAppUrl, ScanError } from "@/lib/vibecode/appScan";
-import { generatePlan } from "@/lib/vibecode/generatePlan";
+import { inferNiches } from "@/lib/vibecode/nicheMap";
 import { matchCreators } from "@/lib/vibecode/matchCreators";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Store lookup + page fetch + one model call. Comfortably under this, but a
-// slow origin shouldn't take the request down with it.
-export const maxDuration = 60;
+// A store lookup or a single page fetch. Generous only so a slow origin
+// can't take the request down with it.
+export const maxDuration = 30;
 
-const CACHE_DAYS = 7;
-const PER_IP_PER_HOUR = 3;
-const PER_IP_PER_DAY = 10;
-const GLOBAL_PER_DAY = 300;
+// Metadata is cheap to refetch; this just avoids hammering Apple and other
+// people's servers when a result link gets shared around.
+const METADATA_CACHE_HOURS = 24;
+const PER_IP_PER_HOUR = 20;
 
-const TEASER_IDEAS = 1;
+const TEASER_VIDEOS = 6;
 const TEASER_CREATORS = 2;
 
 function hashIp(request) {
@@ -57,59 +56,32 @@ function since(ms) {
   return new Date(Date.now() - ms).toISOString();
 }
 
-async function checkQuota(admin, ipHash) {
-  const [hour, day, global] = await Promise.all([
-    admin
-      .from("vibecode_scans")
-      .select("id", { count: "exact", head: true })
-      .eq("scanned_by_ip_hash", ipHash)
-      .gte("scanned_at", since(60 * 60 * 1000)),
-    admin
-      .from("vibecode_scans")
-      .select("id", { count: "exact", head: true })
-      .eq("scanned_by_ip_hash", ipHash)
-      .gte("scanned_at", since(24 * 60 * 60 * 1000)),
-    admin
-      .from("vibecode_scans")
-      .select("id", { count: "exact", head: true })
-      .gte("scanned_at", since(24 * 60 * 60 * 1000)),
-  ]);
-
-  if ((hour.count ?? 0) >= PER_IP_PER_HOUR) {
-    return { ok: false, retryAfter: 3600, message: "That's a few scans in an hour. Try again shortly." };
-  }
-  if ((day.count ?? 0) >= PER_IP_PER_DAY) {
-    return { ok: false, retryAfter: 86400, message: "You've hit today's scan limit. Try again tomorrow." };
-  }
-  if ((global.count ?? 0) >= GLOBAL_PER_DAY) {
-    return { ok: false, retryAfter: 3600, message: "Scans are busy right now — try again in a little while." };
-  }
-  return { ok: true };
-}
-
-// What someone without a subscription sees: enough to prove the thing works,
-// not enough to skip signing up. Creator identity is withheld (that is the
-// part being sold); the sample clips stay, because they are what makes the
-// preview feel real.
+// What someone without a subscription sees: enough of the evidence to judge
+// whether this channel suits their app, not enough to skip signing up. The
+// thumbnails and view counts stay — they are the proof, and hiding them would
+// leave nothing to be convinced by. The links and the handles are the part
+// being sold, so those are withheld rather than blurred.
 function toTeaser(result) {
-  const ideas = result.plan.video_ideas || [];
+  const videos = result.videos || [];
+  const creators = result.creators || [];
   return {
     locked: true,
     app: result.app,
-    plan: {
-      summary: result.plan.summary,
-      audience: result.plan.audience,
-      niche_tags: result.plan.niche_tags,
-      video_ideas: ideas.slice(0, TEASER_IDEAS),
-      locked_idea_count: Math.max(0, ideas.length - TEASER_IDEAS),
-    },
+    niches: result.niches,
     coverage: result.coverage,
-    creator_count: result.creators.length,
-    creators: result.creators.slice(0, TEASER_CREATORS).map((c) => ({
+    niche_matched: result.niche_matched,
+    video_count: videos.length,
+    videos: videos.slice(0, TEASER_VIDEOS).map((v) => ({
+      thumbnail_url: v.thumbnail_url,
+      views: v.views,
+    })),
+    creator_count: creators.length,
+    creators: creators.slice(0, TEASER_CREATORS).map((c) => ({
       id: c.id,
       follower_count: c.follower_count,
       avg_likes_per_video: c.avg_likes_per_video,
       niche_tags: c.niche_tags,
+      niche_matched: c.niche_matched,
       videos: (c.videos || []).map((v) => ({ thumbnail_url: v.thumbnail_url, views: v.views })),
     })),
   };
@@ -117,18 +89,15 @@ function toTeaser(result) {
 
 export async function POST(request) {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: "App scanning isn't configured on this deployment yet." },
-        { status: 503 },
-      );
-    }
-
     const body = await request.json().catch(() => ({}));
     const input = String(body?.url || "").trim();
     if (!input) {
       return NextResponse.json({ error: "Paste a link to your app first." }, { status: 400 });
     }
+
+    // Only ever an exact member of the shared vocabulary — this value goes
+    // straight into a niche_tags filter.
+    const nicheOverride = CREATOR_NICHES.includes(body?.niche) ? body.niche : null;
 
     let normalizedUrl;
     try {
@@ -139,74 +108,94 @@ export async function POST(request) {
 
     const admin = createAdminClient();
 
-    // Who's asking — decides how much of the result comes back, not whether
-    // the scan runs.
+    // Who's asking — decides how much comes back, not whether the scan runs.
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     const unlocked = user ? await brandHasActiveSubscription(supabase, user.id) : false;
 
-    // Cache first: a hit costs nothing, so it is checked before the quota and
-    // never counts against it.
+    // Recent metadata means we can skip the outbound fetch entirely, so this
+    // is checked before the rate limit and never counts against it.
     const { data: cached } = await admin
       .from("vibecode_scans")
-      .select("result, scanned_at")
+      .select("source, app_name, app_category")
       .eq("normalized_url", normalizedUrl)
-      .gte("scanned_at", since(CACHE_DAYS * 24 * 60 * 60 * 1000))
+      .gte("scanned_at", since(METADATA_CACHE_HOURS * 60 * 60 * 1000))
       .maybeSingle();
 
-    if (cached?.result) {
-      return NextResponse.json(unlocked ? { ...cached.result, locked: false } : toTeaser(cached.result));
-    }
-
-    const ipHash = hashIp(request);
-    const quota = await checkQuota(admin, ipHash);
-    if (!quota.ok) {
-      return NextResponse.json(
-        { error: quota.message },
-        { status: 429, headers: { "Retry-After": String(quota.retryAfter) } },
-      );
-    }
-
-    // Reject unreadable links here, before anything bills.
     let app;
-    try {
-      app = await scanApp(input);
-    } catch (e) {
-      if (e instanceof ScanError) {
-        return NextResponse.json({ error: e.message }, { status: 422 });
+    if (cached?.app_name) {
+      // Enough to infer a niche and render the header. The icon and
+      // screenshots aren't stored — they're signed, expiring URLs.
+      app = {
+        source: cached.source,
+        name: cached.app_name,
+        category: cached.app_category,
+        description: "",
+        iconUrl: null,
+        screenshots: [],
+        storeUrl: normalizedUrl,
+      };
+    } else {
+      const ipHash = hashIp(request);
+      const { count } = await admin
+        .from("vibecode_scans")
+        .select("id", { count: "exact", head: true })
+        .eq("scanned_by_ip_hash", ipHash)
+        .gte("scanned_at", since(60 * 60 * 1000));
+
+      if ((count ?? 0) >= PER_IP_PER_HOUR) {
+        return NextResponse.json(
+          { error: "That's a lot of scans in one hour. Try again shortly." },
+          { status: 429, headers: { "Retry-After": "3600" } },
+        );
       }
-      throw e;
+
+      try {
+        app = await scanApp(input);
+      } catch (e) {
+        if (e instanceof ScanError) {
+          return NextResponse.json({ error: e.message }, { status: 422 });
+        }
+        throw e;
+      }
+
+      const { error: writeError } = await admin.from("vibecode_scans").upsert(
+        {
+          normalized_url: normalizedUrl,
+          source: app.source,
+          app_name: app.name,
+          app_category: app.category,
+          scanned_by_ip_hash: ipHash,
+          scanned_at: new Date().toISOString(),
+        },
+        { onConflict: "normalized_url" },
+      );
+      // Losing the log entry shouldn't cost the caller their scan.
+      if (writeError) console.error("[vibecode/scan] could not log scan", writeError);
     }
 
-    const plan = await generatePlan(app);
-    const { creators, coverage } = await matchCreators(admin, {
-      nicheTags: plan.niche_tags,
-      keywords: plan.keywords,
+    const niches = nicheOverride ? [nicheOverride] : inferNiches(app);
+    const { creators, videos, coverage, niche_matched } = await matchCreators(admin, {
+      nicheTags: niches,
     });
 
-    const result = { app, plan, creators, coverage };
-
-    // onConflict on the unique URL so a re-scan after the cache expires
-    // refreshes the row rather than failing.
-    const { error: writeError } = await admin.from("vibecode_scans").upsert(
-      {
-        normalized_url: normalizedUrl,
+    const result = {
+      // The description is only ever an input to niche inference — shipping
+      // 1500 characters of store listing to the browser buys nothing.
+      app: {
         source: app.source,
-        app_name: app.name,
-        app_category: app.category,
-        result,
-        scanned_by_ip_hash: ipHash,
-        scanned_at: new Date().toISOString(),
+        name: app.name,
+        category: app.category,
+        iconUrl: app.iconUrl,
       },
-      { onConflict: "normalized_url" },
-    );
-    // A cache/ledger write failure shouldn't cost the caller their scan —
-    // they already paid for it in latency and we already paid for it in
-    // tokens. Log and serve.
-    if (writeError) console.error("[vibecode/scan] could not persist scan", writeError);
-
+      niches,
+      creators,
+      videos,
+      coverage,
+      niche_matched,
+    };
     return NextResponse.json(unlocked ? { ...result, locked: false } : toTeaser(result));
   } catch (e) {
     console.error("[vibecode/scan] failed", e);
