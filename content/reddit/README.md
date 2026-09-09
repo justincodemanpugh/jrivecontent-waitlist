@@ -13,6 +13,12 @@ Each post file has two versions:
 - **pure-value body** — no product mention, safe for strict subs
 - **soft-P.S. closer** — one honest line, only for builder/side-project subs
 
+**`08-origin-series/`** is a separate play: a true, serialized "built it out of
+spite" founder story modeled on the viral r/SideProject posts. It is
+**r/SideProject only** — the raw promo-heavy format gets removed anywhere else.
+See `08-origin-series/README.md` for the rules (chief one: every sentence has to
+be literally true — no invented people, no inflated numbers).
+
 ---
 
 ## Account prep (do this before posting)
@@ -47,6 +53,35 @@ good the posts are.
 | r/smallbusiness | large | post 4 | pure value | Very strict on promo. |
 | r/microsaas | small | post 6 | soft P.S. ok | Small but on-topic. |
 | r/UGCcreators, r/InfluencerMarketing | mid | post 7 | soft P.S. ok | Creator-side audience, different framing. |
+
+## App-dev & indie-game subreddits
+
+Both early paying users make mobile apps, so posts 09–11 target that crowd. App
+UA is expensive (paid installs run several $ each, worse since ATT) and
+UGC→TikTok→store is a proven cheap-install channel — this audience is receptive.
+
+| Subreddit | Size | Use | Variant | Notes |
+|---|---|---|---|---|
+| r/iOSProgramming | large | 09, 10 | pure value | Tactical, strict on promo. A genuinely useful marketing writeup with no link is fine. |
+| r/androiddev | large | 09, 10 | pure value | Very dev-focused; marketing posts sometimes removed as off-topic. Frame tightly around your own launch. |
+| r/reactnative | mid | 09, 10 | pure value | Cross-platform solo devs, more tolerant of "how I marketed it" posts. |
+| r/FlutterDev | mid | 09, 10 | pure value | Same as RN. Watch for a weekly self-promo thread. |
+| r/gamedev | large | 09, 10 (game-framed) | pure value | Marketing discussion welcome in text posts. Has "Feedback Friday". |
+| r/IndieDev, r/SoloDevelopment | mid | 09, 11 | soft P.S. ok | Build-in-public friendly, game-leaning but tolerant. |
+| r/AppBusiness, r/ASO | small | 09, 10 | soft P.S. ok | Small but exactly on-topic (app growth / ASO / monetization). |
+| r/SideProject | mid | 11, + 09 soft P.S. | series / soft P.S. | Home of the origin story; the install angle plays well here. |
+| r/iosgaming, r/AndroidGaming, r/IndieGaming | large | — | — | Player-facing, not devs. Only for promoting a specific app, never the tool. Skip. |
+
+### Apps vs games framing
+
+- **Apps:** funnel is install → activation → subscription/retention. Creator
+  videos are problem/solution or "POV using this app". Links go to a store
+  listing or custom product page. Attribution via App Store / Play campaign links
+  or per-creator promo codes.
+- **Games:** funnel is install → D1/D7 retention. Creator videos are gameplay
+  clips or trend audio over gameplay — the clip has to be *fun*, not a
+  testimonial. Attribution is mostly install-spike correlation against post
+  timestamps; promo codes rarely apply.
 
 ## Cadence
 

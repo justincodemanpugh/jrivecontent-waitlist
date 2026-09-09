@@ -12,6 +12,7 @@ import {
   completeOnboarding,
 } from "@/lib/onboarding/actions";
 import { logOnboardingEvent } from "@/lib/onboarding/analytics";
+import { recallScan } from "@/lib/vibecode/lastScan";
 
 const STEP_TITLES = [
   "Tell us about your brand",
@@ -30,6 +31,18 @@ export default function OnboardingClient({ initial, userEmail }) {
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  // Someone who came in through the /vibecode scan already gave us their app
+  // link. The server picks it up from `?app=` when it survives, but the
+  // signup → magic link → callback chain usually strips it, so fall back to
+  // what the scanner stashed in the browser. Never overwrites a real value.
+  useEffect(() => {
+    if (data.website) return;
+    const remembered = recallScan();
+    if (remembered) setData((d) => (d.website ? d : { ...d, website: remembered }));
+    // Only worth doing on mount — this is a prefill, not a sync.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const startedRef = useRef(false);
   useEffect(() => {

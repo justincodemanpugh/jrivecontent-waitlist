@@ -4,7 +4,7 @@ import OnboardingClient from "./OnboardingClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({ searchParams }) {
   const supabase = createClient();
   const {
     data: { user },
@@ -21,9 +21,13 @@ export default async function OnboardingPage() {
   // Already finished — send straight to the dashboard.
   if (profile?.onboarded_at) redirect("/dashboard/brand");
 
+  // Someone arriving from the /vibecode scan already told us their app's URL
+  // once — don't make them type it again. A saved value still wins.
+  const scannedApp = typeof searchParams?.app === "string" ? searchParams.app : "";
+
   const initial = {
     brand_name: profile?.brand_name || "",
-    website: profile?.website || "",
+    website: profile?.website || scannedApp || "",
     industry: profile?.industry || "",
     brand_stage: profile?.brand_stage || "",
     monthly_budget: profile?.monthly_budget || "",
