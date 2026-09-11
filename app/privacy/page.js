@@ -248,11 +248,6 @@ export default function PrivacyPage() {
               .
             </p>
           </Section>
-
-          <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            This document is a starting point and is not legal advice. Please
-            have it reviewed by qualified counsel before public launch.
-          </p>
         </div>
       </div>
     </div>
