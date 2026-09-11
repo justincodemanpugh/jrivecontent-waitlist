@@ -1,6 +1,7 @@
 "use client";
 
-import { BadgeCheck, ExternalLink, Heart, Link2, Users } from "lucide-react";
+import { useState } from "react";
+import { BadgeCheck, ExternalLink, Heart, Link2, Play, Users } from "lucide-react";
 import {
   tiktokProfileUrl,
   formatCount,
@@ -16,6 +17,34 @@ import {
 // to work with anyone. Nothing here may imply availability, interest, or that
 // we vetted them, and the verified badge is TikTok's, not ours. There is no
 // Connect action on purpose — there is no account to connect to.
+// TikTok CDN URLs are signed and expire, so next/image would cache a URL that
+// outlives its signature — and an expired one 403s, which used to render as a
+// blank white tile. (Every stored thumbnail had in fact expired: the discovery
+// refresh cron renews avatar_url but never these.) /vibecode re-signs the ones
+// it shows via oEmbed, which repairs rows this grid reads too; until a row has
+// been through that, this renders a real placeholder rather than nothing.
+function Thumb({ src }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-surface-sunken">
+        <Play size={16} className="text-muted" />
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-full w-full object-cover"
+    />
+  );
+}
+
 export default function DiscoveredCreatorCard({ creator }) {
   const {
     username, nickname, avatar_url, bio, bio_link,
@@ -34,18 +63,7 @@ export default function DiscoveredCreatorCard({ creator }) {
               rel="noopener noreferrer nofollow"
               className="relative block aspect-[9/13] overflow-hidden bg-surface-sunken"
             >
-              {v.thumbnail_url ? (
-                // TikTok CDN URLs are signed and expire, and every sync
-                // rewrites them, so next/image would cache a URL that outlives
-                // its signature.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={v.thumbnail_url}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
-              ) : null}
+              <Thumb src={v.thumbnail_url} />
               {v.views > 0 && (
                 <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
                   {formatCount(v.views)}

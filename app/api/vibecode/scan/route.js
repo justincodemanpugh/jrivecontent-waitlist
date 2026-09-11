@@ -1,6 +1,6 @@
 // Public "scan your app" endpoint behind the hero input on /vibecode.
 //
-//   POST /api/vibecode/scan  { url, niche? }
+//   POST /api/vibecode/scan  { url, niche?, stage? }
 //
 // Deliberately unauthenticated: the whole point of the page is that a
 // developer who has never heard of us can paste a link and immediately see
@@ -8,15 +8,20 @@
 // scan — without an active subscription the video thumbnails and view counts
 // show but the links are inert and creator identities are withheld.
 //
-// Nothing here bills. The store lookup is Apple's free endpoint, the web
-// fallback is one page fetch, and the matches are one indexed Postgres query.
-// The rate limit exists because the server fetches a URL the caller supplies,
-// so it must not become a free proxy — see the SSRF guard in appScan.js,
-// which is the real defence.
+// Two stages, because the two halves have very different latencies. The store
+// lookup resolves in ~300ms; matching creators and re-signing thumbnails takes
+// noticeably longer. Returning the app card on its own first means the visitor
+// sees their own app almost immediately instead of watching a spinner, and the
+// second call fills in underneath:
 //
-// `niche` lets the results page override our guess. Category inference is a
-// lookup table (lib/vibecode/nicheMap.js) and it will sometimes be wrong; a
-// dropdown that re-queries is a better answer than pretending otherwise.
+//   stage: "app"  -> { app, niches }              (fast)
+//   stage: "full" -> { platform, directory, videos, ... }   (default)
+//
+// Nothing here bills. The store lookup is Apple's free endpoint, the web
+// fallback is one page fetch, oEmbed is free, and the matches are indexed
+// Postgres queries. The rate limit exists because the server fetches a URL the
+// caller supplies, so it must not become a free proxy — see the SSRF guard in
+// appScan.js, which is the real defence.
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -29,8 +34,6 @@ import { matchCreators } from "@/lib/vibecode/matchCreators";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// A store lookup or a single page fetch. Generous only so a slow origin
-// can't take the request down with it.
 export const maxDuration = 30;
 
 // Metadata is cheap to refetch; this just avoids hammering Apple and other
@@ -39,7 +42,7 @@ const METADATA_CACHE_HOURS = 24;
 const PER_IP_PER_HOUR = 20;
 
 const TEASER_VIDEOS = 6;
-const TEASER_CREATORS = 2;
+const TEASER_CREATORS = 3;
 
 function hashIp(request) {
   const forwarded = request.headers.get("x-forwarded-for") || "";
@@ -56,33 +59,37 @@ function since(ms) {
   return new Date(Date.now() - ms).toISOString();
 }
 
-// What someone without a subscription sees: enough of the evidence to judge
-// whether this channel suits their app, not enough to skip signing up. The
-// thumbnails and view counts stay — they are the proof, and hiding them would
-// leave nothing to be convinced by. The links and the handles are the part
-// being sold, so those are withheld rather than blurred.
+// What someone without a subscription sees. The thumbnails and view counts
+// stay — they are the proof, and hiding them would leave nothing to be
+// convinced by. Identity is what the subscription buys, so names, handles,
+// avatars and links are withheld for BOTH tiers: a signed-up creator must not
+// become visible to an anonymous visitor when the dashboard directory that
+// lists them is subscription-gated (migration 0043).
 function toTeaser(result) {
-  const videos = result.videos || [];
-  const creators = result.creators || [];
+  const strip = (c) => ({
+    id: c.id,
+    source: c.source,
+    niches: c.niches,
+    // Numbers only — enough to judge the roster, not enough to contact anyone.
+    follower_count: c.follower_count,
+    avg_likes_per_video: c.avg_likes_per_video,
+    rate_min: c.rate_min,
+    rate_max: c.rate_max,
+  });
+
   return {
     locked: true,
     app: result.app,
     niches: result.niches,
-    coverage: result.coverage,
-    niche_matched: result.niche_matched,
-    video_count: videos.length,
-    videos: videos.slice(0, TEASER_VIDEOS).map((v) => ({
+    platform_count: result.platform.length,
+    directory_count: result.directory.length,
+    platform: result.platform.slice(0, TEASER_CREATORS).map(strip),
+    directory: result.directory.slice(0, TEASER_CREATORS).map(strip),
+    video_count: result.videos.length,
+    videos_are_niche: result.videosAreNiche,
+    videos: result.videos.slice(0, TEASER_VIDEOS).map((v) => ({
       thumbnail_url: v.thumbnail_url,
       views: v.views,
-    })),
-    creator_count: creators.length,
-    creators: creators.slice(0, TEASER_CREATORS).map((c) => ({
-      id: c.id,
-      follower_count: c.follower_count,
-      avg_likes_per_video: c.avg_likes_per_video,
-      niche_tags: c.niche_tags,
-      niche_matched: c.niche_matched,
-      videos: (c.videos || []).map((v) => ({ thumbnail_url: v.thumbnail_url, views: v.views })),
     })),
   };
 }
@@ -96,8 +103,9 @@ export async function POST(request) {
     }
 
     // Only ever an exact member of the shared vocabulary — this value goes
-    // straight into a niche_tags filter.
+    // straight into a niche filter.
     const nicheOverride = CREATOR_NICHES.includes(body?.niche) ? body.niche : null;
+    const appOnly = body?.stage === "app";
 
     let normalizedUrl;
     try {
@@ -107,13 +115,6 @@ export async function POST(request) {
     }
 
     const admin = createAdminClient();
-
-    // Who's asking — decides how much comes back, not whether the scan runs.
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const unlocked = user ? await brandHasActiveSubscription(supabase, user.id) : false;
 
     // Recent metadata means we can skip the outbound fetch entirely, so this
     // is checked before the rate limit and never counts against it.
@@ -126,15 +127,15 @@ export async function POST(request) {
 
     let app;
     if (cached?.app_name) {
-      // Enough to infer a niche and render the header. The icon and
-      // screenshots aren't stored — they're signed, expiring URLs.
+      // Enough to infer a niche and render the header. The icon isn't stored —
+      // it's a signed, expiring URL — so a cached scan re-fetches for it only
+      // when we need to show the card.
       app = {
         source: cached.source,
         name: cached.app_name,
         category: cached.app_category,
         description: "",
         iconUrl: null,
-        screenshots: [],
         storeUrl: normalizedUrl,
       };
     } else {
@@ -177,24 +178,38 @@ export async function POST(request) {
     }
 
     const niches = nicheOverride ? [nicheOverride] : inferNiches(app);
-    const { creators, videos, coverage, niche_matched } = await matchCreators(admin, {
+    const appCard = {
+      source: app.source,
+      name: app.name,
+      category: app.category,
+      iconUrl: app.iconUrl,
+    };
+
+    // Stage one: hand back the app card and stop. No auth check, no creator
+    // queries — this call exists purely to be fast.
+    if (appOnly) {
+      return NextResponse.json({ stage: "app", app: appCard, niches });
+    }
+
+    // Who's asking — decides how much comes back, not whether the scan runs.
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const unlocked = user ? await brandHasActiveSubscription(supabase, user.id) : false;
+
+    const { platform, directory, videos, videosAreNiche } = await matchCreators(admin, {
       nicheTags: niches,
     });
 
     const result = {
-      // The description is only ever an input to niche inference — shipping
-      // 1500 characters of store listing to the browser buys nothing.
-      app: {
-        source: app.source,
-        name: app.name,
-        category: app.category,
-        iconUrl: app.iconUrl,
-      },
+      app: appCard,
       niches,
-      creators,
+      platform,
+      directory,
       videos,
-      coverage,
-      niche_matched,
+      videos_are_niche: videosAreNiche,
+      videosAreNiche,
     };
     return NextResponse.json(unlocked ? { ...result, locked: false } : toTeaser(result));
   } catch (e) {
