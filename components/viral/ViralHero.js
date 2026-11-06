@@ -16,22 +16,23 @@ export default function ViralHero() {
           <div className="mb-7 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-mist px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-skyDeep ring-1 ring-brand-sky/40">
               <Sparkles size={13} />
-              New: UGC Creator Platform
+              For app &amp; SaaS founders
             </span>
           </div>
         </FadeIn>
 
         <FadeIn delay={120}>
           <h1 className="mx-auto max-w-4xl font-display text-5xl font-bold leading-[1.05] tracking-tight text-brand-ink sm:text-6xl md:text-7xl">
-            Track every video<span className="text-brand-sky">.</span>
-            <br className="hidden sm:block" /> Pay for real results<span className="text-brand-skyDeep">.</span> Scale up<span className="text-brand-ink/40">.</span>
+            You built it<span className="text-brand-sky">.</span>
+            <br className="hidden sm:block" /> Now let&apos;s get you users<span className="text-brand-skyDeep">.</span>
           </h1>
         </FadeIn>
 
         <FadeIn delay={220}>
           <p className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 text-lg text-slate-500 sm:text-xl">
-            Track, manage, and pay UGC creators on TikTok
+            Creators post videos about your app on TikTok
             <PlatformChips className="translate-y-[2px]" only={["tiktok"]} />
+            and you only pay for the views they get.
           </p>
         </FadeIn>
 
@@ -41,7 +42,7 @@ export default function ViralHero() {
               href="/signup"
               className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-skyDeep to-brand-sky px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand-sky/30 transition hover:brightness-105"
             >
-              Start Free Trial
+              Launch a campaign
               <ChevronRight size={18} className="transition group-hover:translate-x-0.5" />
             </Link>
             <a
@@ -55,7 +56,7 @@ export default function ViralHero() {
         </FadeIn>
 
         <FadeIn delay={440}>
-          <p className="mt-5 text-sm text-slate-400">Pay $0 today · Cancel anytime</p>
+          <p className="mt-5 text-sm text-slate-400">Pay $0 today · Only pay for views · Cancel anytime</p>
         </FadeIn>
       </div>
 

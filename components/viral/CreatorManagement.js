@@ -13,7 +13,7 @@ const TABS = [
   },
   {
     title: "Define Your Payout Rules",
-    body: "Set the base fee your creators earn per video or per month. Our payments engine keeps every campaign on one clear, consistent structure.",
+    body: "Pay per 1,000 views, a flat fee per video, a share of revenue, or any mix, with a cap per video. Our payments engine keeps every campaign on one clear, consistent structure.",
     mock: PayoutRulesMock,
   },
   {
@@ -42,7 +42,7 @@ export default function CreatorManagement() {
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
           <h2 className="text-center font-display text-3xl font-bold tracking-tight text-brand-ink sm:text-4xl md:text-5xl">
-            Creator Management
+            Everything handled, in one place
           </h2>
         </FadeIn>
 
