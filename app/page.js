@@ -4,6 +4,7 @@ import ViralHero from "@/components/viral/ViralHero";
 import StatsBar from "@/components/StatsBar";
 import VideoCarousel from "@/components/VideoCarousel";
 import HowItWorks from "@/components/viral/HowItWorks";
+import AppTypes from "@/components/viral/AppTypes";
 import OperatingSystem from "@/components/viral/OperatingSystem";
 import CreatorManagement from "@/components/viral/CreatorManagement";
 import ViralPricing from "@/components/viral/ViralPricing";
@@ -12,9 +13,9 @@ import ViralFAQ from "@/components/viral/ViralFAQ";
 import ViralFooter from "@/components/viral/ViralFooter";
 
 export const metadata = {
-  title: "JriveContent — Track every video. Pay for real results.",
+  title: "JriveContent — You built it. Now let's get you users.",
   description:
-    "Track, manage, and pay UGC creators on TikTok. See every video, pay for what performs, and scale your creator campaigns. Pay $0 today.",
+    "Get users for your app or SaaS with UGC creators on TikTok. Creators post videos about your product and you only pay for the views they get. Pay $0 today.",
 };
 
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
         <StatsBar />
         <VideoCarousel />
         <HowItWorks />
+        <AppTypes />
         <OperatingSystem />
         <CreatorManagement />
         <ViralPricing />

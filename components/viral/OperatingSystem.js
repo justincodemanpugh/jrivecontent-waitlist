@@ -6,8 +6,11 @@ export default function OperatingSystem() {
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
           <h2 className="text-center font-display text-4xl font-bold tracking-tight text-brand-ink sm:text-5xl md:text-6xl">
-            The operating system for UGC
+            Stop marketing your app by hand
           </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-center text-lg text-slate-500">
+            Finding creators yourself means cold DMs, guessing at prices, and paying for videos nobody watches.
+          </p>
         </FadeIn>
 
         <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -15,7 +18,7 @@ export default function OperatingSystem() {
           <FadeIn delay={100}>
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
               <div className="bg-brand-ink px-8 py-7">
-                <h3 className="font-display text-2xl font-bold text-white">Without JriveContent</h3>
+                <h3 className="font-display text-2xl font-bold text-white">Doing it yourself</h3>
               </div>
               <div className="relative p-8">
                 <div className="relative rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -38,9 +41,9 @@ export default function OperatingSystem() {
                   ))}
                 </div>
                 {/* speech bubbles */}
-                <Bubble className="left-6 top-24">Data outdated — refresh manually</Bubble>
-                <Bubble className="right-8 top-10">Tally payouts by hand</Bubble>
-                <Bubble className="bottom-4 right-10">You&apos;re doing the work of 3 people</Bubble>
+                <Bubble className="left-6 top-24">DM&apos;d 40 creators, 3 replied</Bubble>
+                <Bubble className="right-8 top-10">Paid $200 for a video with 300 views</Bubble>
+                <Bubble className="bottom-4 right-10">Tracking views in a spreadsheet</Bubble>
               </div>
             </div>
           </FadeIn>
@@ -50,6 +53,7 @@ export default function OperatingSystem() {
             <div className="overflow-hidden rounded-3xl border border-brand-sky/40 bg-white shadow-lg shadow-brand-sky/10">
               <div className="relative bg-gradient-to-r from-brand-skyDeep to-brand-sky px-8 py-7">
                 <h3 className="font-display text-2xl font-bold text-white">With JriveContent</h3>
+                <p className="mt-1 text-sm text-white/80">Creators come to you. You pay for the views they get.</p>
               </div>
               <div className="bg-brand-mist/40 p-8">
                 <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
