@@ -56,7 +56,7 @@ export default function ViralHero() {
         </FadeIn>
 
         <FadeIn delay={440}>
-          <p className="mt-5 text-sm text-slate-400">Pay $0 today · Only pay for views · Cancel anytime</p>
+          <p className="mt-5 text-sm text-slate-400">$1 for your first 7 days, then $25/month · Creator pay is separate · Cancel anytime</p>
         </FadeIn>
       </div>
 

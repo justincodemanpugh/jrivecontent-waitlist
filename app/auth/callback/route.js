@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { safePath } from "@/lib/auth/safePath";
 
 // Handles both the PKCE `?code=...` callback (OAuth + magic links sent via
 // `@supabase/ssr`) and the legacy/email-confirmation `?token_hash=...&type=...`
@@ -11,7 +12,8 @@ export async function GET(request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") || "/dashboard";
+  // `next` comes from the address bar, so only follow it within this site.
+  const next = safePath(searchParams.get("next"), "/dashboard", origin);
 
   const supabase = createClient();
 

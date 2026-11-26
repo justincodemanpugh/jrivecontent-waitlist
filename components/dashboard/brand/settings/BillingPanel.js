@@ -9,6 +9,7 @@ import {
   formatCardBrand,
 } from "@/lib/dashboard/brand/billingApi";
 import BrandStripePayoutsCard from "@/components/dashboard/brand/settings/BrandStripePayoutsCard";
+import { NEW_SUBSCRIBER_LINE } from "@/lib/billing/pricing";
 
 const RETURN_TO = "/dashboard/brand/settings/billing";
 
@@ -121,7 +122,7 @@ export default function BillingPanel({ connect }) {
                   )}
                 </>
               ) : (
-                "1 free gig. Upgrade for unlimited gigs."
+                `1 free gig. Upgrade for unlimited gigs. ${NEW_SUBSCRIBER_LINE}`
               )}
             </p>
           </div>

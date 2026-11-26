@@ -50,7 +50,7 @@ export default function ProgramsAccountsPage() {
               className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
             >
               <Lock size={15} />
-              Start Free Trial
+              Subscribe
             </Link>
           )
         }

@@ -10,7 +10,9 @@ import {
   Users, Video, Wallet,
 } from "lucide-react";
 import Logo from "@/components/Logo";
-import PlanPreview from "./PlanPreview";
+import PlanPreview, { UnlockCard } from "./PlanPreview";
+import { NEW_SUBSCRIBER_LINE } from "@/lib/billing/pricing";
+import { planHref } from "@/lib/plan/query";
 import { QUESTIONS, normalizeAnswers } from "@/lib/plan/questions";
 import { shortAppName } from "@/lib/plan/templates";
 import { CREATOR_NICHES } from "@/lib/onboarding/creatorConstants";
@@ -365,7 +367,7 @@ export default function Onboarding() {
 
       {screen === "plan" &&
         (result?.plan ? (
-          <PlanPreview data={result} appUrl={state.url} onStartOver={startOver} />
+          <PlanPreview data={result} unlock={<NextStep locked={result.locked} href={planHref(state)} />} onStartOver={startOver} />
         ) : error ? (
           <Screen title="We couldn't build your plan">
             <div className="mx-auto max-w-md">
@@ -382,6 +384,28 @@ export default function Onboarding() {
           </Screen>
         ))}
     </div>
+  );
+}
+
+// /plan asks them to sign up if they need to, saves the plan and takes the
+// payment. Someone already subscribed only needs to save it.
+function NextStep({ locked, href }) {
+  if (!locked) {
+    return (
+      <Link href={href} className="mx-auto mt-12 flex w-fit rounded-full bg-brand-ink px-8 py-4 font-semibold text-white">
+        Save to my plan
+      </Link>
+    );
+  }
+  return (
+    <UnlockCard line={`${NEW_SUBSCRIBER_LINE} Cancel anytime.`}>
+      <Link
+        href={href}
+        className="inline-flex rounded-full bg-white px-8 py-4 font-semibold text-brand-ink transition hover:bg-slate-100"
+      >
+        Unlock for $1
+      </Link>
+    </UnlockCard>
   );
 }
 

@@ -52,7 +52,7 @@ export default function Hero() {
 
         <FadeIn delay={500}>
           <p className="mt-5 text-xs text-slate-500">
-            Pay $0 today · No credit card required
+            Free to join · New subscribers: $1 for 7 days, then $25/month
           </p>
         </FadeIn>
 

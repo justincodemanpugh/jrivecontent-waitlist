@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe, siteUrl } from "@/lib/stripe/server";
+import { safePath } from "@/lib/auth/safePath";
 
 export async function POST(request) {
   try {
@@ -29,13 +30,8 @@ export async function POST(request) {
       );
     }
 
-    let returnTo = "/dashboard/brand/settings/billing";
-    try {
-      const body = await request.json();
-      if (typeof body?.returnTo === "string") returnTo = body.returnTo;
-    } catch {
-      // No body — fine.
-    }
+    const body = await request.json().catch(() => ({}));
+    const returnTo = safePath(body?.returnTo, "/dashboard/brand/settings/billing");
 
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,

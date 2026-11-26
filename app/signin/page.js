@@ -153,7 +153,7 @@ function SignInForm() {
         <p className="mt-6 text-center text-sm text-slate-600">
           Don&apos;t have an account?{" "}
           <Link
-            href="/signup"
+            href={nextParam ? `/signup?role=brand&next=${encodeURIComponent(nextParam)}` : "/signup"}
             className="font-semibold text-brand-skyDeep hover:text-brand-ink"
           >
             Sign up

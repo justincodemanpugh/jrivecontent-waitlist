@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Mail, Loader2, CheckCircle2, Building2, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMagicLink } from "../login/actions";
+import { safePath } from "@/lib/auth/safePath";
 
 export default function SignUpPage() {
   return (
@@ -21,7 +22,10 @@ function SignUpForm() {
   const roleParam = searchParams.get("role");
   const errorParam = searchParams.get("error");
 
-  const inferredRole = roleParam === "creator" ? "creator" : "brand";
+  // Set when sign-up is a step on the way somewhere: saving a plan.
+  const nextParam = safePath(searchParams.get("next"), "");
+  const savingPlan = nextParam.startsWith("/plan");
+  const inferredRole = roleParam === "creator" && !savingPlan ? "creator" : "brand";
 
   const [role, setRole] = useState(inferredRole);
   const [email, setEmail] = useState("");
@@ -39,7 +43,7 @@ function SignUpForm() {
   // long as Supabase preserves the `next` query param. If even that gets
   // stripped, the dashboard router will at least show a clearer error than
   // dropping the user into the wrong onboarding flow.
-  const next = `/dashboard?role=${role}`;
+  const next = nextParam || `/dashboard?role=${role}`;
 
   const callbackUrl = (() => {
     if (typeof window === "undefined") return "";
@@ -89,14 +93,16 @@ function SignUpForm() {
             ← Back to home
           </Link>
           <h1 className="mt-3 text-2xl font-semibold text-brand-ink">
-            Create your JriveContent account
+            {savingPlan ? "Save your plan" : "Create your JriveContent account"}
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Free to join. No credit card required.
+            {savingPlan
+              ? "A free account keeps it. You decide about paying on the next screen."
+              : "Free to join. No credit card required."}
           </p>
         </div>
 
-        {!sent && (
+        {!sent && !savingPlan && (
           <div className="mb-5">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               I&apos;m signing up as a
@@ -197,7 +203,7 @@ function SignUpForm() {
         <p className="mt-6 text-center text-sm text-slate-600">
           Already have an account?{" "}
           <Link
-            href="/signin"
+            href={nextParam ? `/signin?next=${encodeURIComponent(nextParam)}` : "/signin"}
             className="font-semibold text-brand-skyDeep hover:text-brand-ink"
           >
             Sign in

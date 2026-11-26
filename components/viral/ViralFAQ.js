@@ -28,7 +28,7 @@ const FAQS = [
   },
   {
     q: "What does it cost?",
-    a: "Browsing creators is free. Pro starts with a 3-day free trial, then it's $25/month, cancel anytime. On top of that, you pay creators whatever rates you set for your campaign.",
+    a: "Browsing creators is free. Pro is $1 for your first 7 days, then $25/month, cancel anytime. On top of that, you pay creators whatever rates you set for your campaign.",
   },
 ];
 

@@ -25,10 +25,10 @@ const FREE = {
 
 const PRO = {
   title: "Pro",
-  price: "$0",
-  period: "3 days",
+  price: "$1",
+  period: "7 days",
   description: "For brands serious about growth.",
-  priceSubtext: "Then $25/month · Cancel anytime",
+  priceSubtext: "Then $25/month · New subscribers · Cancel anytime",
   features: [
     { label: "Gig postings", value: "Unlimited" },
     { label: "Creator browsing", value: "All creators" },
@@ -38,7 +38,7 @@ const PRO = {
     { label: "Support", value: "Priority" },
     { label: "Billing", value: "Cancel anytime" },
   ],
-  buttonText: "Start Free Trial",
+  buttonText: "Start for $1",
 };
 
 export default function ViralPricing() {

@@ -1,105 +1,118 @@
-// POST /api/stripe/brand-subscription
-// Creates a Stripe Checkout Session for the $25/mo brand platform subscription.
-// The actual product/price lives in Stripe — we reference it via
-// STRIPE_BRAND_SUBSCRIPTION_PRICE_ID in .env.local.
+// POST /api/stripe/brand-subscription  { returnTo?, expectTrial? }
+// Creates a Stripe Checkout Session for the brand subscription: $1 for 7
+// days, then $25/month, for first-time subscribers; $25/month otherwise.
+// The prices live in Stripe — STRIPE_BRAND_SUBSCRIPTION_PRICE_ID (monthly)
+// and STRIPE_BRAND_TRIAL_FEE_PRICE_ID (the one-time $1).
+//
+// Signed-in users only: a payment that isn't tied to an account can't unlock
+// anything.
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe, siteUrl } from "@/lib/stripe/server";
+import { safePath } from "@/lib/auth/safePath";
+import { checkoutParams } from "@/lib/billing/checkout";
+import { customerTrialState } from "@/lib/billing/trial";
 
 // Returns the brand's existing Stripe customer id, creating one if needed
 // and persisting it on brand_profiles so future Checkout / Portal sessions
-// reuse it.
-async function ensureBrandCustomerId({ supabase, user }) {
-  const { data: profile } = await supabase
+// reuse it. Writes use the service role: users can't write billing columns
+// (migration 0048).
+async function ensureBrandCustomerId({ admin, user }) {
+  // Someone who signed up from /plan has no brand row yet, and the Stripe
+  // webhook can only mark a row that exists.
+  const { error: rowError } = await admin
+    .from("brand_profiles")
+    .upsert({ user_id: user.id }, { onConflict: "user_id", ignoreDuplicates: true });
+  if (rowError) throw rowError;
+
+  const { data: profile, error: readError } = await admin
     .from("brand_profiles")
     .select("stripe_customer_id, brand_name")
     .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (profile?.stripe_customer_id) return profile.stripe_customer_id;
+    .single();
+  if (readError) throw readError;
+  if (profile.stripe_customer_id) return profile.stripe_customer_id;
 
   const customer = await stripe.customers.create({
     email: user.email,
-    name: profile?.brand_name || undefined,
+    name: profile.brand_name || undefined,
     metadata: { user_id: user.id },
   });
 
-  // Service role: users can't write billing columns (migration 0048).
-  const { error } = await createAdminClient()
+  const { error } = await admin
     .from("brand_profiles")
     .update({ stripe_customer_id: customer.id })
     .eq("user_id", user.id);
-  if (error) console.error("[stripe/brand-subscription] could not save customer", error);
+  // Unsaved, the next checkout would make a second customer and offer the
+  // trial again.
+  if (error) throw error;
 
   return customer.id;
 }
 
+const refuse = (status, error, extra) => NextResponse.json({ error, ...extra }, { status });
+
 export async function POST(request) {
   try {
     const priceId = process.env.STRIPE_BRAND_SUBSCRIPTION_PRICE_ID;
-    if (!priceId) {
-      return NextResponse.json(
-        { error: "STRIPE_BRAND_SUBSCRIPTION_PRICE_ID is not set." },
-        { status: 500 },
-      );
-    }
+    if (!priceId) return refuse(500, "STRIPE_BRAND_SUBSCRIPTION_PRICE_ID is not set.");
 
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) return refuse(401, "Sign in to subscribe.", { signIn: true });
 
-    const base = siteUrl();
+    const body = await request.json().catch(() => ({}));
+    const returnTo = safePath(body?.returnTo, "/plan");
+    const admin = createAdminClient();
 
-    // Optional return path so Settings → Billing can send the user back to
-    // the same tab after Checkout instead of the dashboard home.
-    let returnTo = null;
-    try {
-      const body = await request.json();
-      returnTo = typeof body?.returnTo === "string" ? body.returnTo : null;
-    } catch {
-      // No body — fine, fall back to default redirect.
+    const [{ data: brand }, { data: creator }] = await Promise.all([
+      admin.from("brand_profiles").select("user_id").eq("user_id", user.id).maybeSingle(),
+      admin.from("creator_profiles").select("onboarded_at").eq("user_id", user.id).maybeSingle(),
+    ]);
+    if (!brand && creator?.onboarded_at) {
+      return refuse(409, "This is a creator account. Sign up with a different email to subscribe.");
     }
 
-    const successPath = returnTo || "/dashboard/brand?subscription=success";
-    const cancelPath = returnTo || "/?subscription=cancel#pricing";
+    const customerId = await ensureBrandCustomerId({ admin, user });
+    const { live, trialEligible } = await customerTrialState(stripe, customerId);
+    if (live) {
+      return refuse(409, "You already have a subscription. Manage it under Billing.", {
+        alreadySubscribed: true,
+      });
+    }
+    // The page offered $1 but this customer can't have it: don't send them to
+    // a checkout for a different price than the button said.
+    if (body?.expectTrial === true && !trialEligible) {
+      return refuse(
+        409,
+        "The $1 week is for first-time subscribers, so it's $25/month for you. Refresh to continue.",
+      );
+    }
 
-    const customerId = user
-      ? await ensureBrandCustomerId({ supabase, user })
-      : null;
+    const trialFeePriceId = process.env.STRIPE_BRAND_TRIAL_FEE_PRICE_ID;
+    // Never fall back to a free week.
+    if (trialEligible && !trialFeePriceId) {
+      return refuse(500, "STRIPE_BRAND_TRIAL_FEE_PRICE_ID is not set.");
+    }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      // Prefer reusing the saved customer when signed in so payment methods
-      // and invoices live on one Stripe customer record.
-      ...(customerId
-        ? { customer: customerId }
-        : user?.email
-          ? { customer_email: user.email }
-          : {}),
-      success_url: `${base}${successPath}`,
-      cancel_url: `${base}${cancelPath}`,
-      allow_promotion_codes: true,
-      metadata: user
-        ? { user_id: user.id, plan: "brand_monthly" }
-        : { plan: "brand_monthly" },
-      subscription_data: {
-        metadata: user
-          ? { user_id: user.id, plan: "brand_monthly" }
-          : { plan: "brand_monthly" },
-        trial_period_days: 3,
-      },
-    });
+    const session = await stripe.checkout.sessions.create(
+      checkoutParams({
+        customerId,
+        userId: user.id,
+        priceId,
+        trialFeePriceId,
+        trial: trialEligible,
+        base: siteUrl(),
+        returnTo,
+      }),
+    );
 
     return NextResponse.json({ url: session.url });
   } catch (e) {
     console.error("[stripe/brand-subscription]", e);
-    return NextResponse.json(
-      { error: e.message || "Subscription checkout failed." },
-      { status: 500 },
-    );
+    return refuse(500, e.message || "Subscription checkout failed.");
   }
 }

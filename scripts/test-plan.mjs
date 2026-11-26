@@ -11,6 +11,8 @@ import {
   toFullPlan,
   toPlanTeaser,
 } from "../lib/plan/preview.js";
+import { planHref, parsePlanQuery } from "../lib/plan/query.js";
+import { dropUnavailable, storablePlan } from "../lib/plan/saved.js";
 
 const ANSWERS = {
   stage: "no_users",
@@ -165,4 +167,30 @@ test("a creator with several niches shows the plan's", () => {
 test("signed-up creators don't crowd out the rest", () => {
   const picked = pickCreators(MATCHES);
   assert.deepEqual(picked.map((c) => c.source), ["platform", "platform", "platform", "directory", "directory"]);
+});
+
+test("inputs survive the trip to /plan", () => {
+  const inputs = { url: "https://a.com/x?y=1&z=2", niche: "Health & Fitness", appName: "A & B", answers: ANSWERS };
+  const href = planHref(inputs);
+  assert.deepEqual(parsePlanQuery(new URL(href, "https://example.com").searchParams), inputs);
+  assert.equal(parsePlanQuery(new URLSearchParams("url=a&niche=b")), null);
+  assert.equal(parsePlanQuery(new URLSearchParams()), null);
+});
+
+test("stored plans keep no bios of scraped accounts", () => {
+  const stored = storablePlan(plan());
+  assert.doesNotMatch(JSON.stringify(stored), /secret bio/);
+  // and still produce the same preview and full plan
+  assert.deepEqual(toPlanTeaser(stored), toPlanTeaser(plan()));
+  assert.deepEqual(toFullPlan(stored), toFullPlan(plan()));
+});
+
+test("anyone who opted out disappears from a saved plan", () => {
+  const stored = storablePlan(plan());
+  const filtered = dropUnavailable(stored, {
+    directoryIds: new Set(["directory-2", "c2", "c3"]),
+    platformIds: new Set(["platform-1"]),
+  });
+  assert.deepEqual(filtered.creators.map((c) => c.id), ["platform-1", "directory-2"]);
+  assert.deepEqual(filtered.videos.map((v) => v.creator_id).sort(), ["c2", "c3"]);
 });

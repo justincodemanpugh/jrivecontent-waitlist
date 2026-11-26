@@ -6,12 +6,12 @@ import { useBrandCheckout } from "@/hooks/useBrandCheckout";
 
 export default function PricingCard({
   variant = "pro", // "free" | "pro"
-  eyebrow = "3-Day Free Trial",
+  eyebrow = "7 days for $1",
   title = "Pro",
-  price = "$0",
-  period = "3 days",
+  price = "$1",
+  period = "7 days",
   description = "For brands serious about growth.",
-  priceSubtext = "Then $25/month · Cancel anytime",
+  priceSubtext = "Then $25/month · New subscribers · Cancel anytime",
   features = [
     { label: "Gig postings", value: "Unlimited" },
     { label: "Creator browsing", value: "All creators" },
@@ -21,7 +21,7 @@ export default function PricingCard({
     { label: "Support", value: "Priority" },
     { label: "Billing", value: "Cancel anytime" },
   ],
-  buttonText = "Start Free Trial",
+  buttonText = "Start for $1",
   // For the free tier we just send the user to signup — no Stripe call.
   ctaHref = null,
   footerNote = "Secure payment via Stripe · Cancel anytime",

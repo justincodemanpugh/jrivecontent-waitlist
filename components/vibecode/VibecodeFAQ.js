@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: "What does it cost?",
-    a: "The scan is free and doesn't need an account. The platform is $0 for three days, then $25/month, and you pay creators their per-video fee directly on top — the average video runs about $40. No retainer and no minimum spend.",
+    a: "The scan is free and doesn't need an account. The platform is $1 for your first 7 days, then $25/month, and you pay creators their per-video fee directly on top — the average video runs about $40. No retainer and no minimum spend.",
   },
 ];
 

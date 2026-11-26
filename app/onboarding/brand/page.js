@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import OnboardingClient from "./OnboardingClient";
 
 export const dynamic = "force-dynamic";
@@ -21,18 +22,21 @@ export default async function OnboardingPage({ searchParams }) {
   // Already finished — send straight to the dashboard.
   if (profile?.onboarded_at) redirect("/dashboard/brand");
 
-  // Someone arriving from the /vibecode scan already told us their app's URL
-  // once — don't make them type it again. A saved value still wins.
+  // Someone who made a plan or scanned their app already told us its name and
+  // link — don't make them type them again. A saved value still wins.
   const scannedApp = typeof searchParams?.app === "string" ? searchParams.app : "";
+  // brand_plans is readable by the server only (migration 0050).
+  const { data: latestPlan } = await createAdminClient()
+    .from("brand_plans")
+    .select("app_url, plan")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   const initial = {
-    brand_name: profile?.brand_name || "",
-    website: profile?.website || scannedApp || "",
-    industry: profile?.industry || "",
-    brand_stage: profile?.brand_stage || "",
-    monthly_budget: profile?.monthly_budget || "",
-    content_needs: profile?.content_needs || [],
-    referral_source: profile?.referral_source || "",
+    brand_name: profile?.brand_name || latestPlan?.plan?.appName || "",
+    website: profile?.website || latestPlan?.app_url || scannedApp || "",
     terms_accepted: Boolean(profile?.terms_accepted_at),
   };
 

@@ -13,7 +13,7 @@ export default function PricingComparison() {
               Simple, <span className="text-brand-skyDeep">flat-rate</span> pricing for brands
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Browse creators for free. Start a 3-day trial to post gigs and connect.
+              Browse creators for free. Subscribe to post gigs and connect: $1 for your first 7 days.
             </p>
           </div>
         </FadeIn>

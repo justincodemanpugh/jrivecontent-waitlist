@@ -18,11 +18,11 @@ const FEATURES = [
 ];
 
 const REDIRECT_REASONS = {
-  "create-campaign": "Start your free 3-day trial to create campaigns and track creators.",
-  "track-accounts": "Start your free 3-day trial to track creator accounts.",
-  "post-gig": "Start your free 3-day trial to post gigs and connect with creators.",
-  "browse-creators": "Browsing creators is free! Start a trial to post gigs.",
-  "invite-creator": "Start your free 3-day trial to invite creators directly.",
+  "create-campaign": "Subscribe to create campaigns and track creators.",
+  "track-accounts": "Subscribe to track creator accounts.",
+  "post-gig": "Subscribe to post gigs and connect with creators.",
+  "browse-creators": "Browsing creators is free! Subscribe to post gigs.",
+  "invite-creator": "Subscribe to invite creators directly.",
 };
 
 export default function BrandPricingPage() {
@@ -37,7 +37,7 @@ export default function BrandPricingPage() {
     setBusy(true);
     setError("");
     try {
-      const url = await startBrandSubscription("/dashboard/brand?subscription=success");
+      const url = await startBrandSubscription("/dashboard/brand/settings/billing");
       window.location.href = url;
     } catch (e) {
       setError(e.message || "Could not start checkout.");
@@ -47,7 +47,7 @@ export default function BrandPricingPage() {
 
   return (
     <>
-      <TopBar title="Start Free Trial" />
+      <TopBar title="Subscribe" />
       <main className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-xl mx-auto">
         {/* Back link */}
         <Link
@@ -70,7 +70,7 @@ export default function BrandPricingPage() {
         <div className="relative rounded-3xl border border-accent-soft/40 bg-surface shadow-xl shadow-accent-soft/10 p-7 sm:p-9">
           {/* Trial pill */}
           <span className="inline-flex items-center rounded-full border border-accent/40 bg-accent-tint px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent">
-            3-Day Free Trial
+            New subscribers: 7 days for $1
           </span>
 
           {/* Plan name + tagline */}
@@ -84,11 +84,11 @@ export default function BrandPricingPage() {
           {/* Price */}
           <div className="mt-6 flex items-baseline gap-2">
             <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-ink">
-              $0
+              $1
             </span>
-            <span className="text-lg text-muted">for 3 days</span>
+            <span className="text-lg text-muted">for 7 days</span>
           </div>
-          <p className="mt-1 text-xs text-faint">Then $25/month · Cancel anytime</p>
+          <p className="mt-1 text-xs text-faint">Then $25/month · Cancel anytime. Subscribed before? $25/month.</p>
 
           {/* CTA */}
           <button
@@ -97,7 +97,7 @@ export default function BrandPricingPage() {
             disabled={busy}
             className="mt-6 w-full rounded-xl bg-accent text-on-accent py-3.5 text-base font-semibold shadow-md shadow-accent-soft/30 hover:bg-ink transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {busy ? "Redirecting to checkout…" : "Start Free Trial"}
+            {busy ? "Redirecting to checkout…" : "Subscribe"}
           </button>
 
           {error && (
@@ -138,7 +138,7 @@ export default function BrandPricingPage() {
 
         {/* Current plan note */}
         <p className="mt-5 text-center text-sm text-muted">
-          Browse creators for free · Start trial to post gigs
+          Browse creators for free · Subscribe to post gigs
         </p>
       </main>
     </>

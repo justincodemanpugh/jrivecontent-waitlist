@@ -69,9 +69,7 @@ export default function Sidebar() {
     if (upgrading) return;
     setUpgrading(true);
     try {
-      const url = await startBrandSubscription(
-        "/dashboard/brand/settings/billing?subscription=success",
-      );
+      const url = await startBrandSubscription("/dashboard/brand/settings/billing");
       window.location.href = url;
     } catch (e) {
       console.error("[upgrade]", e);
@@ -145,8 +143,8 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Upgrade to Pro */}
-      <div className="px-3 pb-3 border-t border-line pt-3">
+      {/* Upgrade to Pro. Hidden until we know they aren't paying already. */}
+      <div className={`px-3 pb-3 border-t border-line pt-3 ${isPro === false ? "" : "hidden"}`}>
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
@@ -154,10 +152,10 @@ export default function Sidebar() {
           className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-skyDeep to-brand-ink text-white px-4 py-2.5 text-sm font-semibold shadow-md shadow-accent-soft/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Sparkles size={16} />
-          {upgrading ? "Redirecting..." : "Start Free Trial"}
+          {upgrading ? "Redirecting..." : "Upgrade"}
         </button>
         <p className="mt-1.5 text-center text-[11px] text-muted">
-          3 days free · then $25/mo
+          New: $1 for 7 days · then $25/mo
         </p>
       </div>
 

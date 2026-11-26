@@ -227,7 +227,7 @@ function EmptyTab({ tab, canPostGig }) {
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-on-accent transition hover:bg-ink/90"
         >
           {canPostGig === false ? <Lock size={16} /> : <Plus size={16} />}
-          {canPostGig === false ? "Start Free Trial" : "New gig"}
+          {canPostGig === false ? "Subscribe" : "New gig"}
         </Link>
       )}
     </div>

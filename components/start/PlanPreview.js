@@ -8,9 +8,11 @@ import { formatCount, tiktokProfileUrl } from "@/lib/discovery/directory";
 // The plan, locked or unlocked. The server has already removed everything a
 // free visitor may not see (lib/plan/preview.js), so the placeholder bars here
 // stand in for text this page never received.
-export default function PlanPreview({ data, appUrl, onStartOver }) {
+//
+// Used by the onboarding (/start) and the saved plan (/plan); `unlock` is
+// whatever each of them puts after the plan.
+export default function PlanPreview({ data, unlock, onStartOver }) {
   const { plan, app, locked } = data;
-  const signupHref = `/signup?role=brand&from=scan&app=${encodeURIComponent(appUrl)}`;
 
   return (
     <div className="pt-8">
@@ -37,25 +39,27 @@ export default function PlanPreview({ data, appUrl, onStartOver }) {
       <Brief plan={plan} locked={locked} />
       <Week plan={plan} />
 
-      {locked && (
-        <div className="mt-12 rounded-3xl bg-brand-ink px-6 py-8 text-center text-white">
-          <h2 className="font-display text-2xl font-bold">Unlock your full plan</h2>
-          <p className="mt-2 text-slate-300">3 days free, then $25/month. Cancel anytime.</p>
-          <Link
-            href={signupHref}
-            className="mt-6 inline-flex rounded-full bg-white px-8 py-4 font-semibold text-brand-ink transition hover:bg-slate-100"
-          >
-            Create your account
-          </Link>
-          <p className="mx-auto mt-4 max-w-md text-xs text-slate-400">
-            Creator pay is separate. Payouts through JriveContent add a 5% platform fee and card processing.
-          </p>
-        </div>
-      )}
+      {unlock}
 
-      <button type="button" onClick={onStartOver} className="mx-auto mt-8 block py-2 text-sm text-slate-500 hover:text-brand-ink">
-        Start over with another app
-      </button>
+      {onStartOver && (
+        <button type="button" onClick={onStartOver} className="mx-auto mt-8 block py-2 text-sm text-slate-500 hover:text-brand-ink">
+          Start over with another app
+        </button>
+      )}
+    </div>
+  );
+}
+
+// The paid step. `line` is the price sentence; it sits beside the button.
+export function UnlockCard({ title = "Unlock your full plan", line, children }) {
+  return (
+    <div className="mt-12 rounded-3xl bg-brand-ink px-6 py-8 text-center text-white">
+      <h2 className="font-display text-2xl font-bold">{title}</h2>
+      <p className="mt-2 text-slate-300">{line}</p>
+      <div className="mt-6">{children}</div>
+      <p className="mx-auto mt-4 max-w-md text-xs text-slate-400">
+        Creator pay is separate. Payouts through JriveContent add a 5% platform fee and card processing.
+      </p>
     </div>
   );
 }

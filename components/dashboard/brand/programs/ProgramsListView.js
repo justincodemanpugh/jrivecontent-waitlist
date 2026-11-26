@@ -117,7 +117,7 @@ export default function ProgramsListView() {
             className="inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition"
           >
             <Lock size={14} />
-            Start Free Trial
+            Subscribe
           </Link>
         )}
       </div>
@@ -156,7 +156,7 @@ export default function ProgramsListView() {
                 className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink text-on-accent px-5 py-2.5 text-sm font-medium hover:bg-ink/90 transition"
               >
                 <Lock size={16} />
-                Start Free Trial to Create a Campaign
+                Subscribe to Create a Campaign
               </Link>
             ))}
         </div>

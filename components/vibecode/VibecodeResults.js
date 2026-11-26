@@ -24,9 +24,7 @@ export default function VibecodeResults({ data, appUrl, onNicheChange, onReset, 
   const directoryCount = locked ? data.directory_count : directory.length;
   const videos = data.videos || [];
 
-  const signupHref = `/signup?role=brand&from=scan${
-    appUrl ? `&app=${encodeURIComponent(appUrl)}` : ""
-  }`;
+  const startHref = appUrl ? `/start?app=${encodeURIComponent(appUrl)}` : "/start";
 
   return (
     <div className="mx-auto max-w-5xl px-6 pb-20 text-left">
@@ -107,7 +105,7 @@ export default function VibecodeResults({ data, appUrl, onNicheChange, onReset, 
 
       {locked
         ? (platformCount > 0 || directoryCount > 0) && (
-            <UnlockBand platformCount={platformCount} href={signupHref} />
+            <UnlockBand platformCount={platformCount} href={startHref} />
           )
         : platformCount > 0 && <NextStepBand />}
     </div>
@@ -240,7 +238,7 @@ function VideoTile({ video, locked }) {
   );
 
   // Locked tiles are inert on purpose: you can see what is working and how
-  // well, you start a trial to find out who made it.
+  // well, you subscribe to find out who made it.
   if (locked) return <div className="group">{tile}</div>;
 
   return (
@@ -261,7 +259,7 @@ function LockedIdentity() {
       <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100" />
       <div
         className="min-w-0 flex-1 space-y-1.5"
-        aria-label="Creator hidden until you start a trial"
+        aria-label="Creator hidden until you subscribe"
       >
         <div className="h-3 w-24 rounded-full bg-slate-200" />
         <div className="h-2.5 w-16 rounded-full bg-slate-100" />
@@ -424,16 +422,16 @@ function UnlockBand({ platformCount, href }) {
           : "Unlock these creators"}
       </h3>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
-        Start the free trial to see who they are, invite them to your campaign,
-        and pay per video — tracking every post from one dashboard.
+        Get your plan, then subscribe to see who they are, invite them to your
+        campaign, and track every post from one dashboard.
       </p>
       <Link
         href={href}
         className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-skyDeep to-brand-sky px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-sky/20 transition hover:brightness-110"
       >
-        Start free trial
+        Get my plan
       </Link>
-      <p className="mt-3 text-xs text-slate-400">$0 today · cancel anytime</p>
+      <p className="mt-3 text-xs text-slate-400">$1 for your first 7 days, then $25/month · cancel anytime</p>
     </div>
   );
 }

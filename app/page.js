@@ -15,7 +15,7 @@ import ViralFooter from "@/components/viral/ViralFooter";
 export const metadata = {
   title: "JriveContent — You built it. Now let's get you users.",
   description:
-    "Get users for your app or SaaS with UGC creators on TikTok. Creators post videos about your product and you only pay for the views they get. Pay $0 today.",
+    "Get users for your app or SaaS with UGC creators on TikTok. Creators post videos about your product and you only pay for the views they get.",
 };
 
 export default function Home() {
