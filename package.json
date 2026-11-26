@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:earnings": "node --test scripts/test-earnings.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.4.0",

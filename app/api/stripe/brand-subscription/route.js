@@ -4,6 +4,7 @@
 // STRIPE_BRAND_SUBSCRIPTION_PRICE_ID in .env.local.
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe, siteUrl } from "@/lib/stripe/server";
 
 // Returns the brand's existing Stripe customer id, creating one if needed
@@ -24,10 +25,12 @@ async function ensureBrandCustomerId({ supabase, user }) {
     metadata: { user_id: user.id },
   });
 
-  await supabase
+  // Service role: users can't write billing columns (migration 0048).
+  const { error } = await createAdminClient()
     .from("brand_profiles")
     .update({ stripe_customer_id: customer.id })
     .eq("user_id", user.id);
+  if (error) console.error("[stripe/brand-subscription] could not save customer", error);
 
   return customer.id;
 }

@@ -49,7 +49,7 @@ export async function POST(request) {
       .from("program_members")
       .select(
         `id, creator_id,
-         program:programs ( id, brand_id, title, pay_per_video_cents, videos_per_period, test_payout_amount_cents )`,
+         program:programs ( id, brand_id, title, pay_per_video_cents, videos_per_period, test_payout_amount_cents, ledger_started_at )`,
       )
       .eq("id", programMemberId)
       .maybeSingle();
@@ -94,6 +94,15 @@ export async function POST(request) {
       // A previous checkout that expired or failed can be retried in place.
       retryTestPayoutId = existingTest?.id || null;
     } else {
+      // Periods after the campaign moved onto the earnings ledger are paid
+      // automatically by /api/payouts/run; funding them here would pay twice.
+      if (program.ledger_started_at && new Date(periodEnd) > new Date(program.ledger_started_at)) {
+        return NextResponse.json(
+          { error: "This period is paid automatically every Monday; nothing to fund." },
+          { status: 400 },
+        );
+      }
+
       const { count: videoCount } = await admin
         .from("program_videos")
         .select("id", { count: "exact", head: true })

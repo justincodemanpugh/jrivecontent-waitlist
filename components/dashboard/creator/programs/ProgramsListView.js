@@ -14,6 +14,9 @@ import {
   MessageCircle,
   DollarSign,
   Unlink,
+  Repeat,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   fetchMyTikTokAccount,
@@ -22,6 +25,8 @@ import {
   fetchMyProgramMemberships,
   acceptProgramInvite,
   leaveProgram,
+  fetchMyEarnings,
+  fetchMyCreatorCodes,
 } from "@/lib/dashboard/creator/programsApi";
 import { setCreatorTikTokHandle } from "@/lib/dashboard/creator/profileActions";
 
@@ -59,15 +64,23 @@ export default function ProgramsListView() {
   const reload = useCallback(async () => {
     setErr("");
     try {
-      const [acct, handleInfo, rows] = await Promise.all([
+      const [acct, handleInfo, rows, earnings, codes] = await Promise.all([
         fetchMyTikTokAccount(),
         fetchMyTikTokHandle(),
         fetchMyProgramMemberships(),
+        fetchMyEarnings().catch(() => []),
+        fetchMyCreatorCodes().catch(() => ({})),
       ]);
       setAccount(acct);
       setHandle(handleInfo.handle);
       setHandleStatus(handleInfo);
-      setMemberships(rows);
+      setMemberships(
+        rows.map((m) => ({
+          ...m,
+          earnings: earnings.filter((e) => e.programMemberId === m.id),
+          creatorCode: m.revshareBps > 0 ? codes[m.brandId] || null : null,
+        })),
+      );
     } catch (e) {
       setErr(e.message || "Couldn't load your campaigns.");
     } finally {
@@ -470,11 +483,8 @@ function InviteCard({ membership, onChanged }) {
           <Film size={12} />
           {membership.videosPerPeriod} videos/{membership.periodType}
         </span>
-        <span className="flex items-center gap-1 font-medium text-success">
-          <DollarSign size={12} />
-          {formatMoney(membership.payPerVideoCents)}/video
-        </span>
-        <span className="capitalize">{membership.payoutSchedule} payouts</span>
+        <PayTerms membership={membership} />
+        <span>Paid every Monday</span>
       </div>
       <div className="mt-4 flex items-center gap-2">
         <button
@@ -498,9 +508,15 @@ function InviteCard({ membership, onChanged }) {
 }
 
 function ProgramCard({ membership, onChanged }) {
-  const nextPayout = membership.payouts?.find(
+  // Older campaigns paid through manual escrow; show any still in flight.
+  const legacyPayout = membership.payouts?.find(
     (p) => p.status === "pending" || p.status === "escrowed",
   );
+  const earnings = membership.earnings || [];
+  const sum = (rows) => rows.reduce((s, e) => s + e.amountCents, 0);
+  const availableCents = sum(earnings.filter((e) => e.status === "payable"));
+  const pendingCents = sum(earnings.filter((e) => e.status === "held"));
+  const paidCents = sum(earnings.filter((e) => e.status === "paid"));
 
   const handleLeave = async () => {
     if (!confirm(`Leave "${membership.title}"?`)) return;
@@ -538,13 +554,26 @@ function ProgramCard({ membership, onChanged }) {
         />
       </div>
 
-      {nextPayout && (
-        <div className="mt-4 rounded-xl bg-surface-sunken border border-line p-3 flex items-center justify-between text-sm">
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
+        <PayTerms membership={membership} />
+        <span>Videos start earning once the brand approves them</span>
+      </div>
+
+      {membership.creatorCode &&<CodeCallout code={membership.creatorCode} brandName={membership.brandName} />}
+
+      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-surface-sunken border border-line p-3 text-center">
+        <EarningsStat label="Pending" value={formatMoney(pendingCents)} hint="On hold for review" />
+        <EarningsStat label="Next payout" value={formatMoney(availableCents)} hint="Paid Monday" />
+        <EarningsStat label="Paid" value={formatMoney(paidCents)} hint="All time" />
+      </div>
+
+      {legacyPayout && (
+        <div className="mt-3 rounded-xl bg-surface-sunken border border-line p-3 flex items-center justify-between text-sm">
           <span className="text-muted">
-            {nextPayout.status === "escrowed" ? "Payment secured" : "Upcoming payout"}
+            {legacyPayout.status === "escrowed" ? "Payment secured" : "Upcoming payout"}
           </span>
           <span className="font-medium text-ink">
-            {formatMoney(nextPayout.creatorPayoutCents)}
+            {formatMoney(legacyPayout.creatorPayoutCents)}
           </span>
         </div>
       )}
@@ -560,6 +589,77 @@ function Metric({ icon: Icon, label, value }) {
       </div>
       <p className="text-sm font-semibold text-ink tabular-nums">{value}</p>
       <p className="text-[11px] text-muted">{label}</p>
+    </div>
+  );
+}
+
+function PayTerms({ membership }) {
+  return (
+    <>
+      {membership.payPerVideoCents > 0 && (
+        <span className="flex items-center gap-1 font-medium text-success">
+          <DollarSign size={12} />
+          {formatMoney(membership.payPerVideoCents)}/video
+        </span>
+      )}
+      {membership.cpmCents > 0 && (
+        <span className="flex items-center gap-1 font-medium text-success">
+          <Eye size={12} />
+          {formatMoney(membership.cpmCents)} per 1K views
+          {membership.maxPayoutPerVideoCents
+            ? ` (up to ${formatMoney(membership.maxPayoutPerVideoCents)}/video)`
+            : ""}
+        </span>
+      )}
+      {membership.revshareBps > 0 && (
+        <span className="flex items-center gap-1 font-medium text-success">
+          <Repeat size={12} />
+          {membership.revshareBps / 100}% of subscriptions
+          {membership.revshareMonths ? ` for ${membership.revshareMonths} mo` : " for life"}
+        </span>
+      )}
+    </>
+  );
+}
+
+function CodeCallout({ code, brandName }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore; the code is visible
+    }
+  };
+  return (
+    <div className="mt-4 rounded-xl border border-accent/30 bg-accent-tint p-3 flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-xs text-muted">Your code for {brandName}</p>
+        <p className="text-lg font-semibold font-mono text-ink tracking-wide">{code}</p>
+        <p className="text-xs text-muted mt-0.5">
+          Say &ldquo;use code {code} in the app&rdquo; in your videos. You earn on every
+          subscription from people who enter it.
+        </p>
+      </div>
+      <button
+        onClick={copy}
+        className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-muted hover:text-ink transition flex-shrink-0"
+      >
+        {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+function EarningsStat({ label, value, hint }) {
+  return (
+    <div>
+      <p className="text-sm font-semibold text-ink tabular-nums">{value}</p>
+      <p className="text-[11px] text-muted">{label}</p>
+      <p className="text-[10px] text-faint">{hint}</p>
     </div>
   );
 }

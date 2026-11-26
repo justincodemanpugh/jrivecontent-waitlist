@@ -9,7 +9,7 @@ export default function ProgramPayoutsPage() {
     <ProgramsShell
       title="Payouts"
       heading="Payouts"
-      subtitle="Track creator payout statuses across your campaigns."
+      subtitle="Creators are paid automatically every Monday for what they earned."
     >
       <Suspense fallback={<div className="animate-pulse h-96 bg-surface-hover rounded-2xl" />}>
         <ProgramPayoutsView />

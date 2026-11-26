@@ -1,9 +1,11 @@
 // POST /api/stripe/webhook
 // Stripe webhook receiver. Verifies signature, then routes each event to the
-// program payout, legacy brief escrow, subscription, or Connect account handler.
+// weekly payout batch, program payout, legacy brief escrow, subscription, or
+// Connect account handler.
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { settleBatch, failBatch } from "@/lib/payouts/run";
 
 // IMPORTANT: Stripe needs the raw request body to verify the signature,
 // so we must opt out of body parsing here.
@@ -122,6 +124,60 @@ export async function POST(request) {
           break;
         }
 
+        break;
+      }
+
+      // --- Weekly creator payout batches (lib/payouts/run.js) ---
+      // The run settles synchronously-successful charges itself; these
+      // cover async payment methods and act as a safety net. settleBatch
+      // and failBatch are idempotent.
+      case "payment_intent.succeeded": {
+        const intent = event.data.object;
+        if (intent.metadata?.kind !== "payout_batch") break;
+        const chargeId =
+          typeof intent.latest_charge === "string"
+            ? intent.latest_charge
+            : intent.latest_charge?.id;
+        await settleBatch(admin, intent.metadata.payout_batch_id, { chargeId });
+        break;
+      }
+
+      case "payment_intent.payment_failed": {
+        const intent = event.data.object;
+        if (intent.metadata?.kind !== "payout_batch") break;
+        const { data: batch } = await admin
+          .from("payout_batches")
+          .select("*")
+          .eq("id", intent.metadata.payout_batch_id)
+          .maybeSingle();
+        if (batch) {
+          await failBatch(admin, batch, {
+            message: intent.last_payment_error?.message || "Payment failed",
+          });
+        }
+        break;
+      }
+
+      case "charge.dispute.created": {
+        // A brand disputing a payout charge: stop new earnings until it's
+        // resolved. Transfers already sent are handled by hand.
+        const dispute = event.data.object;
+        const chargeId =
+          typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id;
+        if (!chargeId) break;
+        const { data: batch } = await admin
+          .from("payout_batches")
+          .select("id, brand_id")
+          .eq("stripe_charge_id", chargeId)
+          .maybeSingle();
+        if (batch) {
+          await admin
+            .from("programs")
+            .update({ status: "paused" })
+            .eq("brand_id", batch.brand_id)
+            .eq("status", "active");
+          console.warn("[stripe/webhook] payout charge disputed; brand campaigns paused", batch);
+        }
         break;
       }
 

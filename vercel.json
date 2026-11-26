@@ -13,8 +13,16 @@
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/programs/payout-cycle",
-      "schedule": "0 8 * * *"
+      "path": "/api/earnings/accrue",
+      "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/payouts/run",
+      "schedule": "0 15 * * 1"
+    },
+    {
+      "path": "/api/payouts/retry",
+      "schedule": "0 16 * * *"
     },
     {
       "path": "/api/discovery/seed",

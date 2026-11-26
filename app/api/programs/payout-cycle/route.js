@@ -11,6 +11,12 @@
 // the brand still pays through Stripe Checkout from the Payouts page.
 //
 // Runs after both sync jobs so the video counts are current.
+//
+// RETIRED: creator pay now flows through the creator_earnings ledger
+// (/api/earnings/accrue) and is charged and paid automatically by
+// /api/payouts/run. This route no longer creates payout rows: running it
+// alongside the ledger would bill the same videos twice. Rows it created
+// earlier can still be funded and released from the Payouts page.
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { feeBreakdown } from "@/lib/stripe/server";
@@ -28,6 +34,10 @@ async function handler(request) {
 
   if (!secret || (providedHeader !== secret && providedAuth !== secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (process.env.LEGACY_PAYOUT_CYCLE !== "1") {
+    return NextResponse.json({ ok: true, retired: true, see: "/api/payouts/run" });
   }
 
   const admin = createAdminClient();

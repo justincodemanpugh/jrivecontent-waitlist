@@ -17,7 +17,9 @@ import {
   fetchMyTikTokAccount,
   fetchMyTikTokHandle,
   fetchMyProgramMemberships,
+  fetchMyEarnings,
 } from "@/lib/dashboard/creator/programsApi";
+import { payTermsLabel } from "@/lib/earnings/calc";
 
 function formatMoney(cents) {
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
@@ -31,17 +33,20 @@ export default function CreatorHomePage() {
   const creator = useCreator();
   const [connected, setConnected] = useState(false);
   const [memberships, setMemberships] = useState([]);
+  const [earnings, setEarnings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
-      const [account, handle, rows] = await Promise.all([
+      const [account, handle, rows, ledger] = await Promise.all([
         fetchMyTikTokAccount(),
         fetchMyTikTokHandle(),
         fetchMyProgramMemberships(),
+        fetchMyEarnings().catch(() => []),
       ]);
       setConnected(Boolean(account || handle?.handle));
       setMemberships(rows);
+      setEarnings(ledger);
     } catch {
       // silent — empty state shows instead
     } finally {
@@ -76,9 +81,16 @@ export default function CreatorHomePage() {
             .reduce((sum, p) => sum + (p.creatorPayoutCents || 0), 0);
           return acc;
         },
-        { videos: 0, views: 0, pending: 0 },
+        {
+          videos: 0,
+          views: 0,
+          // Unpaid ledger earnings (held + payable) plus any legacy payouts.
+          pending: earnings
+            .filter((e) => e.status === "held" || e.status === "payable")
+            .reduce((sum, e) => sum + e.amountCents, 0),
+        },
       ),
-    [active],
+    [active, earnings],
   );
 
   const missingBio = !creator.bio;
@@ -260,7 +272,7 @@ function ProgramRow({ membership, pending }) {
         </p>
       </div>
       <span className="text-sm font-semibold text-success flex-shrink-0">
-        {formatMoney(membership.payPerVideoCents)}
+        {payTermsLabel(membership)}
       </span>
       <ArrowRight size={16} className="text-faint flex-shrink-0" />
     </Link>

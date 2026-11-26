@@ -1,11 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Loader2, Check, Target, AlertCircle, CalendarClock } from "lucide-react";
-import { createProgram, PAYOUT_SCHEDULES } from "@/lib/dashboard/brand/programsApi";
+import {
+  X,
+  Loader2,
+  Check,
+  Target,
+  AlertCircle,
+  DollarSign,
+  Eye,
+  Repeat,
+} from "lucide-react";
+import { createProgram } from "@/lib/dashboard/brand/programsApi";
 import { fetchMyCreators } from "@/lib/dashboard/brand/creatorsApi";
+import { estimateMonthlyCents } from "@/lib/earnings/calc";
 
-const STEPS = ["Basics", "Schedule", "Base", "Creators", "Review"];
+const STEPS = ["Basics", "Pay", "Creators", "Review"];
+
+const toCents = (dollars) => Math.round(Number(dollars || 0) * 100);
+const money = (cents) => `$${(cents / 100).toFixed(2)}`;
 
 export default function CreateProgramModal({ onClose }) {
   const [open, setOpen] = useState(false);
@@ -15,12 +28,23 @@ export default function CreateProgramModal({ onClose }) {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [payoutSchedule, setPayoutSchedule] = useState("monthly");
   const [periodType, setPeriodType] = useState("month");
   const [videosPerPeriod, setVideosPerPeriod] = useState("");
   const [payPerVideo, setPayPerVideo] = useState("");
   const [testPayoutEnabled, setTestPayoutEnabled] = useState(false);
   const [testPayout, setTestPayout] = useState("");
+
+  // Pay types: any combination of base, CPM and rev share.
+  const [baseEnabled, setBaseEnabled] = useState(true);
+  const [cpmEnabled, setCpmEnabled] = useState(false);
+  const [cpm, setCpm] = useState("");
+  const [maxPerVideo, setMaxPerVideo] = useState("");
+  const [viewWindowDays, setViewWindowDays] = useState("30");
+  const [revshareEnabled, setRevshareEnabled] = useState(false);
+  const [revsharePct, setRevsharePct] = useState("30");
+  const [revshareMonths, setRevshareMonths] = useState("12");
+  const [monthlyCap, setMonthlyCap] = useState("");
+  const [expectedViews, setExpectedViews] = useState("10000");
 
   const [roster, setRoster] = useState([]);
   const [rosterLoading, setRosterLoading] = useState(true);
@@ -45,11 +69,34 @@ export default function CreateProgramModal({ onClose }) {
     setTimeout(onClose, 200);
   };
 
-  const hasValidBase = Number(videosPerPeriod) > 0 && Number(payPerVideo) > 0;
+  const baseOn = baseEnabled && Number(payPerVideo) > 0;
+  const cpmOn = cpmEnabled && Number(cpm) > 0;
+  const revshareOn = revshareEnabled && Number(revsharePct) > 0 && Number(revsharePct) <= 100;
+  const hasValidBase =
+    Number(videosPerPeriod) > 0 &&
+    (baseOn || cpmOn || revshareOn) &&
+    (!baseEnabled || Number(payPerVideo) > 0) &&
+    (!cpmEnabled || Number(cpm) > 0) &&
+    (!revshareEnabled || revshareOn);
+
+  const videosPerMonth =
+    periodType === "week" ? Number(videosPerPeriod || 0) * 4.33 : Number(videosPerPeriod || 0);
+  const estimateCents = estimateMonthlyCents({
+    videosPerMonth,
+    payPerVideoCents: baseOn ? toCents(payPerVideo) : 0,
+    cpmCents: cpmOn ? toCents(cpm) : 0,
+    avgViews: Number(expectedViews) || 0,
+    maxPayoutPerVideoCents: cpmOn && Number(maxPerVideo) > 0 ? toCents(maxPerVideo) : null,
+  });
+  const payParts = [
+    baseOn && `${money(toCents(payPerVideo))}/video`,
+    cpmOn && `${money(toCents(cpm))} per 1K views`,
+    revshareOn && `${Number(revsharePct)}% of subscriptions`,
+  ].filter(Boolean);
 
   const canContinue = () => {
     if (step === 0) return title.trim().length > 0;
-    if (step === 2) return hasValidBase;
+    if (step === 1) return hasValidBase;
     return true;
   };
 
@@ -68,8 +115,16 @@ export default function CreateProgramModal({ onClose }) {
         description,
         videosPerPeriod: Number(videosPerPeriod),
         periodType,
-        payPerVideoCents: Math.round(Number(payPerVideo) * 100),
-        payoutSchedule,
+        payPerVideoCents: baseOn ? toCents(payPerVideo) : 0,
+        // Payouts run weekly for every campaign; payout_schedule now only
+        // sets the period the base-pay video target is counted over.
+        payoutSchedule: periodType === "week" ? "weekly" : "monthly",
+        cpmCents: cpmOn ? toCents(cpm) : 0,
+        maxPayoutPerVideoCents: cpmOn && Number(maxPerVideo) > 0 ? toCents(maxPerVideo) : null,
+        viewWindowDays: Number(viewWindowDays) || 30,
+        revshareBps: revshareOn ? Math.round(Number(revsharePct) * 100) : 0,
+        revshareMonths: revshareMonths === "lifetime" ? null : Number(revshareMonths),
+        monthlyCapCents: Number(monthlyCap) > 0 ? toCents(monthlyCap) : null,
         testPayoutAmountCents:
           testPayoutEnabled && Number(testPayout) > 0
             ? Math.round(Number(testPayout) * 100)
@@ -182,50 +237,12 @@ export default function CreateProgramModal({ onClose }) {
 
           {step === 1 && (
             <div>
-              <SectionHeading title="Payout Schedule" hint="Configure how often creators get paid." />
-              <Field label="Payout cycle" hint="How often creators get paid.">
-                <div className="grid grid-cols-3 gap-2">
-                  {PAYOUT_SCHEDULES.map((s) => (
-                    <button
-                      key={s.key}
-                      onClick={() => setPayoutSchedule(s.key)}
-                      className={`flex flex-col items-start gap-2 rounded-xl border px-4 py-3 text-left transition ${
-                        payoutSchedule === s.key
-                          ? "border-accent bg-accent-tint"
-                          : "border-line hover:border-line-strong"
-                      }`}
-                    >
-                      <span
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-                          payoutSchedule === s.key
-                            ? "bg-surface text-accent"
-                            : "bg-surface-hover text-faint"
-                        }`}
-                      >
-                        <CalendarClock size={14} />
-                      </span>
-                      <span
-                        className={`text-sm font-medium ${
-                          payoutSchedule === s.key ? "text-ink" : "text-muted"
-                        }`}
-                      >
-                        {s.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div>
               <SectionHeading
-                title="Base Compensation"
-                hint="Set the video target and flat pay-per-video rate for this campaign."
+                title="How creators get paid"
+                hint="Turn on any mix. Earnings add up automatically and are paid out every Monday."
               />
-              <div className="space-y-4">
-                <Field label="Video target" hint="Number of videos creators should post every period.">
+              <div className="space-y-3">
+                <Field label="Video target" hint="Videos each creator should post every period.">
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -252,21 +269,89 @@ export default function CreateProgramModal({ onClose }) {
                     </div>
                   </div>
                 </Field>
-                <Field label="Pay per video" hint="Flat amount paid per published video.">
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-faint text-sm">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={payPerVideo}
-                      onChange={(e) => setPayPerVideo(e.target.value)}
-                      placeholder="50.00"
-                      className={`${inputCls} pl-7`}
-                    />
+
+                <PayCard
+                  icon={DollarSign}
+                  title="Base pay per video"
+                  hint="A flat fee for each approved video, up to the video target."
+                  enabled={baseEnabled}
+                  onToggle={setBaseEnabled}
+                >
+                  <MoneyInput value={payPerVideo} onChange={setPayPerVideo} placeholder="25.00" />
+                </PayCard>
+
+                <PayCard
+                  icon={Eye}
+                  title="CPM (pay per 1,000 views)"
+                  hint="Pays for views each video gets in its first days after posting."
+                  enabled={cpmEnabled}
+                  onToggle={setCpmEnabled}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <LabeledSmall label="Per 1K views">
+                      <MoneyInput value={cpm} onChange={setCpm} placeholder="1.00" />
+                    </LabeledSmall>
+                    <LabeledSmall label="Max per video">
+                      <MoneyInput value={maxPerVideo} onChange={setMaxPerVideo} placeholder="No max" />
+                    </LabeledSmall>
+                    <LabeledSmall label="Count views for">
+                      <select
+                        value={viewWindowDays}
+                        onChange={(e) => setViewWindowDays(e.target.value)}
+                        className={inputCls}
+                      >
+                        {["7", "14", "30", "60", "90"].map((d) => (
+                          <option key={d} value={d}>
+                            {d} days
+                          </option>
+                        ))}
+                      </select>
+                    </LabeledSmall>
                   </div>
+                </PayCard>
+
+                <PayCard
+                  icon={Repeat}
+                  title="Rev share (% of subscriptions)"
+                  hint="Creators earn a cut of every subscription payment from users who enter their code in your app. Needs RevenueCat; you'll connect it after creating the campaign."
+                  enabled={revshareEnabled}
+                  onToggle={setRevshareEnabled}
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <LabeledSmall label="Creator's share">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={revsharePct}
+                          onChange={(e) => setRevsharePct(e.target.value)}
+                          className={`${inputCls} pr-8`}
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-faint text-sm">%</span>
+                      </div>
+                    </LabeledSmall>
+                    <LabeledSmall label="For each subscriber's first">
+                      <select
+                        value={revshareMonths}
+                        onChange={(e) => setRevshareMonths(e.target.value)}
+                        className={inputCls}
+                      >
+                        <option value="3">3 months</option>
+                        <option value="6">6 months</option>
+                        <option value="12">12 months</option>
+                        <option value="24">24 months</option>
+                        <option value="lifetime">Lifetime</option>
+                      </select>
+                    </LabeledSmall>
+                  </div>
+                  <p className="text-xs text-faint mt-2">
+                    Calculated on what you keep after Apple/Google&apos;s cut.
+                  </p>
+                </PayCard>
+
+                <Field label="Monthly spend cap (optional)" hint="Creators stop earning for the rest of the month once this campaign reaches it.">
+                  <MoneyInput value={monthlyCap} onChange={setMonthlyCap} placeholder="No cap" />
                 </Field>
 
                 <div className="rounded-xl border border-line p-4">
@@ -283,25 +368,13 @@ export default function CreateProgramModal({ onClose }) {
                       </span>
                       <span className="block text-xs text-faint mt-0.5">
                         Offer each new creator a one-time flat payment so you can
-                        see their work before the regular cycle starts. Released
-                        without waiting for a posted video.
+                        see their work before the regular cycle starts.
                       </span>
                     </span>
                   </label>
                   {testPayoutEnabled && (
-                    <div className="relative mt-3">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-faint text-sm">
-                        $
-                      </span>
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={testPayout}
-                        onChange={(e) => setTestPayout(e.target.value)}
-                        placeholder="25.00"
-                        className={`${inputCls} pl-7`}
-                      />
+                    <div className="mt-3">
+                      <MoneyInput value={testPayout} onChange={setTestPayout} placeholder="25.00" />
                     </div>
                   )}
                 </div>
@@ -309,7 +382,7 @@ export default function CreateProgramModal({ onClose }) {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <div>
               <SectionHeading
                 title="Add Creators"
@@ -364,7 +437,7 @@ export default function CreateProgramModal({ onClose }) {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div>
               <SectionHeading title="Campaign Review" hint="Check your campaign details before creating it." />
 
@@ -372,9 +445,9 @@ export default function CreateProgramModal({ onClose }) {
                 <div className="mb-4 flex items-start gap-3 rounded-xl border border-warn-line bg-warn-soft px-4 py-3">
                   <AlertCircle size={18} className="mt-0.5 text-warn flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-warn">Add a video target and pay per video</p>
+                    <p className="text-sm font-medium text-warn">Finish setting up pay</p>
                     <p className="text-xs text-warn mt-0.5">
-                      Go back to the Base step to set a video target and a pay-per-video amount.
+                      Go back to the Pay step: set a video target and fill in every pay type you turned on.
                     </p>
                   </div>
                 </div>
@@ -383,14 +456,27 @@ export default function CreateProgramModal({ onClose }) {
               <p className="text-xs font-medium text-faint uppercase tracking-wide mb-2">Summary</p>
               <div className="rounded-xl border border-line divide-y divide-line mb-4">
                 <SummaryRow label="Campaign name" value={title} />
-                <SummaryRow label="Payout cycle" value={payoutSchedule} capitalize />
+                <SummaryRow label="Payouts" value="Automatic, every Monday" />
                 <SummaryRow
                   label="Video target"
                   value={`${videosPerPeriod || 0} / ${periodType}`}
                 />
+                <SummaryRow label="Pay" value={payParts.join(" + ") || "None"} />
+                {cpmOn && (
+                  <SummaryRow
+                    label="CPM limits"
+                    value={`${Number(maxPerVideo) > 0 ? `max ${money(toCents(maxPerVideo))}/video · ` : ""}views in first ${viewWindowDays} days`}
+                  />
+                )}
+                {revshareOn && (
+                  <SummaryRow
+                    label="Rev share length"
+                    value={revshareMonths === "lifetime" ? "Lifetime" : `${revshareMonths} months per subscriber`}
+                  />
+                )}
                 <SummaryRow
-                  label="Pay per video"
-                  value={payPerVideo ? `$${Number(payPerVideo).toFixed(2)}` : "$0.00"}
+                  label="Monthly cap"
+                  value={Number(monthlyCap) > 0 ? money(toCents(monthlyCap)) : "None"}
                 />
                 <SummaryRow
                   label="Test video payout"
@@ -407,17 +493,41 @@ export default function CreateProgramModal({ onClose }) {
               </div>
 
               {hasValidBase && (
-                <div className="rounded-xl border border-accent/30 bg-accent-tint px-4 py-3">
-                  <p className="text-xs font-medium text-muted">Payout Simulation</p>
-                  <p className="text-sm text-ink mt-0.5">
-                    ≈{" "}
-                    <span className="font-semibold">
-                      ${(Number(videosPerPeriod) * Number(payPerVideo)).toFixed(2)}
-                    </span>{" "}
-                    per creator, per {periodType}
-                  </p>
+                <div className="rounded-xl border border-accent/30 bg-accent-tint px-4 py-3 space-y-2">
+                  <p className="text-xs font-medium text-muted">Estimated cost per creator</p>
+                  {(baseOn || cpmOn) && (
+                    <p className="text-sm text-ink">
+                      ≈ <span className="font-semibold">{money(estimateCents)}</span> / month
+                      {cpmOn && (
+                        <>
+                          {" "}at{" "}
+                          <input
+                            type="number"
+                            min={0}
+                            value={expectedViews}
+                            onChange={(e) => setExpectedViews(e.target.value)}
+                            className="w-24 rounded-lg border border-line bg-surface px-2 py-0.5 text-sm"
+                          />{" "}
+                          views per video
+                        </>
+                      )}
+                    </p>
+                  )}
+                  {revshareOn && (
+                    <p className="text-sm text-ink">
+                      {(baseOn || cpmOn) ? "+ " : ""}
+                      {Number(revsharePct)}% of each subscription they bring in
+                    </p>
+                  )}
                 </div>
               )}
+
+              <p className="mt-4 text-xs text-faint">
+                By creating this campaign you authorize JriveContent to charge your card on file
+                each Monday for what creators earned that week, plus a{" "}
+                {Math.round(Number(process.env.NEXT_PUBLIC_PLATFORM_FEE_RATE || 0.05) * 100)}% platform
+                fee and card processing.
+              </p>
             </div>
           )}
 
@@ -485,6 +595,59 @@ function SummaryRow({ label, value, capitalize }) {
       <span className={`font-medium text-ink ${capitalize ? "capitalize" : ""}`}>
         {value}
       </span>
+    </div>
+  );
+}
+
+function PayCard({ icon: Icon, title, hint, enabled, onToggle, children }) {
+  return (
+    <div
+      className={`rounded-xl border p-4 transition ${
+        enabled ? "border-accent bg-accent-tint/40" : "border-line"
+      }`}
+    >
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => onToggle(e.target.checked)}
+          className="mt-1 h-4 w-4 rounded border-line accent-accent"
+        />
+        <span className="flex-1">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-ink">
+            <Icon size={14} className="text-accent" />
+            {title}
+          </span>
+          <span className="block text-xs text-faint mt-0.5">{hint}</span>
+        </span>
+      </label>
+      {enabled && <div className="mt-3 pl-7">{children}</div>}
+    </div>
+  );
+}
+
+function MoneyInput({ value, onChange, placeholder }) {
+  return (
+    <div className="relative">
+      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-faint text-sm">$</span>
+      <input
+        type="number"
+        min={0}
+        step="0.01"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`${inputCls} pl-7`}
+      />
+    </div>
+  );
+}
+
+function LabeledSmall({ label, children }) {
+  return (
+    <div>
+      <span className="block text-xs text-muted mb-1">{label}</span>
+      {children}
     </div>
   );
 }

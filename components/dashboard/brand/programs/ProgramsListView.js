@@ -23,12 +23,9 @@ import {
 } from "@/lib/dashboard/brand/programsApi";
 import { fetchBilling } from "@/lib/dashboard/brand/billingApi";
 import CreateProgramModal from "@/components/dashboard/brand/programs/CreateProgramModal";
+import { payTermsLabel } from "@/lib/earnings/calc";
 
 const UPGRADE_HREF = "/dashboard/brand/pricing?from=create-campaign";
-
-function centsToDollars(cents) {
-  return `$${(Number(cents || 0) / 100).toFixed(2)}`;
-}
 
 export default function ProgramsListView() {
   const [programs, setPrograms] = useState([]);
@@ -209,7 +206,7 @@ function ProgramCard({ program }) {
 
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-sm font-semibold text-success">
-            {centsToDollars(program.payPerVideoCents)}/video
+            {payTermsLabel(program)}
           </span>
           <div className="relative">
             <button

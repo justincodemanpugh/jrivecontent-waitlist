@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Link2,
   UserX,
+  Repeat,
+  Wallet,
 } from "lucide-react";
 import {
   fetchProgramById,
@@ -21,9 +23,13 @@ import {
   removeProgramMember,
   fundProgramPayout,
   releaseProgramPayout,
+  fetchBrandEarnings,
+  fetchRevenueCatIntegration,
+  nextPayoutRunAt,
 } from "@/lib/dashboard/brand/programsApi";
 import { fetchMyCreators } from "@/lib/dashboard/brand/creatorsApi";
 import { currentPeriod } from "@/lib/programs/periods";
+import RevenueCatSetup from "@/components/dashboard/brand/programs/RevenueCatSetup";
 
 function formatMoney(cents) {
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
@@ -38,13 +44,22 @@ export default function ProgramDetailView({ programId }) {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [earnings, setEarnings] = useState([]);
+  const [revenueCat, setRevenueCat] = useState(null);
 
   const reload = useCallback(async () => {
     if (!programId) return;
     setErr("");
     try {
-      const data = await fetchProgramById(programId);
+      const [data, rows] = await Promise.all([
+        fetchProgramById(programId),
+        fetchBrandEarnings({ programId }).catch(() => []),
+      ]);
       setProgram(data);
+      setEarnings(rows);
+      if (data.revshareBps > 0) {
+        fetchRevenueCatIntegration().then(setRevenueCat).catch(() => setRevenueCat(null));
+      }
     } catch (e) {
       setErr(e.message || "Couldn't load this campaign.");
     } finally {
@@ -106,17 +121,43 @@ export default function ProgramDetailView({ programId }) {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted">
-          <span className="flex items-center gap-1.5 font-medium text-success">
-            <DollarSign size={15} />
-            {formatMoney(program.payPerVideoCents)} per video
-          </span>
+          {program.payPerVideoCents > 0 && (
+            <span className="flex items-center gap-1.5 font-medium text-success">
+              <DollarSign size={15} />
+              {formatMoney(program.payPerVideoCents)} per video
+            </span>
+          )}
+          {program.cpmCents > 0 && (
+            <span className="flex items-center gap-1.5 font-medium text-success">
+              <Eye size={15} />
+              {formatMoney(program.cpmCents)} per 1K views
+              {program.maxPayoutPerVideoCents
+                ? ` (max ${formatMoney(program.maxPayoutPerVideoCents)}/video)`
+                : ""}
+            </span>
+          )}
+          {program.revshareBps > 0 && (
+            <span className="flex items-center gap-1.5 font-medium text-success">
+              <Repeat size={15} />
+              {program.revshareBps / 100}% rev share
+              {program.revshareMonths ? ` for ${program.revshareMonths} mo` : " for life"}
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <Film size={15} />
             {program.videosPerPeriod} videos / {program.periodType}
           </span>
-          <span className="capitalize">{program.payoutSchedule} payouts</span>
+          <span className="flex items-center gap-1.5">
+            <Wallet size={15} />
+            Next payout{" "}
+            {nextPayoutRunAt().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+          </span>
         </div>
       </div>
+
+      {program.revshareBps > 0 && (
+        <RevenueCatSetup integration={revenueCat} onChanged={reload} />
+      )}
 
       {/* Creators */}
       <section className="space-y-3">
@@ -135,6 +176,10 @@ export default function ProgramDetailView({ programId }) {
                 member={member}
                 program={program}
                 period={{ start, end }}
+                earnings={earnings.filter((e) => e.programMemberId === member.id)}
+                creatorCode={
+                  revenueCat?.codes?.find((c) => c.creatorId === member.creatorId)?.code || null
+                }
                 onChanged={reload}
               />
             ))}
@@ -179,7 +224,7 @@ function MemberStatusBadge({ status }) {
   );
 }
 
-function MemberCard({ member, program, period, onChanged }) {
+function MemberCard({ member, program, period, earnings = [], creatorCode, onChanged }) {
   const [funding, setFunding] = useState(false);
   const [error, setError] = useState("");
 
@@ -188,36 +233,18 @@ function MemberCard({ member, program, period, onChanged }) {
     const posted = new Date(v.postedAt);
     return posted >= period.start && posted < period.end;
   });
-  const billableCount = Math.min(videosThisPeriod.length, program.videosPerPeriod);
-  const owedCents = billableCount * program.payPerVideoCents;
-
-  // Matched by overlap rather than exact timestamps: rows created before
-  // period math moved to UTC carry the brand's local-midnight boundaries, and
-  // an exact match would miss them and offer to fund the period twice.
-  const currentPayout = member.payouts?.find((p) => {
-    if (p.payoutType === "test" || !p.periodStart) return false;
-    const start = new Date(p.periodStart).getTime();
-    return start >= period.start.getTime() && start < period.end.getTime();
-  });
+  const unpaid = earnings.filter((e) => e.status === "held" || e.status === "payable");
+  const unpaidByKind = unpaid.reduce((acc, e) => {
+    acc[e.kind] = (acc[e.kind] || 0) + e.amountCents;
+    return acc;
+  }, {});
+  const unpaidCents = unpaid.reduce((sum, e) => sum + e.amountCents, 0);
+  const paidCents = earnings
+    .filter((e) => e.status === "paid")
+    .reduce((sum, e) => sum + e.amountCents, 0);
 
   const testPayout = member.payouts?.find((p) => p.payoutType === "test");
   const testPayoutOffered = (program.testPayoutAmountCents || 0) > 0;
-
-  const handleFund = async () => {
-    setError("");
-    setFunding(true);
-    try {
-      const url = await fundProgramPayout({
-        programMemberId: member.id,
-        periodStart: period.start.toISOString(),
-        periodEnd: period.end.toISOString(),
-      });
-      window.location.href = url;
-    } catch (e) {
-      setError(e.message || "Could not start deposit.");
-      setFunding(false);
-    }
-  };
 
   const handleFundTest = async () => {
     setError("");
@@ -332,40 +359,33 @@ function MemberCard({ member, program, period, onChanged }) {
         </div>
       )}
 
-      {/* Payout for current period */}
+      {/* Earnings, paid automatically every Monday */}
       {member.status === "active" && (
-        <div className="mt-4 rounded-xl bg-surface-sunken border border-line p-4 flex items-center justify-between gap-3 flex-wrap">
-          <div>
+        <div className="mt-4 rounded-xl bg-surface-sunken border border-line p-4 flex items-start justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
             <p className="text-sm text-muted">
-              This period: {billableCount} video{billableCount !== 1 ? "s" : ""} ·{" "}
-              <span className="font-medium text-ink">{formatMoney(owedCents)}</span> owed
+              Earned, not yet paid:{" "}
+              <span className="font-medium text-ink">{formatMoney(unpaidCents)}</span>
+              {" · "}Paid so far:{" "}
+              <span className="font-medium text-ink">{formatMoney(paidCents)}</span>
             </p>
+            {unpaidCents !== 0 && (
+              <p className="text-xs text-faint mt-1">
+                {[
+                  unpaidByKind.base && `Base ${formatMoney(unpaidByKind.base)}`,
+                  unpaidByKind.cpm && `CPM ${formatMoney(unpaidByKind.cpm)}`,
+                  unpaidByKind.revshare && `Rev share ${formatMoney(unpaidByKind.revshare)}`,
+                  unpaidByKind.adjustment && `Adjustments ${formatMoney(unpaidByKind.adjustment)}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
             {error && <p className="text-xs text-danger mt-1">{error}</p>}
           </div>
-          {!currentPayout && owedCents > 0 && (
-            <button
-              onClick={handleFund}
-              disabled={funding}
-              className="inline-flex items-center gap-2 rounded-full bg-ink text-on-accent px-4 py-2 text-sm font-medium hover:bg-ink/90 transition disabled:opacity-60"
-            >
-              {funding && <Loader2 size={14} className="animate-spin" />}
-              Fund payout
-            </button>
-          )}
-          {currentPayout?.status === "escrowed" && (
-            <button
-              onClick={() => handleRelease(currentPayout.id)}
-              disabled={funding}
-              className="inline-flex items-center gap-2 rounded-full bg-success-solid text-white px-4 py-2 text-sm font-medium hover:bg-success-solid/90 transition disabled:opacity-60"
-            >
-              {funding ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-              Release to creator
-            </button>
-          )}
-          {(currentPayout?.status === "released" || currentPayout?.status === "released_pending") && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
-              <CheckCircle2 size={14} />
-              Paid
+          {creatorCode && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-tint px-3 py-1 text-xs font-semibold text-accent">
+              Code: {creatorCode}
             </span>
           )}
         </div>
