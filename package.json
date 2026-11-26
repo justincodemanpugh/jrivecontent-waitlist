@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test:earnings": "node --test scripts/test-earnings.mjs",
     "test:plan": "node --test scripts/test-plan.mjs",
-    "test:billing": "node --test scripts/test-billing.mjs"
+    "test:billing": "node --test scripts/test-billing.mjs",
+    "test:week": "node --test scripts/test-week.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.4.0",

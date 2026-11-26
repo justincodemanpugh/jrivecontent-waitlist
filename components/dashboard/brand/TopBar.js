@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, ListChecks } from "lucide-react";
+import { locate } from "@/lib/dashboard/brand/nav";
 import { useBrand } from "@/components/dashboard/brand/BrandProvider";
 import NotificationsBell from "@/components/dashboard/NotificationsBell";
 import ThemeToggle from "@/components/dashboard/ThemeToggle";
@@ -9,10 +12,12 @@ import ThemeToggle from "@/components/dashboard/ThemeToggle";
 export default function TopBar({ title = "Campaigns", checklistHidden, checklistProgress, onShowChecklist }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const brand = useBrand();
+  const { section, page } = locate(usePathname());
+  const subTabs = section && section.pages.length > 1 ? section.pages : null;
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-surface/80 backdrop-blur-md border-b border-line">
-      <div className="h-full px-6 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-md border-b border-line">
+      <div className="h-16 px-6 flex items-center justify-between gap-4">
         <h1 className="text-lg font-semibold text-ink">{title}</h1>
 
         <div className="flex items-center gap-2">
@@ -92,6 +97,22 @@ export default function TopBar({ title = "Campaigns", checklistHidden, checklist
                     <span className="text-sm text-ink-soft">Theme</span>
                     <ThemeToggle compact />
                   </div>
+                  {/* The phone tab bar has no room for these, and cancelling
+                      has to be reachable everywhere. */}
+                  <Link
+                    href="/dashboard/brand/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-ink-soft hover:bg-surface-sunken"
+                  >
+                    Settings
+                  </Link>
+                  <Link
+                    href="/dashboard/brand/settings/billing"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-ink-soft hover:bg-surface-sunken"
+                  >
+                    Billing
+                  </Link>
                   <form action="/auth/signout" method="post">
                     <button
                       type="submit"
@@ -106,6 +127,24 @@ export default function TopBar({ title = "Campaigns", checklistHidden, checklist
           </div>
         </div>
       </div>
+
+      {subTabs && (
+        // h-11: the messages layout subtracts it from the screen height.
+        <nav aria-label={section.label} className="flex h-11 gap-1 overflow-x-auto px-4">
+          {subTabs.map((tab) => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              aria-current={page.href === tab.href ? "page" : undefined}
+              className={`flex shrink-0 items-center border-b-2 px-3 text-sm font-medium ${
+                page.href === tab.href ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </nav>
+      )}
     </header>
   );
 }

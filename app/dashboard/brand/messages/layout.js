@@ -7,6 +7,8 @@ export default function BrandMessagesLayout({ children }) {
       <TopBar title="Messages" />
       <MessagesLayout
         role="brand"
+        // The Creators sub-tabs add h-11 above.
+        heightClass="h-[calc(100vh-10.75rem)] lg:h-[calc(100vh-6.75rem)]"
         basePath="/dashboard/brand/messages"
         emptyCopy="Accept a creator on one of your gigs to start a conversation."
         intro="Conversations open after you accept a creator's application."

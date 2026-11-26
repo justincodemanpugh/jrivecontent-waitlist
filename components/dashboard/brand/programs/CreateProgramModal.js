@@ -20,35 +20,37 @@ const STEPS = ["Basics", "Pay", "Creators", "Review"];
 const toCents = (dollars) => Math.round(Number(dollars || 0) * 100);
 const money = (cents) => `$${(cents / 100).toFixed(2)}`;
 
-export default function CreateProgramModal({ onClose }) {
+// `initial` pre-fills the form (the creator board passes the plan's terms). The
+// founder still walks through and confirms every step.
+export default function CreateProgramModal({ onClose, initial = {} }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initial.title || "");
   const [description, setDescription] = useState("");
-  const [periodType, setPeriodType] = useState("month");
-  const [videosPerPeriod, setVideosPerPeriod] = useState("");
-  const [payPerVideo, setPayPerVideo] = useState("");
+  const [periodType, setPeriodType] = useState(initial.periodType || "month");
+  const [videosPerPeriod, setVideosPerPeriod] = useState(initial.videosPerPeriod || "");
+  const [payPerVideo, setPayPerVideo] = useState(initial.payPerVideo || "");
   const [testPayoutEnabled, setTestPayoutEnabled] = useState(false);
   const [testPayout, setTestPayout] = useState("");
 
   // Pay types: any combination of base, CPM and rev share.
-  const [baseEnabled, setBaseEnabled] = useState(true);
-  const [cpmEnabled, setCpmEnabled] = useState(false);
-  const [cpm, setCpm] = useState("");
-  const [maxPerVideo, setMaxPerVideo] = useState("");
+  const [baseEnabled, setBaseEnabled] = useState(initial.baseEnabled ?? true);
+  const [cpmEnabled, setCpmEnabled] = useState(initial.cpmEnabled ?? false);
+  const [cpm, setCpm] = useState(initial.cpm || "");
+  const [maxPerVideo, setMaxPerVideo] = useState(initial.maxPerVideo || "");
   const [viewWindowDays, setViewWindowDays] = useState("30");
-  const [revshareEnabled, setRevshareEnabled] = useState(false);
-  const [revsharePct, setRevsharePct] = useState("30");
+  const [revshareEnabled, setRevshareEnabled] = useState(initial.revshareEnabled ?? false);
+  const [revsharePct, setRevsharePct] = useState(initial.revsharePct || "30");
   const [revshareMonths, setRevshareMonths] = useState("12");
-  const [monthlyCap, setMonthlyCap] = useState("");
+  const [monthlyCap, setMonthlyCap] = useState(initial.monthlyCap || "");
   const [expectedViews, setExpectedViews] = useState("10000");
 
   const [roster, setRoster] = useState([]);
   const [rosterLoading, setRosterLoading] = useState(true);
-  const [selectedCreatorIds, setSelectedCreatorIds] = useState([]);
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState(initial.memberCreatorIds || []);
 
   useEffect(() => {
     fetchMyCreators()

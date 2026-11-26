@@ -39,6 +39,8 @@ export default function PlanPreview({ data, unlock, onStartOver }) {
       <Brief plan={plan} locked={locked} />
       <Week plan={plan} />
 
+      {locked && <MainPagePicture />}
+
       {unlock}
 
       {onStartOver && (
@@ -47,6 +49,48 @@ export default function PlanPreview({ data, unlock, onStartOver }) {
         </button>
       )}
     </div>
+  );
+}
+
+// What the subscription keeps giving after the plan: a drawing of the main
+// page with made-up contents, labelled as an example.
+function MainPagePicture() {
+  const columns = [
+    ["To message", 3],
+    ["Messaged", 2],
+    ["Said yes", 1],
+    ["Posting", 1],
+  ];
+  return (
+    <section className="mt-12">
+      <h2 className="font-display text-xl font-bold sm:text-2xl">Then your main page keeps you going</h2>
+      <p className="mt-1 text-sm text-slate-500">Today&apos;s task, your creators and your numbers. Example:</p>
+      <div aria-hidden="true" className="mt-4 space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-xs">
+        <div className="rounded-2xl bg-brand-mist p-3">
+          <p className="text-slate-500">Today</p>
+          <p className="text-sm font-semibold">Message 2 creators from your list.</p>
+          <span className="mt-2 inline-block rounded-full bg-brand-ink px-3 py-1 font-semibold text-white">Done</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {columns.map(([label, count]) => (
+            <div key={label} className="rounded-xl bg-white p-2">
+              <p className="truncate font-semibold">{label}</p>
+              {Array.from({ length: count }).map((_, i) => (
+                <span key={i} className="mt-1.5 block h-5 rounded-md bg-slate-100" />
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {["Videos", "Views", "Owed"].map((label) => (
+            <div key={label} className="rounded-xl bg-white p-2">
+              <p className="truncate text-slate-500">{label}</p>
+              <Bar className="mt-2 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

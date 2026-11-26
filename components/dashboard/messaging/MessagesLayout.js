@@ -16,6 +16,8 @@ export default function MessagesLayout({
   basePath,
   emptyCopy,
   intro,
+  // Screen height minus whatever sits above and below the layout.
+  heightClass = "h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)]",
   children,
 }) {
   const pathname = usePathname();
@@ -25,7 +27,7 @@ export default function MessagesLayout({
     pathname && pathname !== basePath && pathname.startsWith(`${basePath}/`);
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-surface">
+    <div className={`flex bg-surface ${heightClass}`}>
       {/* Inbox column */}
       <aside
         className={[

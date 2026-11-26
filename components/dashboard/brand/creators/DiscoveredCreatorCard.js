@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BadgeCheck, ExternalLink, Heart, Link2, Play, Users } from "lucide-react";
+import AddToBoardButton from "@/components/dashboard/brand/board/AddToBoardButton";
 import {
   tiktokProfileUrl,
   formatCount,
@@ -48,7 +49,7 @@ function Thumb({ src }) {
 export default function DiscoveredCreatorCard({ creator }) {
   const {
     username, nickname, avatar_url, bio, bio_link,
-    follower_count, avg_likes_per_video, avg_views, verified, niche_tags, videos,
+    follower_count, avg_likes_per_video, avg_views, verified, niche_tags, videos, id,
   } = creator;
 
   return (
@@ -139,6 +140,8 @@ export default function DiscoveredCreatorCard({ creator }) {
             ))}
           </div>
         )}
+
+        <AddToBoardButton source="directory" creatorId={id} />
 
         <div className="flex gap-2">
           <a

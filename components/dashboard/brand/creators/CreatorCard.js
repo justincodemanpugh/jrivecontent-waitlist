@@ -1,6 +1,7 @@
 "use client";
 
 import { Instagram, Music2, Youtube, MapPin, UserPlus, Clock, CheckCircle2 } from "lucide-react";
+import AddToBoardButton from "@/components/dashboard/brand/board/AddToBoardButton";
 
 // Browse card. Tapping anywhere on the card opens the profile modal; the
 // "Connect" button is a separate target that triggers the connection flow.
@@ -142,6 +143,8 @@ export default function CreatorCard({
             </>
           )}
         </span>
+
+        <AddToBoardButton source="platform" creatorId={creator.id} />
       </div>
     </button>
   );

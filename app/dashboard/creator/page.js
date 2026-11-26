@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import TopBar from "@/components/dashboard/creator/TopBar";
 import StatStrip from "@/components/dashboard/creator/home/StatStrip";
+import PendingInvite from "@/components/dashboard/creator/PendingInvite";
 import { useCreator } from "@/components/dashboard/creator/CreatorProvider";
 import {
   fetchMyTikTokAccount,
@@ -115,6 +116,8 @@ export default function CreatorHomePage() {
               : "Connect TikTok so brands can track your videos and pay you."}
           </p>
         </div>
+
+        <PendingInvite />
 
         <StatStrip />
 

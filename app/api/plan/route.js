@@ -17,7 +17,8 @@ import { matchForPlan } from "@/lib/vibecode/matchCreators";
 import { normalizeAnswers } from "@/lib/plan/questions";
 import { shortAppName } from "@/lib/plan/templates";
 import { buildPlan, toFullPlan, toPlanTeaser } from "@/lib/plan/preview";
-import { dropUnavailable, storablePlan } from "@/lib/plan/saved";
+import { storablePlan } from "@/lib/plan/saved";
+import { latestPlan, stillAvailable } from "@/lib/plan/stored";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,29 +40,6 @@ function failure(e) {
     { error: "We couldn't load your plan. Try again in a minute." },
     { status: 500 },
   );
-}
-
-async function idsStillThere(admin, table, column, ids, filter) {
-  if (!ids.length) return new Set();
-  let query = admin.from(table).select(column).in(column, ids);
-  if (filter) query = filter(query);
-  const { data, error } = await query;
-  // Failing closed: showing someone who opted out is worse than an error.
-  if (error) throw error;
-  return new Set((data || []).map((r) => r[column]));
-}
-
-async function stillAvailable(admin, plan) {
-  const directory = [
-    ...plan.creators.filter((c) => c.source === "directory").map((c) => c.id),
-    ...plan.videos.map((v) => v.creator_id),
-  ];
-  const platform = plan.creators.filter((c) => c.source === "platform").map((c) => c.id);
-  const [directoryIds, platformIds] = await Promise.all([
-    idsStillThere(admin, "discovered_creators", "id", directory, (q) => q.eq("hidden", false)),
-    idsStillThere(admin, "creator_profiles", "user_id", platform),
-  ]);
-  return dropUnavailable(plan, { directoryIds, platformIds });
 }
 
 async function respond({ supabase, admin, user, row }) {
@@ -103,14 +81,7 @@ export async function GET() {
     if (!user) return signInRequired();
 
     const admin = createAdminClient();
-    const { data: row, error } = await admin
-      .from("brand_plans")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) throw error;
+    const row = await latestPlan(admin, user.id);
     if (!row) return NextResponse.json({ saved: false });
 
     return await respond({ supabase, admin, user, row });
@@ -192,6 +163,9 @@ export async function POST(request) {
           niche,
           answers,
           plan,
+          // A rebuilt plan has different tasks, so the week starts over.
+          done_tasks: [],
+          week_started_at: null,
         },
         { onConflict: "user_id,app_url" },
       )
