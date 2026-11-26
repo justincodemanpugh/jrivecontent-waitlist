@@ -17,6 +17,10 @@
 //   stage: "app"  -> { app, niches }              (fast)
 //   stage: "full" -> { platform, directory, videos, ... }   (default)
 //
+// The onboarding at /start sends its `answers` too and gets back a plan
+// instead: { app, niches, locked, plan }. See lib/plan/preview.js for what a
+// caller without a subscription receives.
+//
 // Nothing here bills. The store lookup is Apple's free endpoint, the web
 // fallback is one page fetch, oEmbed is free, and the matches are indexed
 // Postgres queries. The rate limit exists because the server fetches a URL the
@@ -30,7 +34,9 @@ import { brandHasActiveSubscription } from "@/lib/billing/subscription";
 import { CREATOR_NICHES } from "@/lib/onboarding/creatorConstants";
 import { scanApp, normalizeAppUrl, ScanError } from "@/lib/vibecode/appScan";
 import { inferNiches } from "@/lib/vibecode/nicheMap";
-import { matchCreators } from "@/lib/vibecode/matchCreators";
+import { matchCreators, matchForPlan } from "@/lib/vibecode/matchCreators";
+import { normalizeAnswers } from "@/lib/plan/questions";
+import { buildPlan, toFullPlan, toPlanTeaser } from "@/lib/plan/preview";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,6 +112,11 @@ export async function POST(request) {
     // straight into a niche filter.
     const nicheOverride = CREATOR_NICHES.includes(body?.niche) ? body.niche : null;
     const appOnly = body?.stage === "app";
+
+    const answers = body?.answers ? normalizeAnswers(body.answers) : null;
+    if (body?.answers && !answers) {
+      return NextResponse.json({ error: "Answer every question first." }, { status: 400 });
+    }
 
     let normalizedUrl;
     try {
@@ -197,6 +208,22 @@ export async function POST(request) {
       data: { user },
     } = await supabase.auth.getUser();
     const unlocked = user ? await brandHasActiveSubscription(supabase, user.id) : false;
+
+    if (answers) {
+      const plan = buildPlan({
+        app: appCard,
+        appName: typeof body.appName === "string" ? body.appName.slice(0, 80) : "",
+        niche: niches[0],
+        answers,
+        matches: await matchForPlan(admin, { nicheTags: [niches[0]] }),
+      });
+      return NextResponse.json({
+        app: appCard,
+        niches,
+        locked: !unlocked,
+        plan: unlocked ? toFullPlan(plan) : toPlanTeaser(plan),
+      });
+    }
 
     const { platform, directory, videos, videosAreNiche } = await matchCreators(admin, {
       nicheTags: niches,

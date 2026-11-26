@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:earnings": "node --test scripts/test-earnings.mjs"
+    "test:earnings": "node --test scripts/test-earnings.mjs",
+    "test:plan": "node --test scripts/test-plan.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.4.0",
