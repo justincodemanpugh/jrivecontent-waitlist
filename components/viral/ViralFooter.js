@@ -42,7 +42,7 @@ export default function ViralFooter() {
               </span>
             </Link>
             <p className="mt-3 max-w-[220px] text-sm text-slate-400">
-              The operating system for UGC marketing.
+              Get creators posting about your app.
             </p>
           </div>
           {COLUMNS.map((col) => (

@@ -7,28 +7,36 @@ import { FadeIn } from "@/hooks/useFadeIn";
 // list in components/FAQ.js. Answers must match how the product works.
 const FAQS = [
   {
+    q: "What do I get for free?",
+    a: "Paste your link and answer five questions. You see one video to recreate, five creators without their names, the start of the message and the first day of your week. The rest unlocks when you subscribe.",
+  },
+  {
     q: "I don't have any creators yet. Is this still for me?",
-    a: "Yes. Post a campaign and creators on JriveContent can apply to it. You can also browse creator profiles and invite the ones that fit your app.",
-  },
-  {
-    q: "How does paying per view work?",
-    a: "You set a rate per 1,000 views, for example $2. A video that gets 100,000 views earns the creator $200, and a video that flops costs you almost nothing. You can cap what any one video earns, and add a flat fee per video or a revenue share if you want.",
-  },
-  {
-    q: "How do you stop fake views?",
-    a: "View-based earnings wait 7 days before they're paid out. That gives you time to review every video and reject anything with fake or bought views before any money moves.",
-  },
-  {
-    q: "Do I get to review videos?",
-    a: "Yes. Every video shows up in your dashboard, and you can reject ones that don't meet your brief.",
-  },
-  {
-    q: "Can I see which videos actually make me money?",
-    a: "If your app uses RevenueCat, you can connect it so purchases are tied back to the creator who drove them. That also lets you pay creators a share of the revenue they bring in.",
+    a: "Yes. Your plan lists creators to start with. Some signed up with JriveContent; others are public TikTok accounts that you message yourself.",
   },
   {
     q: "What does it cost?",
-    a: "Browsing creators is free. Pro is $1 for your first 7 days, then $25/month, cancel anytime. On top of that, you pay creators whatever rates you set for your campaign.",
+    a: "$1 for your first 7 days, then $25 a month. The $1 week is for first-time subscribers. Creator pay is separate, and payouts through JriveContent add a 5% platform fee and card processing.",
+  },
+  {
+    q: "How do I pay creators?",
+    a: "You choose: a flat fee per video, a rate per 1,000 views, a share of revenue, or a mix, with a monthly cap. A video earns nothing until you approve it.",
+  },
+  {
+    q: "How do you stop fake views?",
+    a: "View-based earnings wait 7 days before they're paid out, videos with suspicious numbers are flagged, and you can reject any video before money moves.",
+  },
+  {
+    q: "Can I see which videos actually make me money?",
+    a: "If your app uses RevenueCat, you can connect it so purchases are tied back to the creator who brought them. That also lets you pay creators a share of that revenue.",
+  },
+  {
+    q: "Will this get me users?",
+    a: "Nobody can promise that. Creator videos have worked for some apps, but most videos don't take off. Your plan gives you the next step each day.",
+  },
+  {
+    q: "How do I cancel?",
+    a: "From your plan page or from Billing in your dashboard, whenever you like.",
   },
 ];
 

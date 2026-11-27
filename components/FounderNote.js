@@ -54,7 +54,7 @@ export default function FounderNote() {
               </a>
               
               <Link
-                href="/signup"
+                href="/start"
                 className="inline-flex items-center justify-center rounded-full bg-brand-ink text-white px-6 py-3 font-medium hover:bg-slate-800 transition"
               >
                 Get started for free
