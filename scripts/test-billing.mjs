@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { checkoutParams } from "../lib/billing/checkout.js";
 import { trialState } from "../lib/billing/trial.js";
-import { safePath } from "../lib/auth/safePath.js";
+import { safePath, signInDestination } from "../lib/auth/safePath.js";
 
 const base = {
   customerId: "cus_1",
@@ -71,5 +71,35 @@ test("redirects stay on this site", () => {
     null,
   ]) {
     assert.equal(safePath(bad, "/x", origin), "/x", String(bad));
+  }
+});
+
+test("sign-in lands where it was going, however `next` arrives", () => {
+  const origin = "https://example.com";
+  const to = (next) => signInDestination(next, origin);
+  const plan = "/plan?url=https%3A%2F%2Fa.com&niche=Health+%26+Fitness";
+  const returnAddress = `${origin}/auth/callback?next=${encodeURIComponent(plan)}`;
+
+  assert.equal(to("/dashboard?role=brand"), "/dashboard?role=brand");
+  assert.equal(to(returnAddress), plan);
+  assert.equal(to(`/auth/callback?next=${encodeURIComponent(plan)}`), plan);
+  // The bare site address: what the email sends when the return address is refused.
+  assert.equal(to(origin), "/dashboard");
+  assert.equal(to(null), "/dashboard");
+});
+
+test("a return address can't be used to leave the site", () => {
+  const origin = "https://example.com";
+  const wrap = (inner) => `${origin}/auth/callback?next=${encodeURIComponent(inner)}`;
+  for (const bad of [
+    "https://evil.com",
+    "http://localhost:3000/auth/callback?next=%2Fplan",
+    wrap("https://evil.com/x"),
+    wrap("//evil.com"),
+    wrap("@evil.com"),
+    wrap("/auth/callback?next=%2F%2Fevil.com"),
+    `${origin}/auth/callback`,
+  ]) {
+    assert.equal(signInDestination(bad, origin), "/dashboard", bad);
   }
 });
