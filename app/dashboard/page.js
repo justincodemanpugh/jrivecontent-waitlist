@@ -45,6 +45,7 @@ export default async function DashboardRouter({ searchParams }) {
   if (brand) redirect("/onboarding/brand");
   if (creator) redirect("/onboarding/creator");
 
-  // No role signal at all — send to role picker (user is already authenticated).
-  redirect("/choose-role");
+  // A new account with nothing to go on is treated as a founder and starts
+  // with their app link. Creators arrive with a hint from their sign-up link.
+  redirect("/start");
 }

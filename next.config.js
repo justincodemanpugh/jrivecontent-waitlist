@@ -10,6 +10,20 @@ const nextConfig = {
       // redirects, so the page can come back.
       { source: "/vibecode", has: [{ type: "query", key: "app" }], destination: "/start", permanent: false },
       { source: "/vibecode", destination: "/", permanent: false },
+      // Signing up starts with the app link. A sign-up address that says why
+      // it was opened (an invite, a saved plan, a creator) still shows the form.
+      {
+        source: "/signup",
+        missing: [
+          { type: "query", key: "role" },
+          { type: "query", key: "next" },
+          { type: "query", key: "error" },
+        ],
+        destination: "/start",
+        permanent: false,
+      },
+      // The old "brand or creator?" screen.
+      { source: "/choose-role", destination: "/start", permanent: false },
     ];
   },
 };

@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mail, Loader2, CheckCircle2, Building2, Sparkles } from "lucide-react";
+import { Mail, Loader2, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMagicLink } from "../login/actions";
 import { safePath } from "@/lib/auth/safePath";
@@ -25,9 +25,11 @@ function SignUpForm() {
   // Set when sign-up is a step on the way somewhere: saving a plan.
   const nextParam = safePath(searchParams.get("next"), "");
   const savingPlan = nextParam.startsWith("/plan");
-  const inferredRole = roleParam === "creator" && !savingPlan ? "creator" : "brand";
-
-  const [role, setRole] = useState(inferredRole);
+  // Nobody is asked what they are: the link they came from says so. Creators
+  // arrive from an invite or the "For creators" link, everyone else is a
+  // founder. (A bare /signup goes to /start, see next.config.js.)
+  const joining = nextParam.startsWith("/join/");
+  const role = joining || (roleParam === "creator" && !savingPlan) ? "creator" : "brand";
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -93,7 +95,11 @@ function SignUpForm() {
             ← Back to home
           </Link>
           <h1 className="mt-3 text-2xl font-semibold text-brand-ink">
-            {savingPlan ? "Save your plan" : "Create your JriveContent account"}
+            {savingPlan
+              ? "Save your plan"
+              : role === "creator"
+                ? "Create your creator account"
+                : "Create your JriveContent account"}
           </h1>
           <p className="mt-1 text-sm text-slate-600">
             {savingPlan
@@ -101,40 +107,6 @@ function SignUpForm() {
               : "Free to join. No credit card required."}
           </p>
         </div>
-
-        {!sent && !savingPlan && (
-          <div className="mb-5">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              I&apos;m signing up as a
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setRole("brand")}
-                className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
-                  role === "brand"
-                    ? "border-brand-skyDeep bg-brand-mist text-brand-ink"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <Building2 size={16} />
-                Brand
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole("creator")}
-                className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
-                  role === "creator"
-                    ? "border-brand-skyDeep bg-brand-mist text-brand-ink"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <Sparkles size={16} />
-                Creator
-              </button>
-            </div>
-          </div>
-        )}
 
         {sent ? (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
